@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "Bash(mvn wrapper:wrapper:*)",
+      "Bash(./mvnw spring-boot:run:*)"
+    ]
+  }
+}
