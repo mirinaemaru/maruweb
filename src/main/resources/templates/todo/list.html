@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List - Maru Web</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <!-- LiveReload Script -->
+    <script th:if="${@environment.getProperty('spring.devtools.livereload.enabled') != 'false'}">
+        document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>');
+    </script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Menu -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Maru Web</h2>
+                <p class="sidebar-subtitle">Management System</p>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active">
+                        <a th:href="@{/todos}">
+                            <span class="menu-icon">📝</span>
+                            <span class="menu-text">Todo</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/calendar}">
+                            <span class="menu-icon">📅</span>
+                            <span class="menu-text">Calendar</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <p>&copy; 2024 Maru Web</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <div class="container">
+        <header>
+            <h1>Todo List</h1>
+            <p class="subtitle">Manage your tasks efficiently</p>
+        </header>
+
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <!-- Add Todo Form -->
+        <div class="add-todo-section">
+            <form th:action="@{/todos}" method="post" th:object="${todo}">
+                <div class="form-group">
+                    <input type="text"
+                           th:field="*{title}"
+                           placeholder="Add a new todo..."
+                           class="todo-input"
+                           autofocus>
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </div>
+                <div class="form-group">
+                    <textarea th:field="*{description}"
+                              placeholder="Description (optional)"
+                              class="todo-textarea"
+                              rows="2"></textarea>
+                </div>
+            </form>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs">
+            <a th:href="@{/todos}"
+               th:classappend="${filter == 'active'} ? 'active' : ''">
+                Active
+            </a>
+            <a th:href="@{/todos(filter='completed')}"
+               th:classappend="${filter == 'completed'} ? 'active' : ''">
+                Completed
+            </a>
+            <a th:href="@{/todos(filter='all')}"
+               th:classappend="${filter == 'all'} ? 'active' : ''">
+                All
+            </a>
+        </div>
+
+        <!-- Date Range Filter (Completed/All 탭에서만 표시) -->
+        <div th:if="${filter == 'completed' || filter == 'all'}" class="date-filter-section">
+            <form th:action="@{/todos}" method="get" class="date-filter-form">
+                <input type="hidden" name="filter" th:value="${filter}">
+                <div class="date-inputs">
+                    <div class="date-input-group">
+                        <label for="from">From:</label>
+                        <input type="date"
+                               id="from"
+                               name="from"
+                               th:value="${from}"
+                               class="date-input">
+                    </div>
+                    <div class="date-input-group">
+                        <label for="to">To:</label>
+                        <input type="date"
+                               id="to"
+                               name="to"
+                               th:value="${to}"
+                               class="date-input">
+                    </div>
+                    <button type="submit" class="btn btn-search">Search</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Todo List -->
+        <div class="todo-list">
+            <div th:if="${#lists.isEmpty(todos)}" class="empty-state">
+                <p>No todos found. Add one to get started!</p>
+            </div>
+
+            <div th:each="todo : ${todos}" class="todo-item" th:classappend="${todo.completed == 'Y'} ? 'completed' : ''">
+                <div class="todo-content">
+                    <form th:action="@{/todos/{id}/toggle(id=${todo.id})}" method="post" class="toggle-form">
+                        <input type="checkbox"
+                               th:checked="${todo.completed == 'Y'}"
+                               onchange="this.form.submit()"
+                               class="todo-checkbox">
+                    </form>
+                    <div class="todo-text">
+                        <h3 th:text="${todo.title}">Todo Title</h3>
+                        <!-- Active 탭에서는 description 수정 가능 -->
+                        <div th:if="${filter == 'active'}">
+                            <form th:action="@{/todos/{id}/description(id=${todo.id})}" method="post" class="description-form">
+                                <textarea name="description"
+                                          th:text="${todo.description}"
+                                          placeholder="Add description..."
+                                          class="todo-description-edit"
+                                          rows="2"></textarea>
+                                <input type="hidden" name="filter" th:value="${filter}">
+                                <button type="submit" class="btn-save-desc">Save</button>
+                            </form>
+                        </div>
+                        <!-- Completed/All 탭에서는 읽기 전용 -->
+                        <p th:if="${filter != 'active' && todo.description}"
+                           th:text="${todo.description}"
+                           class="todo-description">Description</p>
+                        <small class="todo-date" th:text="${#temporals.format(todo.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01</small>
+                    </div>
+                </div>
+                <div class="todo-actions">
+                    <a th:href="@{/todos/{id}/edit(id=${todo.id})}" class="btn btn-edit">Edit</a>
+                    <form th:action="@{/todos/{id}/delete(id=${todo.id})}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-delete" onclick="return confirm('Are you sure?')">Delete</button>
+                    </form>
+                </div>
+            </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

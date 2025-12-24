@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar - Maru Web</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/calendar.css}">
+    <!-- LiveReload Script -->
+    <script th:if="${@environment.getProperty('spring.devtools.livereload.enabled') != 'false'}">
+        document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>');
+    </script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Menu -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Maru Web</h2>
+                <p class="sidebar-subtitle">Management System</p>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a th:href="@{/todos}">
+                            <span class="menu-icon">📝</span>
+                            <span class="menu-text">Todo</span>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a th:href="@{/calendar}">
+                            <span class="menu-icon">📅</span>
+                            <span class="menu-text">Calendar</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <p>&copy; 2024 Maru Web</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <div class="container">
+                    <!-- Header -->
+                    <header class="calendar-header">
+                        <h1>Calendar</h1>
+                    </header>
+
+                    <!-- Flash Messages -->
+                    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+                    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+                    <!-- Google Calendar Connection Status -->
+                    <div class="google-connection-banner">
+                        <div th:if="${isGoogleConnected}" class="connection-status connected">
+                            <div class="status-info">
+                                <span class="status-icon">✓</span>
+                                <span class="status-text">Connected to Google Calendar</span>
+                            </div>
+                            <div class="status-actions">
+                                <form th:action="@{/calendar/oauth2/sync}" method="post" style="display: inline;">
+                                    <button type="submit" class="btn btn-sync">🔄 Sync Now</button>
+                                </form>
+                                <form th:action="@{/calendar/oauth2/disconnect}" method="post" style="display: inline;"
+                                      onsubmit="return confirm('Are you sure you want to disconnect from Google Calendar?');">
+                                    <button type="submit" class="btn btn-disconnect">Disconnect</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div th:unless="${isGoogleConnected}" class="connection-status disconnected">
+                            <div class="status-info">
+                                <span class="status-icon">⚠</span>
+                                <span class="status-text">Not connected to Google Calendar</span>
+                            </div>
+                            <div class="status-actions">
+                                <a th:href="@{/calendar/oauth2/connect}" class="btn btn-connect">Connect Google Calendar</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calendar Navigation -->
+                    <div class="calendar-navigation">
+                        <a th:href="@{/calendar(year=${gridData.previousMonth.year}, month=${gridData.previousMonth.monthValue})}"
+                           class="btn btn-nav">← Previous</a>
+                        <h2 class="current-month" th:text="${gridData.monthYearDisplay}">January 2024</h2>
+                        <a th:href="@{/calendar(year=${gridData.nextMonth.year}, month=${gridData.nextMonth.monthValue})}"
+                           class="btn btn-nav">Next →</a>
+                        <a th:href="@{/calendar}" class="btn btn-today">Today</a>
+                    </div>
+
+                    <!-- Add Event Button -->
+                    <div class="add-event-section">
+                        <button onclick="showAddEventModal()" class="btn btn-primary">+ Add Event</button>
+                    </div>
+
+                    <!-- Calendar Grid -->
+                    <div class="calendar-grid">
+                        <!-- Weekday Headers -->
+                        <div class="calendar-header-row">
+                            <div class="calendar-header-cell">Sun</div>
+                            <div class="calendar-header-cell">Mon</div>
+                            <div class="calendar-header-cell">Tue</div>
+                            <div class="calendar-header-cell">Wed</div>
+                            <div class="calendar-header-cell">Thu</div>
+                            <div class="calendar-header-cell">Fri</div>
+                            <div class="calendar-header-cell">Sat</div>
+                        </div>
+
+                        <!-- Calendar Days Grid -->
+                        <div class="calendar-body">
+                            <div th:each="week : ${gridData.weeks}" class="calendar-week">
+                                <div th:each="day : ${week}"
+                                     class="calendar-day"
+                                     th:classappend="${day.isCurrentMonth ? '' : 'other-month'} + ' ' + ${day.isToday ? 'today' : ''}"
+                                     th:attr="data-date=${day.date}"
+                                     onclick="showAddEventModalWithDate(this.getAttribute('data-date'))">
+                                    <div class="day-number" th:text="${day.dayOfMonth}">1</div>
+                                    <div class="day-events">
+                                        <div th:each="event : ${day.events}"
+                                             class="event-item"
+                                             th:classappend="${event.allDay == 'Y' ? 'all-day' : ''}"
+                                             th:attr="data-event-id=${event.id}"
+                                             th:title="${event.allDay == 'N' ? #temporals.format(event.startDateTime, 'HH:mm') + ' ' + event.title : event.title}"
+                                             onclick="event.stopPropagation(); showEventDetail(this.getAttribute('data-event-id'))">
+                                            <span class="event-time" th:if="${event.allDay == 'N'}"
+                                                  th:text="${#temporals.format(event.startDateTime, 'HH:mm')}">09:00</span>
+                                            <span class="event-title" th:text="${event.title}">Event Title</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Event Modal -->
+    <div id="addEventModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddEventModal()">&times;</span>
+            <h2>Add New Event</h2>
+            <form th:action="@{/calendar/events}" method="post" th:object="${calendarEvent}">
+                <div class="form-group">
+                    <label>Title *</label>
+                    <input type="text" th:field="*{title}" required class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea th:field="*{description}" class="form-input" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Start Date & Time</label>
+                    <input type="datetime-local" id="startDateTime" th:field="*{startDateTime}" required class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>End Date & Time</label>
+                    <input type="datetime-local" id="endDateTime" th:field="*{endDateTime}" required class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" th:field="*{location}" class="form-input">
+                </div>
+                <div class="form-group checkbox-group">
+                    <label>
+                        <input type="checkbox" id="allDayCheckbox" name="allDay" value="Y">
+                        All Day Event
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Create Event</button>
+                    <button type="button" onclick="closeAddEventModal()" class="btn btn-secondary">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script th:src="@{/js/calendar.js}"></script>
+</body>
+</html>

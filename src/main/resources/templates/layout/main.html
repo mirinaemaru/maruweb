@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} ?: 'Maru Web'">Maru Web</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <!-- LiveReload Script -->
+    <script th:if="${@environment.getProperty('spring.devtools.livereload.enabled') != 'false'}">
+        document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>');
+    </script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Menu -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Maru Web</h2>
+                <p class="sidebar-subtitle">Management System</p>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/todos')} ? 'active' : ''">
+                        <a th:href="@{/todos}">
+                            <span class="menu-icon">📝</span>
+                            <span class="menu-text">Todo</span>
+                        </a>
+                    </li>
+                    <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/calendar')} ? 'active' : ''">
+                        <a th:href="@{/calendar}">
+                            <span class="menu-icon">📅</span>
+                            <span class="menu-text">Calendar</span>
+                        </a>
+                    </li>
+                    <!-- 추가 메뉴는 여기에 추가 -->
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <p>&copy; 2024 Maru Web</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="content-wrapper" th:insert="${contentFragment}">
+                <!-- Page content will be inserted here -->
+            </div>
+        </main>
+    </div>
+</body>
+</html>
