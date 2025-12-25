@@ -29,6 +29,18 @@
 #   MVNW_VERBOSE - true: enable verbose log; debug: trace the mvnw script; others: silence the output
 # ----------------------------------------------------------------------------
 
+# ============================================================================
+# Project-specific Java 17 configuration (macOS)
+# This project requires Java 17. Auto-detect and set JAVA_HOME.
+# ============================================================================
+if [ -x "/usr/libexec/java_home" ]; then
+  JAVA_17_HOME=$(/usr/libexec/java_home -v 17 2>/dev/null)
+  if [ -n "$JAVA_17_HOME" ] && [ -d "$JAVA_17_HOME" ]; then
+    export JAVA_HOME="$JAVA_17_HOME"
+  fi
+fi
+# ============================================================================
+
 set -euf
 [ "${MVNW_VERBOSE-}" != debug ] || set -x
 
