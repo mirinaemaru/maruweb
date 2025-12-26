@@ -31,6 +31,56 @@ body {
     top: 0;
     box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
     z-index: 1000;
+    transform: translateX(-260px);
+    transition: transform 0.3s ease;
+}
+
+.sidebar:hover,
+.sidebar.show {
+    transform: translateX(0);
+}
+
+/* Sidebar Toggle Button */
+.sidebar-toggle {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 40px;
+    height: 50px;
+    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 0 8px 8px 0;
+    cursor: pointer;
+    z-index: 1001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+    transition: all 0.3s ease;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar-toggle:hover {
+    width: 45px;
+    background: linear-gradient(180deg, #5a6fd6 0%, #6a4190 100%);
+}
+
+.sidebar-toggle:hover + .sidebar,
+.sidebar-toggle:focus + .sidebar {
+    transform: translateX(0);
+}
+
+.sidebar:hover ~ .sidebar-toggle,
+.sidebar-toggle:hover {
+    left: 260px;
+    border-radius: 0 8px 8px 0;
+}
+
+/* When sidebar is shown, move toggle to sidebar edge */
+.app-container:has(.sidebar:hover) .sidebar-toggle,
+.app-container:has(.sidebar-toggle:hover) .sidebar-toggle {
+    left: 260px;
 }
 
 .sidebar-header {
@@ -105,9 +155,10 @@ body {
 /* Main Content */
 .main-content {
     flex: 1;
-    margin-left: 260px;
+    margin-left: 50px;
     padding: 30px;
     background: #f5f7fa;
+    transition: margin-left 0.3s ease;
 }
 
 .content-wrapper {
@@ -528,10 +579,26 @@ header h1 {
 @media (max-width: 768px) {
     .sidebar {
         width: 220px;
+        transform: translateX(-220px);
+    }
+
+    .sidebar:hover,
+    .sidebar.show {
+        transform: translateX(0);
+    }
+
+    .sidebar:hover ~ .sidebar-toggle,
+    .sidebar-toggle:hover {
+        left: 220px;
+    }
+
+    .app-container:has(.sidebar:hover) .sidebar-toggle,
+    .app-container:has(.sidebar-toggle:hover) .sidebar-toggle {
+        left: 220px;
     }
 
     .main-content {
-        margin-left: 220px;
+        margin-left: 50px;
         padding: 15px;
     }
 
@@ -565,33 +632,27 @@ header h1 {
 
 @media (max-width: 480px) {
     .sidebar {
-        width: 70px;
+        width: 200px;
+        transform: translateX(-200px);
     }
 
-    .sidebar-header h2,
-    .sidebar-subtitle,
-    .menu-text,
-    .sidebar-footer p {
-        display: none;
+    .sidebar:hover,
+    .sidebar.show {
+        transform: translateX(0);
     }
 
-    .sidebar-header {
-        padding: 20px 10px;
-        text-align: center;
+    .sidebar:hover ~ .sidebar-toggle,
+    .sidebar-toggle:hover {
+        left: 200px;
     }
 
-    .sidebar-nav li a {
-        justify-content: center;
-        padding: 15px 10px;
-    }
-
-    .menu-icon {
-        margin-right: 0;
-        font-size: 1.5em;
+    .app-container:has(.sidebar:hover) .sidebar-toggle,
+    .app-container:has(.sidebar-toggle:hover) .sidebar-toggle {
+        left: 200px;
     }
 
     .main-content {
-        margin-left: 70px;
+        margin-left: 50px;
         padding: 10px;
     }
 }
