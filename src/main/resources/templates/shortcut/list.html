@@ -14,6 +14,9 @@
 </head>
 <body>
     <div class="app-container">
+        <!-- Sidebar Toggle Button -->
+        <button class="sidebar-toggle" aria-label="Toggle menu">☰</button>
+
         <!-- Sidebar Menu -->
         <aside class="sidebar">
             <div class="sidebar-header">
@@ -92,7 +95,7 @@
                                 </div>
 
                                 <div class="shortcuts-list">
-                                    <div th:each="shortcut : ${category.shortcuts}" class="shortcut-item">
+                                    <div th:each="shortcut : ${category.shortcuts}" class="shortcut-item" th:attr="data-display-order=${shortcut.displayOrder}">
                                         <div class="shortcut-info">
                                             <a th:href="${shortcut.url}"
                                                target="_blank"
@@ -200,7 +203,9 @@
                 </div>
                 <div class="form-group-vertical">
                     <label>Display Order</label>
-                    <input type="number" name="displayOrder" value="0" class="form-input">
+                    <select id="addShortcutOrder" name="displayOrder" class="form-input">
+                        <!-- Options will be populated by JavaScript -->
+                    </select>
                 </div>
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">Create Shortcut</button>
@@ -231,7 +236,9 @@
                 </div>
                 <div class="form-group-vertical">
                     <label>Display Order</label>
-                    <input type="number" id="editShortcutOrder" name="displayOrder" value="0" class="form-input">
+                    <select id="editShortcutOrder" name="displayOrder" class="form-input">
+                        <!-- Options will be populated by JavaScript -->
+                    </select>
                 </div>
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">Update Shortcut</button>
