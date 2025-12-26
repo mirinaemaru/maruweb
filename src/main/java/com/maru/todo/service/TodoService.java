@@ -40,6 +40,26 @@ public class TodoService {
                 completed, "N", fromDateTime, toDateTime);
     }
 
+    public List<Todo> searchTodos(String completed, String keyword, LocalDate from, LocalDate to) {
+        LocalDateTime fromDateTime = from.atStartOfDay();
+        LocalDateTime toDateTime = to.atTime(LocalTime.MAX);
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            return todoRepository.searchByKeywordAndStatusAndDateRange(
+                    keyword.trim(), completed, "N", fromDateTime, toDateTime);
+        }
+        return todoRepository.findByCompletedAndDeletedAndCreatedAtBetweenOrderByCreatedAtDesc(
+                completed, "N", fromDateTime, toDateTime);
+    }
+
+    public List<Todo> searchAllTodos(String keyword, LocalDate from, LocalDate to) {
+        LocalDateTime fromDateTime = from.atStartOfDay();
+        LocalDateTime toDateTime = to.atTime(LocalTime.MAX);
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            return todoRepository.searchByKeywordAndDateRange(keyword.trim(), "N", fromDateTime, toDateTime);
+        }
+        return todoRepository.findByDeletedAndCreatedAtBetweenOrderByCreatedAtDesc("N", fromDateTime, toDateTime);
+    }
+
     public Optional<Todo> getTodoById(Long id) {
         return todoRepository.findById(id);
     }
