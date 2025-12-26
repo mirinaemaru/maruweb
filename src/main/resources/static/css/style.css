@@ -327,8 +327,14 @@ header h1 {
     gap: 8px;
 }
 
+.keyword-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
 .keyword-input {
-    padding: 8px 12px;
+    padding: 8px 30px 8px 12px;
     border: 2px solid #e0e0e0;
     border-radius: 6px;
     font-size: 14px;
@@ -340,6 +346,30 @@ header h1 {
     outline: none;
     border-color: #667eea;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.keyword-clear {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: #999;
+    color: white;
+    border-radius: 50%;
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.keyword-clear:hover {
+    background: #667eea;
 }
 
 .date-separator {
