@@ -22,7 +22,7 @@
 /* Category Tabs */
 .category-tabs {
     display: flex;
-    gap: 0;
+    gap: 6px;
     border-bottom: 2px solid #e0e0e0;
     margin-bottom: 0;
 }
@@ -32,7 +32,7 @@
     cursor: pointer;
     font-weight: 500;
     color: #666;
-    border: 2px solid transparent;
+    border: 2px solid #e0e0e0;
     border-bottom: none;
     border-radius: 8px 8px 0 0;
     background: #f5f5f5;
