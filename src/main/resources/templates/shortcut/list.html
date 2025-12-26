@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shortcuts - Maru Web</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/shortcut.css}">
+    <!-- LiveReload Script -->
+    <script th:if="${@environment.getProperty('spring.devtools.livereload.enabled') != 'false'}">
+        document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>');
+    </script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Menu -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Maru Web</h2>
+                <p class="sidebar-subtitle">Management System</p>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a th:href="@{/todos}">
+                            <span class="menu-icon">📝</span>
+                            <span class="menu-text">Todo</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/calendar}">
+                            <span class="menu-icon">📅</span>
+                            <span class="menu-text">Calendar</span>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a th:href="@{/shortcuts}">
+                            <span class="menu-icon">🔗</span>
+                            <span class="menu-text">Shortcuts</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <p>&copy; 2024 Maru Web</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <div class="container">
+                    <!-- Header -->
+                    <header>
+                        <h1>Shortcuts</h1>
+                        <p class="subtitle">Quick access to your favorite links</p>
+                    </header>
+
+                    <!-- Flash Messages -->
+                    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+                    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+                    <!-- Action Bar: Add Category + Active Category Actions -->
+                    <div class="action-bar">
+                        <button onclick="showAddCategoryModal()" class="btn btn-primary">+ Add Category</button>
+
+                        <!-- Active Category Actions (shown for selected tab) -->
+                        <div id="activeCategoryActions" class="category-actions-bar" style="display: none;">
+                            <button id="btnAddLink" class="btn btn-small btn-add" onclick="showAddShortcutModalForActive()">+ Link</button>
+                            <button id="btnEditCategory" class="btn btn-small btn-edit" onclick="showEditCategoryModalForActive()">Edit</button>
+                            <form id="deleteCategoryForm" method="post" style="display: inline;" onsubmit="return confirm('Delete this category and all its shortcuts?');">
+                                <button type="submit" class="btn btn-small btn-delete">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Category Tabs -->
+                    <div class="category-tabs-container">
+                        <div th:if="${#lists.isEmpty(categories)}" class="empty-state">
+                            <p>No categories yet. Create one to get started!</p>
+                        </div>
+
+                        <div th:unless="${#lists.isEmpty(categories)}" class="category-tabs">
+                            <div th:each="category, iterStat : ${categories}"
+                                 class="category-tab"
+                                 th:classappend="${iterStat.first} ? 'active' : ''"
+                                 th:attr="data-category-id=${category.id}, data-category-name=${category.name}, data-category-description=${category.description ?: ''}, data-category-order=${category.displayOrder}"
+                                 th:onclick="'selectCategory(' + ${category.id} + ')'">
+                                <span th:text="${category.name}">Category</span>
+                            </div>
+                        </div>
+
+                        <!-- Tab Content: Shortcuts List -->
+                        <div th:unless="${#lists.isEmpty(categories)}" class="tab-content">
+                            <div th:each="category, iterStat : ${categories}"
+                                 class="shortcuts-panel"
+                                 th:classappend="${iterStat.first} ? 'active' : ''"
+                                 th:id="'panel-' + ${category.id}">
+
+                                <div th:if="${#lists.isEmpty(category.shortcuts)}" class="empty-shortcuts">
+                                    <p>No shortcuts in this category yet.</p>
+                                </div>
+
+                                <div class="shortcuts-list">
+                                    <div th:each="shortcut : ${category.shortcuts}" class="shortcut-item">
+                                        <div class="shortcut-info">
+                                            <a th:href="${shortcut.url}"
+                                               target="_blank"
+                                               class="shortcut-link"
+                                               th:title="${shortcut.url}">
+                                                <span class="link-icon">🔗</span>
+                                                <span class="shortcut-name" th:text="${shortcut.name}">Shortcut Name</span>
+                                            </a>
+                                            <span th:if="${shortcut.description}"
+                                                  class="shortcut-description"
+                                                  th:text="${shortcut.description}">Description</span>
+                                        </div>
+                                        <div class="shortcut-actions">
+                                            <button class="btn btn-tiny btn-edit"
+                                                    th:attr="onclick='showEditShortcutModal(' + ${shortcut.id} + ', \'' + ${shortcut.name} + '\', \'' + ${shortcut.url} + '\', \'' + (${shortcut.description} ?: '') + '\', ' + ${shortcut.displayOrder} + ', ' + ${category.id} + ')'">Edit</button>
+                                            <form th:action="@{/shortcuts/items/{id}/delete(id=${shortcut.id})}"
+                                                  method="post"
+                                                  style="display: inline;"
+                                                  onsubmit="return confirm('Delete this shortcut?');">
+                                                <input type="hidden" name="categoryId" th:value="${category.id}">
+                                                <button type="submit" class="btn btn-tiny btn-delete">Delete</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Category Modal -->
+    <div id="addCategoryModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddCategoryModal()">&times;</span>
+            <h2>Add New Category</h2>
+            <form th:action="@{/shortcuts/categories}" method="post">
+                <div class="form-group-vertical">
+                    <label>Category Name *</label>
+                    <input type="text" name="name" required class="form-input">
+                </div>
+                <div class="form-group-vertical">
+                    <label>Description</label>
+                    <textarea name="description" class="form-input" rows="2"></textarea>
+                </div>
+                <div class="form-group-vertical">
+                    <label>Display Order</label>
+                    <input type="number" name="displayOrder" value="0" class="form-input">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Create Category</button>
+                    <button type="button" onclick="closeAddCategoryModal()" class="btn btn-secondary">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Category Modal -->
+    <div id="editCategoryModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditCategoryModal()">&times;</span>
+            <h2>Edit Category</h2>
+            <form id="editCategoryForm" method="post">
+                <div class="form-group-vertical">
+                    <label>Category Name *</label>
+                    <input type="text" id="editCategoryName" name="name" required class="form-input">
+                </div>
+                <div class="form-group-vertical">
+                    <label>Description</label>
+                    <textarea id="editCategoryDescription" name="description" class="form-input" rows="2"></textarea>
+                </div>
+                <div class="form-group-vertical">
+                    <label>Display Order</label>
+                    <input type="number" id="editCategoryOrder" name="displayOrder" value="0" class="form-input">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Update Category</button>
+                    <button type="button" onclick="closeEditCategoryModal()" class="btn btn-secondary">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Shortcut Modal -->
+    <div id="addShortcutModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddShortcutModal()">&times;</span>
+            <h2>Add New Shortcut</h2>
+            <p id="addShortcutCategoryName" class="modal-subtitle">to Category: </p>
+            <form id="addShortcutForm" th:action="@{/shortcuts/items}" method="post">
+                <input type="hidden" id="addShortcutCategoryId" name="categoryId">
+                <div class="form-group-vertical">
+                    <label>Name *</label>
+                    <input type="text" name="name" required class="form-input">
+                </div>
+                <div class="form-group-vertical">
+                    <label>URL *</label>
+                    <input type="url" name="url" required class="form-input" placeholder="https://...">
+                </div>
+                <div class="form-group-vertical">
+                    <label>Description</label>
+                    <textarea name="description" class="form-input" rows="2"></textarea>
+                </div>
+                <div class="form-group-vertical">
+                    <label>Display Order</label>
+                    <input type="number" name="displayOrder" value="0" class="form-input">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Create Shortcut</button>
+                    <button type="button" onclick="closeAddShortcutModal()" class="btn btn-secondary">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Shortcut Modal -->
+    <div id="editShortcutModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditShortcutModal()">&times;</span>
+            <h2>Edit Shortcut</h2>
+            <form id="editShortcutForm" method="post">
+                <input type="hidden" id="editShortcutCategoryId" name="categoryId">
+                <div class="form-group-vertical">
+                    <label>Name *</label>
+                    <input type="text" id="editShortcutName" name="name" required class="form-input">
+                </div>
+                <div class="form-group-vertical">
+                    <label>URL *</label>
+                    <input type="url" id="editShortcutUrl" name="url" required class="form-input">
+                </div>
+                <div class="form-group-vertical">
+                    <label>Description</label>
+                    <textarea id="editShortcutDescription" name="description" class="form-input" rows="2"></textarea>
+                </div>
+                <div class="form-group-vertical">
+                    <label>Display Order</label>
+                    <input type="number" id="editShortcutOrder" name="displayOrder" value="0" class="form-input">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Update Shortcut</button>
+                    <button type="button" onclick="closeEditShortcutModal()" class="btn btn-secondary">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script th:src="@{/js/shortcut.js}"></script>
+</body>
+</html>

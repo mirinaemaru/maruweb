@@ -32,6 +32,12 @@
                             <span class="menu-text">Calendar</span>
                         </a>
                     </li>
+                    <li>
+                        <a th:href="@{/shortcuts}">
+                            <span class="menu-icon">🔗</span>
+                            <span class="menu-text">Shortcuts</span>
+                        </a>
+                    </li>
                 </ul>
             </nav>
             <div class="sidebar-footer">
@@ -132,14 +138,13 @@
                         <h3 th:text="${todo.title}">Todo Title</h3>
                         <!-- Active 탭에서는 description 수정 가능 -->
                         <div th:if="${filter == 'active'}">
-                            <form th:action="@{/todos/{id}/description(id=${todo.id})}" method="post" class="description-form">
+                            <form th:id="'descForm-' + ${todo.id}" th:action="@{/todos/{id}/description(id=${todo.id})}" method="post" class="description-form">
                                 <textarea name="description"
                                           th:text="${todo.description}"
                                           placeholder="Add description..."
                                           class="todo-description-edit"
                                           rows="2"></textarea>
                                 <input type="hidden" name="filter" th:value="${filter}">
-                                <button type="submit" class="btn-save-desc">Save</button>
                             </form>
                         </div>
                         <!-- Completed/All 탭에서는 읽기 전용 -->
@@ -150,6 +155,7 @@
                     </div>
                 </div>
                 <div class="todo-actions">
+                    <button th:if="${filter == 'active'}" type="submit" th:form="'descForm-' + ${todo.id}" class="btn btn-save">Save</button>
                     <a th:href="@{/todos/{id}/edit(id=${todo.id})}" class="btn btn-edit">Edit</a>
                     <form th:action="@{/todos/{id}/delete(id=${todo.id})}" method="post" style="display: inline;">
                         <button type="submit" class="btn btn-delete" onclick="return confirm('Are you sure?')">Delete</button>

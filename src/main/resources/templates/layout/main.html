@@ -32,7 +32,12 @@
                             <span class="menu-text">Calendar</span>
                         </a>
                     </li>
-                    <!-- 추가 메뉴는 여기에 추가 -->
+                    <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/shortcuts')} ? 'active' : ''">
+                        <a th:href="@{/shortcuts}">
+                            <span class="menu-icon">🔗</span>
+                            <span class="menu-text">Shortcuts</span>
+                        </a>
+                    </li>
                 </ul>
             </nav>
             <div class="sidebar-footer">
