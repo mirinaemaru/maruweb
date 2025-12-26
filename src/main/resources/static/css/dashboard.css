@@ -1,0 +1,186 @@
+/* Dashboard Styles */
+
+/* Dashboard Grid */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+}
+
+/* Dashboard Card */
+.dashboard-card {
+    background: #fff;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s;
+}
+
+.dashboard-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.15);
+}
+
+/* Card Header */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.card-header h2 {
+    font-size: 1.1em;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+
+.card-icon {
+    font-size: 1.2em;
+}
+
+.card-badge {
+    background: rgba(255, 255, 255, 0.25);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: 600;
+}
+
+/* Card Content */
+.card-content {
+    padding: 15px 20px;
+    min-height: 150px;
+}
+
+.empty-state-small {
+    color: #999;
+    text-align: center;
+    padding: 40px 20px;
+    font-size: 0.95em;
+}
+
+/* Dashboard List */
+.dashboard-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.dashboard-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.dashboard-list-item:last-child {
+    border-bottom: none;
+}
+
+.item-link {
+    flex: 1;
+    text-decoration: none;
+    min-width: 0;
+    margin-right: 10px;
+}
+
+.item-link:hover .item-title {
+    color: #667eea;
+}
+
+.item-title {
+    display: block;
+    color: #333;
+    font-size: 0.95em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.2s;
+}
+
+.item-date,
+.item-time {
+    color: #999;
+    font-size: 0.85em;
+    white-space: nowrap;
+}
+
+/* Shortcuts Preview */
+.shortcuts-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.shortcut-category-preview h4 {
+    color: #667eea;
+    font-size: 0.9em;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.shortcut-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.shortcut-links li a {
+    display: inline-block;
+    padding: 5px 12px;
+    background: #f5f5f5;
+    color: #333;
+    text-decoration: none;
+    border-radius: 15px;
+    font-size: 0.85em;
+    transition: all 0.2s;
+}
+
+.shortcut-links li a:hover {
+    background: #667eea;
+    color: white;
+}
+
+/* Card Footer */
+.card-footer {
+    padding: 12px 20px;
+    background: #f8f9fa;
+    border-top: 1px solid #e0e0e0;
+}
+
+.card-link {
+    color: #667eea;
+    text-decoration: none;
+    font-size: 0.9em;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.card-link:hover {
+    color: #764ba2;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .card-content {
+        min-height: auto;
+    }
+}

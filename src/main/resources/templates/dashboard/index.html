@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Maru Web</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Menu -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Maru Web</h2>
+                <p class="sidebar-subtitle">Management System</p>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active">
+                        <a th:href="@{/}">
+                            <span class="menu-icon">🏠</span>
+                            <span class="menu-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/todos}">
+                            <span class="menu-icon">📝</span>
+                            <span class="menu-text">Todo</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/calendar}">
+                            <span class="menu-icon">📅</span>
+                            <span class="menu-text">Calendar</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/shortcuts}">
+                            <span class="menu-icon">🔗</span>
+                            <span class="menu-text">Shortcuts</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <p>&copy; 2024 Maru Web</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <div class="container">
+                    <header>
+                        <div>
+                            <h1>Dashboard</h1>
+                            <p class="subtitle" th:text="'Today: ' + ${#temporals.format(today, 'yyyy-MM-dd (E)')}">Today</p>
+                        </div>
+                    </header>
+
+                    <!-- Dashboard Grid -->
+                    <div class="dashboard-grid">
+                        <!-- Active Todos Card -->
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h2>
+                                    <span class="card-icon">📝</span>
+                                    Active Todos
+                                </h2>
+                                <span class="card-badge" th:text="${activeTodoCount}">0</span>
+                            </div>
+                            <div class="card-content">
+                                <div th:if="${#lists.isEmpty(activeTodos)}" class="empty-state-small">
+                                    No active todos
+                                </div>
+                                <ul class="dashboard-list" th:unless="${#lists.isEmpty(activeTodos)}">
+                                    <li th:each="todo : ${activeTodos}" class="dashboard-list-item">
+                                        <a th:href="@{/todos/{id}/edit(id=${todo.id})}" class="item-link">
+                                            <span class="item-title" th:text="${todo.title}">Todo Title</span>
+                                        </a>
+                                        <small class="item-date" th:text="${#temporals.format(todo.createdAt, 'MM-dd')}">01-01</small>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="card-footer">
+                                <a th:href="@{/todos}" class="card-link">View All Todos →</a>
+                            </div>
+                        </div>
+
+                        <!-- Today's Events Card -->
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h2>
+                                    <span class="card-icon">📅</span>
+                                    Today's Events
+                                </h2>
+                                <span class="card-badge" th:text="${#lists.size(todayEvents)}">0</span>
+                            </div>
+                            <div class="card-content">
+                                <div th:if="${#lists.isEmpty(todayEvents)}" class="empty-state-small">
+                                    No events today
+                                </div>
+                                <ul class="dashboard-list" th:unless="${#lists.isEmpty(todayEvents)}">
+                                    <li th:each="event : ${todayEvents}" class="dashboard-list-item">
+                                        <span class="item-title" th:text="${event.title}">Event Title</span>
+                                        <small class="item-time" th:if="${event.allDay != 'Y'}"
+                                               th:text="${#temporals.format(event.startDateTime, 'HH:mm')}">10:00</small>
+                                        <small class="item-time" th:if="${event.allDay == 'Y'}">All day</small>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="card-footer">
+                                <a th:href="@{/calendar}" class="card-link">View Calendar →</a>
+                            </div>
+                        </div>
+
+                        <!-- Upcoming Events Card -->
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h2>
+                                    <span class="card-icon">🗓️</span>
+                                    Upcoming Events
+                                </h2>
+                            </div>
+                            <div class="card-content">
+                                <div th:if="${#lists.isEmpty(upcomingEvents)}" class="empty-state-small">
+                                    No upcoming events
+                                </div>
+                                <ul class="dashboard-list" th:unless="${#lists.isEmpty(upcomingEvents)}">
+                                    <li th:each="event : ${upcomingEvents}" class="dashboard-list-item">
+                                        <span class="item-title" th:text="${event.title}">Event Title</span>
+                                        <small class="item-date" th:text="${#temporals.format(event.startDateTime, 'MM-dd HH:mm')}">01-01 10:00</small>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="card-footer">
+                                <a th:href="@{/calendar}" class="card-link">View Calendar →</a>
+                            </div>
+                        </div>
+
+                        <!-- Quick Shortcuts Card -->
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h2>
+                                    <span class="card-icon">🔗</span>
+                                    Quick Shortcuts
+                                </h2>
+                            </div>
+                            <div class="card-content">
+                                <div th:if="${#lists.isEmpty(shortcutCategories)}" class="empty-state-small">
+                                    No shortcuts yet
+                                </div>
+                                <div th:unless="${#lists.isEmpty(shortcutCategories)}" class="shortcuts-preview">
+                                    <div th:each="category : ${shortcutCategories}" class="shortcut-category-preview">
+                                        <h4 th:text="${category.name}">Category</h4>
+                                        <ul class="shortcut-links">
+                                            <li th:each="shortcut : ${category.shortcuts}" th:if="${!shortcut.deleted.equals('Y')}">
+                                                <a th:href="${shortcut.url}" target="_blank" th:text="${shortcut.name}">Link</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <a th:href="@{/shortcuts}" class="card-link">Manage Shortcuts →</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
