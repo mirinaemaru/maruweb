@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Tracker - Maru Web</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/habit.css}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Menu -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Maru Web</h2>
+                <p class="sidebar-subtitle">Management System</p>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a th:href="@{/}"><span class="menu-icon">🏠</span><span class="menu-text">Dashboard</span></a></li>
+                    <li><a th:href="@{/todos}"><span class="menu-icon">📝</span><span class="menu-text">Todo</span></a></li>
+                    <li><a th:href="@{/calendar}"><span class="menu-icon">📅</span><span class="menu-text">Calendar</span></a></li>
+                    <li><a th:href="@{/dday}"><span class="menu-icon">⏰</span><span class="menu-text">D-Day</span></a></li>
+                    <li><a th:href="@{/notes}"><span class="menu-icon">📒</span><span class="menu-text">Notes</span></a></li>
+                    <li class="active"><a th:href="@{/habits}"><span class="menu-icon">✅</span><span class="menu-text">Habits</span></a></li>
+                    <li><a th:href="@{/shortcuts}"><span class="menu-icon">🔗</span><span class="menu-text">Shortcuts</span></a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer"><p>&copy; 2024 Maru Web</p></div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <div class="container">
+                    <header>
+                        <h1>Habit Tracker</h1>
+                        <p class="subtitle">Track your daily habits</p>
+                    </header>
+
+                    <!-- Flash Messages -->
+                    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+                    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+                    <!-- Add Habit Form -->
+                    <div class="add-habit-section">
+                        <form th:action="@{/habits}" method="post" th:object="${newHabit}" class="add-habit-form">
+                            <input type="text" th:field="*{name}" placeholder="New habit name..." class="habit-input" required>
+                            <select th:field="*{icon}" class="icon-select">
+                                <option value="✅">✅ Check</option>
+                                <option value="🏃">🏃 Exercise</option>
+                                <option value="📚">📚 Reading</option>
+                                <option value="💧">💧 Water</option>
+                                <option value="🧘">🧘 Meditation</option>
+                                <option value="💊">💊 Vitamins</option>
+                                <option value="🌅">🌅 Early Rise</option>
+                                <option value="✍️">✍️ Writing</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary">Add Habit</button>
+                        </form>
+                    </div>
+
+                    <!-- Month Navigation -->
+                    <div class="month-nav">
+                        <a th:href="@{/habits(year=${prevYear}, month=${prevMonth})}" class="nav-btn">◀ Prev</a>
+                        <h2 th:text="${year + '-' + (month < 10 ? '0' + month : month)}">2024-01</h2>
+                        <a th:href="@{/habits(year=${nextYear}, month=${nextMonth})}" class="nav-btn">Next ▶</a>
+                    </div>
+
+                    <!-- Habit Tracker Grid -->
+                    <div th:if="${#lists.isEmpty(habits)}" class="empty-state">
+                        <p>No habits yet. Add your first habit to track!</p>
+                    </div>
+
+                    <div class="habit-tracker" th:unless="${#lists.isEmpty(habits)}">
+                        <table class="habit-table">
+                            <thead>
+                                <tr>
+                                    <th class="habit-name-col">Habit</th>
+                                    <th class="streak-col">Streak</th>
+                                    <th th:each="day : ${days}"
+                                        th:text="${day.dayOfMonth}"
+                                        th:classappend="${day.equals(today)} ? 'today' : ''"
+                                        class="day-col">1</th>
+                                    <th class="action-col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="habit : ${habits}">
+                                    <td class="habit-name-cell">
+                                        <span class="habit-icon" th:text="${habit.icon}">✅</span>
+                                        <span th:text="${habit.name}">Habit Name</span>
+                                    </td>
+                                    <td class="streak-cell">
+                                        <span class="streak-badge" th:text="${streaks[habit.id] + ' days'}">0 days</span>
+                                    </td>
+                                    <td th:each="day : ${days}" class="check-cell" th:classappend="${day.equals(today)} ? 'today' : ''">
+                                        <form th:action="@{/habits/{id}/toggle(id=${habit.id})}" method="post">
+                                            <input type="hidden" name="date" th:value="${day}">
+                                            <input type="hidden" name="year" th:value="${year}">
+                                            <input type="hidden" name="month" th:value="${month}">
+                                            <button type="submit" class="check-btn"
+                                                    th:classappend="${records[habit.id] != null and records[habit.id].contains(day)} ? 'checked' : ''">
+                                                <span th:if="${records[habit.id] != null and records[habit.id].contains(day)}">✓</span>
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td class="action-cell">
+                                        <a th:href="@{/habits/{id}/edit(id=${habit.id})}" class="btn btn-edit btn-tiny">Edit</a>
+                                        <form th:action="@{/habits/{id}/delete(id=${habit.id})}" method="post" style="display: inline;">
+                                            <button type="submit" class="btn btn-delete btn-tiny" onclick="return confirm('Delete this habit?')">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

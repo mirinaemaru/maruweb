@@ -1,0 +1,187 @@
+/* D-Day Styles */
+
+/* Add D-Day Section */
+.add-dday-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+}
+
+.add-dday-form .form-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.dday-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 12px 20px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s;
+}
+
+.dday-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.icon-select {
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    background: white;
+    cursor: pointer;
+}
+
+.icon-select:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+/* Section Title */
+.section-title {
+    font-size: 1.3em;
+    color: #333;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #667eea;
+}
+
+.section-title.past {
+    border-bottom-color: #999;
+    color: #666;
+}
+
+/* D-Day Section */
+.dday-section {
+    margin-bottom: 40px;
+}
+
+/* D-Day Grid */
+.dday-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* D-Day Card */
+.dday-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    transition: all 0.3s;
+}
+
+.dday-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+}
+
+.dday-card.today {
+    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+}
+
+.dday-card.past {
+    opacity: 0.7;
+    background: #f8f9fa;
+}
+
+/* D-Day Icon */
+.dday-icon {
+    font-size: 2.5em;
+    width: 60px;
+    text-align: center;
+}
+
+/* D-Day Info */
+.dday-info {
+    flex: 1;
+}
+
+.dday-info h3 {
+    font-size: 1.2em;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.dday-date {
+    color: #666;
+    font-size: 0.95em;
+}
+
+/* D-Day Count */
+.dday-count {
+    font-size: 1.8em;
+    font-weight: 700;
+    color: #667eea;
+    min-width: 100px;
+    text-align: center;
+}
+
+.dday-count.today {
+    color: #dc3545;
+    animation: pulse 1.5s infinite;
+}
+
+.dday-count.past {
+    color: #999;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* D-Day Actions */
+.dday-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Button Small */
+.btn-small {
+    padding: 6px 14px;
+    font-size: 13px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .add-dday-form .form-row {
+        flex-direction: column;
+    }
+
+    .dday-input {
+        width: 100%;
+    }
+
+    .dday-card {
+        flex-wrap: wrap;
+    }
+
+    .dday-icon {
+        width: auto;
+    }
+
+    .dday-count {
+        width: 100%;
+        text-align: left;
+        margin-top: 10px;
+    }
+
+    .dday-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D-Day - Maru Web</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/dday.css}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Menu -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Maru Web</h2>
+                <p class="sidebar-subtitle">Management System</p>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a th:href="@{/}">
+                            <span class="menu-icon">🏠</span>
+                            <span class="menu-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/todos}">
+                            <span class="menu-icon">📝</span>
+                            <span class="menu-text">Todo</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/calendar}">
+                            <span class="menu-icon">📅</span>
+                            <span class="menu-text">Calendar</span>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a th:href="@{/dday}">
+                            <span class="menu-icon">⏰</span>
+                            <span class="menu-text">D-Day</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/notes}">
+                            <span class="menu-icon">📒</span>
+                            <span class="menu-text">Notes</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/habits}">
+                            <span class="menu-icon">✅</span>
+                            <span class="menu-text">Habits</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/shortcuts}">
+                            <span class="menu-icon">🔗</span>
+                            <span class="menu-text">Shortcuts</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <p>&copy; 2024 Maru Web</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <div class="container">
+                    <header>
+                        <h1>D-Day</h1>
+                        <p class="subtitle">Track your important dates</p>
+                    </header>
+
+                    <!-- Flash Messages -->
+                    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+                    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+                    <!-- Add D-Day Form -->
+                    <div class="add-dday-section">
+                        <form th:action="@{/dday}" method="post" th:object="${newDDay}" class="add-dday-form">
+                            <div class="form-row">
+                                <input type="text" th:field="*{title}" placeholder="D-Day title..." class="dday-input" required>
+                                <input type="date" th:field="*{targetDate}" class="date-input" required>
+                                <select th:field="*{icon}" class="icon-select">
+                                    <option value="🎯">🎯 Target</option>
+                                    <option value="🎂">🎂 Birthday</option>
+                                    <option value="💍">💍 Anniversary</option>
+                                    <option value="✈️">✈️ Travel</option>
+                                    <option value="🎓">🎓 Graduation</option>
+                                    <option value="💼">💼 Work</option>
+                                    <option value="🏃">🏃 Exercise</option>
+                                    <option value="📅">📅 Event</option>
+                                </select>
+                                <button type="submit" class="btn btn-primary">Add</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Upcoming D-Days -->
+                    <div class="dday-section">
+                        <h2 class="section-title">Upcoming</h2>
+                        <div th:if="${#lists.isEmpty(upcomingDDays)}" class="empty-state">
+                            <p>No upcoming D-Days</p>
+                        </div>
+                        <div class="dday-grid" th:unless="${#lists.isEmpty(upcomingDDays)}">
+                            <div th:each="dday : ${upcomingDDays}" class="dday-card" th:classappend="${dday.today} ? 'today' : ''">
+                                <div class="dday-icon" th:text="${dday.icon}">🎯</div>
+                                <div class="dday-info">
+                                    <h3 th:text="${dday.title}">Title</h3>
+                                    <p class="dday-date" th:text="${#temporals.format(dday.targetDate, 'yyyy-MM-dd (E)')}">2024-01-01</p>
+                                </div>
+                                <div class="dday-count" th:classappend="${dday.today} ? 'today' : ''">
+                                    <span th:text="${dday.DDayDisplay}">D-30</span>
+                                </div>
+                                <div class="dday-actions">
+                                    <a th:href="@{/dday/{id}/edit(id=${dday.id})}" class="btn btn-edit btn-small">Edit</a>
+                                    <form th:action="@{/dday/{id}/delete(id=${dday.id})}" method="post" style="display: inline;">
+                                        <button type="submit" class="btn btn-delete btn-small" onclick="return confirm('Delete this D-Day?')">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Past D-Days -->
+                    <div class="dday-section" th:unless="${#lists.isEmpty(pastDDays)}">
+                        <h2 class="section-title past">Past</h2>
+                        <div class="dday-grid past">
+                            <div th:each="dday : ${pastDDays}" class="dday-card past">
+                                <div class="dday-icon" th:text="${dday.icon}">🎯</div>
+                                <div class="dday-info">
+                                    <h3 th:text="${dday.title}">Title</h3>
+                                    <p class="dday-date" th:text="${#temporals.format(dday.targetDate, 'yyyy-MM-dd (E)')}">2024-01-01</p>
+                                </div>
+                                <div class="dday-count past">
+                                    <span th:text="${dday.DDayDisplay}">D+30</span>
+                                </div>
+                                <div class="dday-actions">
+                                    <a th:href="@{/dday/{id}/edit(id=${dday.id})}" class="btn btn-edit btn-small">Edit</a>
+                                    <form th:action="@{/dday/{id}/delete(id=${dday.id})}" method="post" style="display: inline;">
+                                        <button type="submit" class="btn btn-delete btn-small" onclick="return confirm('Delete this D-Day?')">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${note.title} + ' - Maru Web'">Note - Maru Web</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/note.css}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Menu -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Maru Web</h2>
+                <p class="sidebar-subtitle">Management System</p>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a th:href="@{/}"><span class="menu-icon">🏠</span><span class="menu-text">Dashboard</span></a></li>
+                    <li><a th:href="@{/todos}"><span class="menu-icon">📝</span><span class="menu-text">Todo</span></a></li>
+                    <li><a th:href="@{/calendar}"><span class="menu-icon">📅</span><span class="menu-text">Calendar</span></a></li>
+                    <li><a th:href="@{/dday}"><span class="menu-icon">⏰</span><span class="menu-text">D-Day</span></a></li>
+                    <li class="active"><a th:href="@{/notes}"><span class="menu-icon">📒</span><span class="menu-text">Notes</span></a></li>
+                    <li><a th:href="@{/habits}"><span class="menu-icon">✅</span><span class="menu-text">Habits</span></a></li>
+                    <li><a th:href="@{/shortcuts}"><span class="menu-icon">🔗</span><span class="menu-text">Shortcuts</span></a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer"><p>&copy; 2024 Maru Web</p></div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <div class="container">
+                    <header>
+                        <div>
+                            <span class="note-category-badge" th:if="${note.category != null and note.category != ''}" th:text="${note.category}">Category</span>
+                            <h1 th:text="${note.title}">Note Title</h1>
+                            <p class="subtitle" th:text="'Last updated: ' + ${#temporals.format(note.updatedAt, 'yyyy-MM-dd HH:mm')}">Updated</p>
+                        </div>
+                        <div class="header-actions">
+                            <a th:href="@{/notes/{id}/edit(id=${note.id})}" class="btn btn-edit">Edit</a>
+                            <a th:href="@{/notes}" class="btn btn-secondary">Back to List</a>
+                        </div>
+                    </header>
+
+                    <div class="note-content-view">
+                        <div th:if="${note.content != null and note.content != ''}"
+                             th:utext="${#strings.replace(#strings.escapeXml(note.content), '&#10;', '<br>')}">
+                            Note content here...
+                        </div>
+                        <div th:if="${note.content == null or note.content == ''}" class="empty-content">
+                            No content
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

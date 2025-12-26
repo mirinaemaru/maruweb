@@ -3,13 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Todo - Maru Web</title>
+    <title th:text="${note.id != null} ? 'Edit Note - Maru Web' : 'New Note - Maru Web'">Note - Maru Web</title>
     <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
-    <!-- LiveReload Script -->
-    <script th:if="${@environment.getProperty('spring.devtools.livereload.enabled') != 'false'}">
-        document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>');
-    </script>
+    <link rel="stylesheet" th:href="@{/css/note.css}">
 </head>
 <body>
     <div class="app-container">
@@ -22,17 +19,15 @@
             <nav class="sidebar-nav">
                 <ul>
                     <li><a th:href="@{/}"><span class="menu-icon">🏠</span><span class="menu-text">Dashboard</span></a></li>
-                    <li class="active"><a th:href="@{/todos}"><span class="menu-icon">📝</span><span class="menu-text">Todo</span></a></li>
+                    <li><a th:href="@{/todos}"><span class="menu-icon">📝</span><span class="menu-text">Todo</span></a></li>
                     <li><a th:href="@{/calendar}"><span class="menu-icon">📅</span><span class="menu-text">Calendar</span></a></li>
                     <li><a th:href="@{/dday}"><span class="menu-icon">⏰</span><span class="menu-text">D-Day</span></a></li>
-                    <li><a th:href="@{/notes}"><span class="menu-icon">📒</span><span class="menu-text">Notes</span></a></li>
+                    <li class="active"><a th:href="@{/notes}"><span class="menu-icon">📒</span><span class="menu-text">Notes</span></a></li>
                     <li><a th:href="@{/habits}"><span class="menu-icon">✅</span><span class="menu-text">Habits</span></a></li>
                     <li><a th:href="@{/shortcuts}"><span class="menu-icon">🔗</span><span class="menu-text">Shortcuts</span></a></li>
                 </ul>
             </nav>
-            <div class="sidebar-footer">
-                <p>&copy; 2024 Maru Web</p>
-            </div>
+            <div class="sidebar-footer"><p>&copy; 2024 Maru Web</p></div>
         </aside>
 
         <!-- Main Content Area -->
@@ -40,40 +35,36 @@
             <div class="content-wrapper">
                 <div class="container">
                     <header>
-                        <h1>Edit Todo</h1>
-                        <a th:href="@{/todos}" class="btn btn-secondary">Back to List</a>
+                        <h1 th:text="${note.id != null} ? 'Edit Note' : 'New Note'">Note</h1>
+                        <a th:href="@{/notes}" class="btn btn-secondary">Back to List</a>
                     </header>
 
                     <div class="edit-form">
-                        <form th:action="@{/todos/{id}(id=${todo.id})}" method="post" th:object="${todo}">
+                        <form th:action="${note.id != null} ? @{/notes/{id}(id=${note.id})} : @{/notes}"
+                              method="post" th:object="${note}">
                             <div class="form-group">
                                 <label for="title">Title *</label>
-                                <input type="text"
-                                       id="title"
-                                       th:field="*{title}"
-                                       class="todo-input"
-                                       required>
+                                <input type="text" id="title" th:field="*{title}" class="todo-input" required autofocus>
                             </div>
 
                             <div class="form-group">
-                                <label for="description">Description</label>
-                                <textarea id="description"
-                                          th:field="*{description}"
-                                          class="todo-textarea"
-                                          rows="5"></textarea>
+                                <label for="category">Category</label>
+                                <input type="text" id="category" th:field="*{category}" class="todo-input"
+                                       list="categoryList" placeholder="Enter or select category">
+                                <datalist id="categoryList">
+                                    <option th:each="cat : ${categories}" th:value="${cat}">
+                                </datalist>
                             </div>
 
                             <div class="form-group">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" th:checked="${todo.completed == 'Y'}" name="completed" value="Y">
-                                    <span>Mark as completed</span>
-                                </label>
-                                <input type="hidden" name="completed" value="N">
+                                <label for="content">Content</label>
+                                <textarea id="content" th:field="*{content}" class="note-textarea" rows="15"
+                                          placeholder="Write your note here..."></textarea>
                             </div>
 
                             <div class="form-actions">
-                                <button type="submit" class="btn btn-primary">Update Todo</button>
-                                <a th:href="@{/todos}" class="btn btn-secondary">Cancel</a>
+                                <button type="submit" class="btn btn-primary" th:text="${note.id != null} ? 'Update Note' : 'Create Note'">Save</button>
+                                <a th:href="@{/notes}" class="btn btn-secondary">Cancel</a>
                             </div>
                         </form>
                     </div>

@@ -112,6 +112,17 @@
     white-space: nowrap;
 }
 
+.item-dday {
+    color: #667eea;
+    font-size: 0.9em;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.item-dday.today {
+    color: #dc3545;
+}
+
 /* Shortcuts Preview */
 .shortcuts-preview {
     display: flex;
