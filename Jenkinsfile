@@ -2,6 +2,10 @@ pipeline {
     agent any
 
     environment {
+        // Java 17 설정
+        JAVA_HOME = '/Users/changsupark/Library/Java/JavaVirtualMachines/corretto-17.0.5/Contents/Home'
+        PATH = "${JAVA_HOME}/bin:${env.PATH}"
+
         // Environment variables from Jenkins credentials
         GOOGLE_CLIENT_ID = credentials('google-client-id')
         GOOGLE_CLIENT_SECRET = credentials('google-client-secret')
