@@ -22,6 +22,7 @@ public class TodoController {
 
     @GetMapping
     public String listTodos(@RequestParam(required = false) String filter,
+                           @RequestParam(required = false) String keyword,
                            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
                            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
                            Model model) {
@@ -35,10 +36,10 @@ public class TodoController {
         }
 
         if ("completed".equals(filter)) {
-            model.addAttribute("todos", todoService.getTodosByStatusWithDateRange("Y", from, to));
+            model.addAttribute("todos", todoService.searchTodos("Y", keyword, from, to));
             model.addAttribute("filter", "completed");
         } else if ("all".equals(filter)) {
-            model.addAttribute("todos", todoService.getAllTodosWithDateRange(from, to));
+            model.addAttribute("todos", todoService.searchAllTodos(keyword, from, to));
             model.addAttribute("filter", "all");
         } else {
             // 기본값은 active (날짜 필터 없음)
@@ -47,6 +48,7 @@ public class TodoController {
         }
 
         model.addAttribute("todo", new Todo());
+        model.addAttribute("keyword", keyword);
         model.addAttribute("from", from);
         model.addAttribute("to", to);
         return "todo/list";

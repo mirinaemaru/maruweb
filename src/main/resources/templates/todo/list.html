@@ -79,46 +79,44 @@
             </form>
         </div>
 
-        <!-- Filter Tabs -->
-        <div class="filter-tabs">
-            <a th:href="@{/todos}"
-               th:classappend="${filter == 'active'} ? 'active' : ''">
-                Active
-            </a>
-            <a th:href="@{/todos(filter='completed')}"
-               th:classappend="${filter == 'completed'} ? 'active' : ''">
-                Completed
-            </a>
-            <a th:href="@{/todos(filter='all')}"
-               th:classappend="${filter == 'all'} ? 'active' : ''">
-                All
-            </a>
-        </div>
+        <!-- Filter Tabs with Search -->
+        <div class="filter-row">
+            <div class="filter-tabs">
+                <a th:href="@{/todos}"
+                   th:classappend="${filter == 'active'} ? 'active' : ''">
+                    Active
+                </a>
+                <a th:href="@{/todos(filter='completed')}"
+                   th:classappend="${filter == 'completed'} ? 'active' : ''">
+                    Completed
+                </a>
+                <a th:href="@{/todos(filter='all')}"
+                   th:classappend="${filter == 'all'} ? 'active' : ''">
+                    All
+                </a>
+            </div>
 
-        <!-- Date Range Filter (Completed/All 탭에서만 표시) -->
-        <div th:if="${filter == 'completed' || filter == 'all'}" class="date-filter-section">
-            <form th:action="@{/todos}" method="get" class="date-filter-form">
-                <input type="hidden" name="filter" th:value="${filter}">
-                <div class="date-inputs">
-                    <div class="date-input-group">
-                        <label for="from">From:</label>
-                        <input type="date"
-                               id="from"
-                               name="from"
-                               th:value="${from}"
-                               class="date-input">
-                    </div>
-                    <div class="date-input-group">
-                        <label for="to">To:</label>
-                        <input type="date"
-                               id="to"
-                               name="to"
-                               th:value="${to}"
-                               class="date-input">
-                    </div>
+            <!-- Search Filter (Completed/All 탭에서만 표시) -->
+            <div th:if="${filter == 'completed' || filter == 'all'}" class="search-filter">
+                <form th:action="@{/todos}" method="get" class="search-filter-form">
+                    <input type="hidden" name="filter" th:value="${filter}">
+                    <input type="text"
+                           name="keyword"
+                           th:value="${keyword}"
+                           placeholder="Search keyword..."
+                           class="keyword-input">
+                    <input type="date"
+                           name="from"
+                           th:value="${from}"
+                           class="date-input">
+                    <span class="date-separator">~</span>
+                    <input type="date"
+                           name="to"
+                           th:value="${to}"
+                           class="date-input">
                     <button type="submit" class="btn btn-search">Search</button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
 
         <!-- Todo List -->
@@ -149,7 +147,7 @@
                             </form>
                         </div>
                         <!-- Completed/All 탭에서는 읽기 전용 -->
-                        <p th:if="${filter != 'active' && todo.description}"
+                        <p th:if="${filter != 'active' and todo.description != null and todo.description != ''}"
                            th:text="${todo.description}"
                            class="todo-description">Description</p>
                         <small class="todo-date" th:text="${#temporals.format(todo.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01</small>
@@ -167,5 +165,29 @@
             </div>
         </main>
     </div>
+    <!-- Keyword Highlighting Script -->
+    <script th:if="${keyword != null and keyword != ''}" th:inline="javascript">
+        (function() {
+            const keyword = /*[[${keyword}]]*/ '';
+            if (!keyword || keyword.trim() === '') return;
+
+            function highlightText(element) {
+                if (!element || !element.textContent) return;
+
+                const text = element.textContent;
+                const regex = new RegExp('(' + keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+
+                if (regex.test(text)) {
+                    element.innerHTML = text.replace(regex, '<span class="keyword-highlight">$1</span>');
+                }
+            }
+
+            // Highlight titles
+            document.querySelectorAll('.todo-text h3').forEach(highlightText);
+
+            // Highlight descriptions (read-only)
+            document.querySelectorAll('.todo-description').forEach(highlightText);
+        })();
+    </script>
 </body>
 </html>
