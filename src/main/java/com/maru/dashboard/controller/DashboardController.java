@@ -2,6 +2,8 @@ package com.maru.dashboard.controller;
 
 import com.maru.calendar.entity.CalendarEvent;
 import com.maru.calendar.service.CalendarEventService;
+import com.maru.dday.entity.DDay;
+import com.maru.dday.service.DDayService;
 import com.maru.shortcut.entity.ShortcutCategory;
 import com.maru.shortcut.service.ShortcutService;
 import com.maru.todo.entity.Todo;
@@ -23,6 +25,7 @@ public class DashboardController {
     private final TodoService todoService;
     private final CalendarEventService calendarEventService;
     private final ShortcutService shortcutService;
+    private final DDayService ddayService;
 
     @GetMapping("/")
     public String dashboard(Model model) {
@@ -51,11 +54,18 @@ public class DashboardController {
                 .limit(3)
                 .collect(Collectors.toList());
 
+        // Upcoming D-Days (limit to 5)
+        List<DDay> upcomingDDays = ddayService.getUpcomingDDays()
+                .stream()
+                .limit(5)
+                .collect(Collectors.toList());
+
         model.addAttribute("activeTodos", activeTodos);
         model.addAttribute("activeTodoCount", activeTodoCount);
         model.addAttribute("todayEvents", todayEvents);
         model.addAttribute("upcomingEvents", upcomingEvents);
         model.addAttribute("shortcutCategories", shortcutCategories);
+        model.addAttribute("upcomingDDays", upcomingDDays);
         model.addAttribute("today", LocalDate.now());
 
         return "dashboard/index";

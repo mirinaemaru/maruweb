@@ -1,0 +1,212 @@
+/* Habit Tracker Styles */
+
+/* Add Habit Section */
+.add-habit-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+}
+
+.add-habit-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.habit-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 12px 20px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.habit-input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+/* Month Navigation */
+.month-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 25px;
+}
+
+.month-nav h2 {
+    font-size: 1.5em;
+    color: #333;
+    min-width: 150px;
+    text-align: center;
+}
+
+.nav-btn {
+    padding: 8px 16px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #666;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.nav-btn:hover {
+    background: #667eea;
+    color: white;
+}
+
+/* Habit Tracker Table */
+.habit-tracker {
+    overflow-x: auto;
+}
+
+.habit-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.habit-table th,
+.habit-table td {
+    padding: 12px 8px;
+    text-align: center;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.habit-table thead th {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+    font-size: 0.85em;
+}
+
+.habit-table thead th.today {
+    background: #ffc107;
+    color: #333;
+}
+
+.habit-name-col {
+    min-width: 150px;
+    text-align: left !important;
+    padding-left: 15px !important;
+}
+
+.streak-col {
+    min-width: 80px;
+}
+
+.day-col {
+    min-width: 35px;
+}
+
+.action-col {
+    min-width: 120px;
+}
+
+/* Habit Name Cell */
+.habit-name-cell {
+    text-align: left !important;
+    padding-left: 15px !important;
+    font-weight: 500;
+}
+
+.habit-icon {
+    margin-right: 8px;
+    font-size: 1.2em;
+}
+
+/* Streak Cell */
+.streak-cell {
+    text-align: center;
+}
+
+.streak-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Check Cell */
+.check-cell {
+    padding: 8px 4px !important;
+}
+
+.check-cell.today {
+    background: rgba(255, 193, 7, 0.1);
+}
+
+.check-btn {
+    width: 28px;
+    height: 28px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: white;
+}
+
+.check-btn:hover {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.check-btn.checked {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+}
+
+/* Action Cell */
+.action-cell {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn-tiny {
+    padding: 4px 8px;
+    font-size: 11px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .add-habit-form {
+        flex-direction: column;
+    }
+
+    .habit-input {
+        width: 100%;
+    }
+
+    .habit-table th,
+    .habit-table td {
+        padding: 8px 4px;
+        font-size: 0.85em;
+    }
+
+    .habit-name-col {
+        min-width: 100px;
+    }
+
+    .check-btn {
+        width: 24px;
+        height: 24px;
+    }
+}

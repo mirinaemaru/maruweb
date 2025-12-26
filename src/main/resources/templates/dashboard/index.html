@@ -37,6 +37,24 @@
                         </a>
                     </li>
                     <li>
+                        <a th:href="@{/dday}">
+                            <span class="menu-icon">⏰</span>
+                            <span class="menu-text">D-Day</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/notes}">
+                            <span class="menu-icon">📒</span>
+                            <span class="menu-text">Notes</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/habits}">
+                            <span class="menu-icon">✅</span>
+                            <span class="menu-text">Habits</span>
+                        </a>
+                    </li>
+                    <li>
                         <a th:href="@{/shortcuts}">
                             <span class="menu-icon">🔗</span>
                             <span class="menu-text">Shortcuts</span>
@@ -113,6 +131,33 @@
                             </div>
                             <div class="card-footer">
                                 <a th:href="@{/calendar}" class="card-link">View Calendar →</a>
+                            </div>
+                        </div>
+
+                        <!-- D-Day Card -->
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h2>
+                                    <span class="card-icon">⏰</span>
+                                    D-Day
+                                </h2>
+                            </div>
+                            <div class="card-content">
+                                <div th:if="${#lists.isEmpty(upcomingDDays)}" class="empty-state-small">
+                                    No upcoming D-Days
+                                </div>
+                                <ul class="dashboard-list" th:unless="${#lists.isEmpty(upcomingDDays)}">
+                                    <li th:each="dday : ${upcomingDDays}" class="dashboard-list-item">
+                                        <span class="item-title">
+                                            <span th:text="${dday.icon}">🎯</span>
+                                            <span th:text="${dday.title}">D-Day Title</span>
+                                        </span>
+                                        <small class="item-dday" th:classappend="${dday.today} ? 'today' : ''" th:text="${dday.DDayDisplay}">D-30</small>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="card-footer">
+                                <a th:href="@{/dday}" class="card-link">View All D-Days →</a>
                             </div>
                         </div>
 

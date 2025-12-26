@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes - Maru Web</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/note.css}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Menu -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Maru Web</h2>
+                <p class="sidebar-subtitle">Management System</p>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a th:href="@{/}">
+                            <span class="menu-icon">🏠</span>
+                            <span class="menu-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/todos}">
+                            <span class="menu-icon">📝</span>
+                            <span class="menu-text">Todo</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/calendar}">
+                            <span class="menu-icon">📅</span>
+                            <span class="menu-text">Calendar</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/dday}">
+                            <span class="menu-icon">⏰</span>
+                            <span class="menu-text">D-Day</span>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a th:href="@{/notes}">
+                            <span class="menu-icon">📒</span>
+                            <span class="menu-text">Notes</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/habits}">
+                            <span class="menu-icon">✅</span>
+                            <span class="menu-text">Habits</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/shortcuts}">
+                            <span class="menu-icon">🔗</span>
+                            <span class="menu-text">Shortcuts</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <p>&copy; 2024 Maru Web</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <div class="container">
+                    <header>
+                        <div>
+                            <h1>Notes</h1>
+                            <p class="subtitle">Your personal notebook</p>
+                        </div>
+                        <a th:href="@{/notes/new}" class="btn btn-primary">+ New Note</a>
+                    </header>
+
+                    <!-- Flash Messages -->
+                    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+                    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+                    <!-- Filter Row -->
+                    <div class="filter-row">
+                        <div class="category-filter">
+                            <a th:href="@{/notes}" th:classappend="${selectedCategory == null and keyword == null} ? 'active' : ''">All</a>
+                            <a th:each="cat : ${categories}"
+                               th:href="@{/notes(category=${cat})}"
+                               th:classappend="${selectedCategory == cat} ? 'active' : ''"
+                               th:text="${cat}">Category</a>
+                        </div>
+                        <div class="search-filter">
+                            <form th:action="@{/notes}" method="get" class="search-form">
+                                <input type="text" name="keyword" th:value="${keyword}" placeholder="Search notes..." class="search-input">
+                                <button type="submit" class="btn btn-search">Search</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Notes Grid -->
+                    <div th:if="${#lists.isEmpty(notes)}" class="empty-state">
+                        <p>No notes yet. Create your first note!</p>
+                    </div>
+
+                    <div class="notes-grid" th:unless="${#lists.isEmpty(notes)}">
+                        <div th:each="note : ${notes}" class="note-card" th:classappend="${note.pinned} ? 'pinned' : ''">
+                            <div class="note-header">
+                                <span class="note-category" th:if="${note.category != null and note.category != ''}" th:text="${note.category}">Category</span>
+                                <form th:action="@{/notes/{id}/pin(id=${note.id})}" method="post" class="pin-form">
+                                    <button type="submit" class="pin-btn" th:classappend="${note.pinned} ? 'active' : ''">📌</button>
+                                </form>
+                            </div>
+                            <a th:href="@{/notes/{id}(id=${note.id})}" class="note-link">
+                                <h3 th:text="${note.title}">Note Title</h3>
+                                <p class="note-preview" th:text="${#strings.abbreviate(note.content, 100)}">Content preview...</p>
+                            </a>
+                            <div class="note-footer">
+                                <small th:text="${#temporals.format(note.updatedAt, 'yyyy-MM-dd HH:mm')}">2024-01-01</small>
+                                <div class="note-actions">
+                                    <a th:href="@{/notes/{id}/edit(id=${note.id})}" class="btn btn-edit btn-tiny">Edit</a>
+                                    <form th:action="@{/notes/{id}/delete(id=${note.id})}" method="post" style="display: inline;">
+                                        <button type="submit" class="btn btn-delete btn-tiny" onclick="return confirm('Delete this note?')">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
