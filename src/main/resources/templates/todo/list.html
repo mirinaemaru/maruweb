@@ -98,13 +98,17 @@
 
             <!-- Search Filter (Completed/All 탭에서만 표시) -->
             <div th:if="${filter == 'completed' || filter == 'all'}" class="search-filter">
-                <form th:action="@{/todos}" method="get" class="search-filter-form">
+                <form th:action="@{/todos}" method="get" class="search-filter-form" id="searchForm">
                     <input type="hidden" name="filter" th:value="${filter}">
-                    <input type="text"
-                           name="keyword"
-                           th:value="${keyword}"
-                           placeholder="Search keyword..."
-                           class="keyword-input">
+                    <div class="keyword-wrapper">
+                        <input type="text"
+                               name="keyword"
+                               id="keywordInput"
+                               th:value="${keyword}"
+                               placeholder="Search keyword..."
+                               class="keyword-input">
+                        <button type="button" class="keyword-clear" onclick="clearKeyword()" th:if="${keyword != null and keyword != ''}">×</button>
+                    </div>
                     <input type="date"
                            name="from"
                            th:value="${from}"
@@ -165,6 +169,14 @@
             </div>
         </main>
     </div>
+    <!-- Clear Keyword Script -->
+    <script>
+        function clearKeyword() {
+            document.getElementById('keywordInput').value = '';
+            document.getElementById('searchForm').submit();
+        }
+    </script>
+
     <!-- Keyword Highlighting Script -->
     <script th:if="${keyword != null and keyword != ''}" th:inline="javascript">
         (function() {
