@@ -2,7 +2,7 @@
 name: deploy
 description: Deploy the application through Jenkins pipeline. Use when user asks to deploy, push to production, check deployment status, or verify app health.
 allowed-tools: Bash, Read, Grep, Glob
-model: Sonnet
+model: sonnet
 ---
 
 # Deploy Skill
@@ -32,7 +32,7 @@ git push origin master
 ```
 
 ### 4. Monitor Jenkins Build
-- Jenkins URL: http://localhost:8080/job/maruweb/
+- Jenkins URL: http://localhost:9090/job/maruweb-local/
 - Jenkins automatically:
   - Checks out code
   - Builds with Maven
