@@ -40,12 +40,12 @@ body {
     transform: translateX(0);
 }
 
-/* Sidebar Toggle Trigger (invisible hover area) */
+/* Sidebar Toggle Trigger (hover area) */
 .sidebar-toggle {
     position: fixed;
     left: 0;
     top: 0;
-    width: 3px;
+    width: 30px;
     height: 100vh;
     background: rgba(102, 126, 234, 0.15);
     border: none;
@@ -55,7 +55,7 @@ body {
 }
 
 .sidebar-toggle:hover {
-    width: 5px;
+    width: 35px;
     background: rgba(102, 126, 234, 0.3);
 }
 
