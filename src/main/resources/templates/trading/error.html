@@ -81,7 +81,13 @@
                     <li><a th:href="@{/calendar}"><span class="menu-icon">📅</span><span class="menu-text">Calendar</span></a></li>
                     <li><a th:href="@{/notes}"><span class="menu-icon">📒</span><span class="menu-text">Notes</span></a></li>
                     <li><a th:href="@{/shortcuts}"><span class="menu-icon">🔗</span><span class="menu-text">Shortcuts</span></a></li>
-                    <li class="active"><a th:href="@{/trading/dashboard}"><span class="menu-icon">📊</span><span class="menu-text">Trading</span></a></li>
+                    <li class="has-submenu active"><a th:href="@{/trading/dashboard}"><span class="menu-icon">📊</span><span class="menu-text">Trading</span></a>
+                        <ul class="submenu">
+                            <li><a th:href="@{/trading/accounts}">계좌관리</a></li>
+                            <li><a th:href="@{/trading/strategies}">전략 관리</a></li>
+                            <li><a th:href="@{/trading/orders}">주문조회</a></li>
+                        </ul>
+                    </li>
                 </ul>
             </nav>
         </aside>

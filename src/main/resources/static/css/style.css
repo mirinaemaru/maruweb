@@ -144,6 +144,51 @@ body {
     font-size: 1em;
 }
 
+/* Submenu Styles */
+.sidebar-nav li.has-submenu > a {
+    position: relative;
+}
+
+.sidebar-nav li.has-submenu > a::after {
+    content: '▼';
+    font-size: 0.7em;
+    margin-left: auto;
+    transition: transform 0.3s;
+}
+
+.sidebar-nav li.has-submenu.active > a::after {
+    transform: rotate(180deg);
+}
+
+.submenu {
+    list-style: none;
+    padding-left: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.sidebar-nav li.has-submenu.active .submenu {
+    max-height: 300px;
+}
+
+.submenu li a {
+    padding: 12px 20px 12px 50px;
+    font-size: 0.9em;
+    border-left: 4px solid transparent;
+}
+
+.submenu li a:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-left-color: rgba(255, 255, 255, 0.5);
+}
+
+.submenu li.active a {
+    background: rgba(255, 255, 255, 0.25);
+    border-left-color: rgba(255, 255, 255, 0.8);
+    font-weight: 600;
+}
+
 .sidebar-footer {
     padding: 20px;
     border-top: 1px solid rgba(255, 255, 255, 0.2);
