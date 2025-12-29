@@ -580,20 +580,29 @@ header h1 {
 .todo-title-with-desc {
     display: flex;
     align-items: baseline;
-    white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
     max-width: 100%;
 }
 
 .todo-title-text {
     flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .todo-desc-inline {
     color: #888;
     font-weight: 400;
     font-size: 0.9em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+}
+
+.todo-desc-inline span {
+    display: inline-block;
+    max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
