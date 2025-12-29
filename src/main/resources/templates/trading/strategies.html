@@ -8,21 +8,29 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
         .strategies-page {
-            padding: 20px;
-            max-width: 1400px;
+            padding: 30px;
+            max-width: 1600px;
             margin: 0 auto;
         }
         .page-header {
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            border-radius: 16px;
+            color: white;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
         }
         .page-header h1 {
-            font-size: 28px;
-            color: #333;
+            font-size: 36px;
+            font-weight: 700;
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
         .page-header p {
-            color: #666;
-            font-size: 14px;
+            font-size: 16px;
+            opacity: 0.95;
         }
         .strategies-list {
             display: flex;
@@ -31,14 +39,15 @@
         }
         .strategy-card {
             background: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: all 0.3s;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(0,0,0,0.04);
         }
         .strategy-card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+            transform: translateY(-5px);
         }
         .strategy-header {
             display: flex;
@@ -47,9 +56,10 @@
             margin-bottom: 15px;
         }
         .strategy-name {
-            font-size: 20px;
-            font-weight: bold;
-            color: #333;
+            font-size: 22px;
+            font-weight: 700;
+            color: #2c3e50;
+            letter-spacing: -0.3px;
         }
         .strategy-status {
             display: flex;
@@ -80,21 +90,23 @@
         }
         .badge {
             display: inline-block;
-            padding: 6px 14px;
-            border-radius: 4px;
-            font-size: 13px;
-            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
         .badge-active {
-            background-color: #d1e7dd;
-            color: #0a3622;
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            color: #0a472e;
         }
         .badge-inactive {
-            background-color: #f8d7da;
-            color: #721c24;
+            background: #e8e8e8;
+            color: #666;
         }
         .badge-paused {
-            background-color: #fff3cd;
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
             color: #856404;
         }
         .empty-state {
@@ -155,6 +167,7 @@
                     <li class="has-submenu active">
                         <a th:href="@{/trading/dashboard}"><span class="menu-icon">📊</span><span class="menu-text">Trading</span></a>
                         <ul class="submenu">
+                            <li><a th:href="@{/trading/dashboard}">Dashboard</a></li>
                             <li><a th:href="@{/trading/accounts}">계좌관리</a></li>
                             <li class="active"><a th:href="@{/trading/strategies}">전략 관리</a></li>
                             <li><a th:href="@{/trading/orders}">주문조회</a></li>

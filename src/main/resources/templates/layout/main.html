@@ -48,6 +48,9 @@
                     <li class="has-submenu" th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading')} ? 'active' : ''">
                         <a th:href="@{/trading/dashboard}"><span class="menu-icon">📊</span><span class="menu-text">Trading</span></a>
                         <ul class="submenu">
+                            <li th:classappend="${#httpServletRequest.requestURI == '/trading/dashboard'} ? 'active' : ''">
+                                <a th:href="@{/trading/dashboard}">Dashboard</a>
+                            </li>
                             <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/accounts')} ? 'active' : ''">
                                 <a th:href="@{/trading/accounts}">계좌관리</a>
                             </li>
