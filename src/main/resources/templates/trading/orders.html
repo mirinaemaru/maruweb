@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주문 조회 - Maru Web</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .orders-page {
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        .page-header {
+            margin-bottom: 30px;
+        }
+        .page-header h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .page-header p {
+            color: #666;
+            font-size: 14px;
+        }
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .filter-form {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .filter-form label {
+            font-weight: 600;
+            color: #333;
+        }
+        .filter-form select {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            min-width: 200px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .filter-form select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .filter-form button {
+            padding: 10px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .filter-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .orders-table-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .orders-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .orders-table th {
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+        .orders-table td {
+            padding: 15px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+        .orders-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+        .orders-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .badge-buy {
+            background-color: #d1e7dd;
+            color: #0a3622;
+        }
+        .badge-sell {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .badge-filled {
+            background-color: #d1e7dd;
+            color: #0a3622;
+        }
+        .badge-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .badge-cancelled {
+            background-color: #e2e3e5;
+            color: #41464b;
+        }
+        .badge-rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        .empty-message {
+            color: #666;
+            font-size: 18px;
+        }
+        .price-positive {
+            color: #dc3545;
+            font-weight: 600;
+        }
+        .price-negative {
+            color: #0066ff;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <button class="sidebar-toggle" aria-label="Toggle menu">☰</button>
+
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Maru Web</h2>
+                <p class="sidebar-subtitle">Management System</p>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a th:href="@{/}"><span class="menu-icon">🏠</span><span class="menu-text">Dashboard</span></a></li>
+                    <li><a th:href="@{/todos}"><span class="menu-icon">📝</span><span class="menu-text">Todo</span></a></li>
+                    <li><a th:href="@{/calendar}"><span class="menu-icon">📅</span><span class="menu-text">Calendar</span></a></li>
+                    <li><a th:href="@{/notes}"><span class="menu-icon">📒</span><span class="menu-text">Notes</span></a></li>
+                    <li><a th:href="@{/shortcuts}"><span class="menu-icon">🔗</span><span class="menu-text">Shortcuts</span></a></li>
+                    <li class="has-submenu active">
+                        <a th:href="@{/trading/dashboard}"><span class="menu-icon">📊</span><span class="menu-text">Trading</span></a>
+                        <ul class="submenu">
+                            <li><a th:href="@{/trading/accounts}">계좌관리</a></li>
+                            <li><a th:href="@{/trading/strategies}">전략 관리</a></li>
+                            <li class="active"><a th:href="@{/trading/orders}">주문조회</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="orders-page">
+                <div class="page-header">
+                    <h1>📈 주문 조회</h1>
+                    <p>계좌별 주문 내역을 조회할 수 있습니다.</p>
+                </div>
+
+                <div class="filter-section">
+                    <form class="filter-form" method="get" th:action="@{/trading/orders}">
+                        <label for="accountId">계좌 선택:</label>
+                        <select id="accountId" name="accountId" onchange="this.form.submit()">
+                            <option value="">-- 계좌를 선택하세요 --</option>
+                            <option th:each="account : ${accounts}"
+                                    th:value="${account.accountId}"
+                                    th:text="${account.alias} + ' (' + ${account.accountId} + ')'"
+                                    th:selected="${account.accountId == selectedAccountId}">
+                                Account
+                            </option>
+                        </select>
+                        <button type="submit">조회</button>
+                    </form>
+                </div>
+
+                <div th:if="${orders != null && !orders.isEmpty()}" class="orders-table-container">
+                    <table class="orders-table">
+                        <thead>
+                            <tr>
+                                <th>주문일시</th>
+                                <th>종목명</th>
+                                <th>종목코드</th>
+                                <th>구분</th>
+                                <th>주문가격</th>
+                                <th>주문수량</th>
+                                <th>체결수량</th>
+                                <th>상태</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="order : ${orders}">
+                                <td th:text="${order.orderTime != null ? #temporals.format(order.orderTime, 'yyyy-MM-dd HH:mm:ss') : '-'}">2024-01-01 10:00:00</td>
+                                <td th:text="${order.stockName ?: '-'}">종목명</td>
+                                <td th:text="${order.stockCode ?: '-'}">000000</td>
+                                <td>
+                                    <span class="badge"
+                                          th:classappend="${order.side == 'BUY'} ? 'badge-buy' : 'badge-sell'"
+                                          th:text="${order.side == 'BUY'} ? '매수' : '매도'">
+                                        매수
+                                    </span>
+                                </td>
+                                <td th:class="${order.side == 'BUY'} ? 'price-positive' : 'price-negative'"
+                                    th:text="${order.price != null ? #numbers.formatDecimal(order.price, 0, 'COMMA', 0, 'POINT') + '원' : '-'}">
+                                    0원
+                                </td>
+                                <td th:text="${order.quantity != null ? #numbers.formatDecimal(order.quantity, 0, 'COMMA', 0, 'POINT') : '-'}">0</td>
+                                <td th:text="${order.filledQuantity != null ? #numbers.formatDecimal(order.filledQuantity, 0, 'COMMA', 0, 'POINT') : '-'}">0</td>
+                                <td>
+                                    <span class="badge"
+                                          th:classappend="${order.status == 'FILLED'} ? 'badge-filled' :
+                                                         (${order.status == 'PENDING'} ? 'badge-pending' :
+                                                         (${order.status == 'CANCELLED'} ? 'badge-cancelled' : 'badge-rejected'))"
+                                          th:text="${order.status == 'FILLED'} ? '체결' :
+                                                   (${order.status == 'PENDING'} ? '대기' :
+                                                   (${order.status == 'CANCELLED'} ? '취소' : '거부'))">
+                                        체결
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div th:if="${selectedAccountId != null && (orders == null || orders.isEmpty())}" class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <div class="empty-message">조회된 주문이 없습니다.</div>
+                </div>
+
+                <div th:if="${selectedAccountId == null}" class="empty-state">
+                    <div class="empty-icon">📊</div>
+                    <div class="empty-message">계좌를 선택하여 주문 내역을 조회하세요.</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.querySelector('.sidebar-toggle').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('show');
+        });
+    </script>
+</body>
+</html>
