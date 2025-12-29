@@ -48,7 +48,20 @@
       "Read(//opt/homebrew/Cellar/tomcat@9/9.0.113/libexec/webapps/ROOT/WEB-INF/**)",
       "Read(/Users/changsupark/maruweb.log)",
       "Read(/Users/changsupark/run-maruweb.sh)",
-      "Read(/tmp/**)"
+      "Read(/tmp/**)",
+      "Bash(./run-maruweb.sh)",
+      "Bash(./stop-maruweb.sh)",
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(git fetch:*)",
+      "Bash(git remote:*)",
+      "Bash(git config:*)",
+      "Bash(git tag:*)"
     ]
   }
 }
