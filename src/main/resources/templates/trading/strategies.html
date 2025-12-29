@@ -302,7 +302,7 @@
 </head>
 <body>
     <div class="app-container">
-        <button class="sidebar-toggle" aria-label="Toggle menu">☰</button>
+        <div class="sidebar-toggle" aria-label="Show menu"></div>
 
         <aside class="sidebar">
             <div class="sidebar-header">
@@ -471,9 +471,6 @@
     </div>
 
     <script>
-        document.querySelector('.sidebar-toggle').addEventListener('click', function() {
-            document.querySelector('.sidebar').classList.toggle('show');
-        });
     </script>
 </body>
 </html>

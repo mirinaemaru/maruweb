@@ -40,47 +40,28 @@ body {
     transform: translateX(0);
 }
 
-/* Sidebar Toggle Button */
+/* Sidebar Toggle Trigger (invisible hover area) */
 .sidebar-toggle {
     position: fixed;
     left: 0;
     top: 0;
-    width: 40px;
-    height: 50px;
-    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    width: 3px;
+    height: 100vh;
+    background: rgba(102, 126, 234, 0.15);
     border: none;
-    border-radius: 0 8px 8px 0;
     cursor: pointer;
     z-index: 1001;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 18px;
     transition: all 0.3s ease;
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
 }
 
 .sidebar-toggle:hover {
-    width: 45px;
-    background: linear-gradient(180deg, #5a6fd6 0%, #6a4190 100%);
+    width: 5px;
+    background: rgba(102, 126, 234, 0.3);
 }
 
 .sidebar-toggle:hover + .sidebar,
 .sidebar-toggle:focus + .sidebar {
     transform: translateX(0);
-}
-
-.sidebar:hover ~ .sidebar-toggle,
-.sidebar-toggle:hover {
-    left: 260px;
-    border-radius: 0 8px 8px 0;
-}
-
-/* When sidebar is shown, move toggle to sidebar edge */
-.app-container:has(.sidebar:hover) .sidebar-toggle,
-.app-container:has(.sidebar-toggle:hover) .sidebar-toggle {
-    left: 260px;
 }
 
 .sidebar-header {
