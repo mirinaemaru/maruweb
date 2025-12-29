@@ -3,7 +3,10 @@ package com.maru.trading.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
@@ -150,6 +153,120 @@ public class TradingApiService {
         } catch (RestClientException e) {
             log.error("Failed to get positions from Trading System", e);
             throw new RuntimeException("포지션 목록을 가져올 수 없습니다.", e);
+        }
+    }
+
+    /**
+     * 전략 상세 조회
+     */
+    public Map<String, Object> getStrategy(String strategyId) {
+        String url = "/api/v1/admin/strategies/" + strategyId;
+        try {
+            log.debug("Calling Trading API: {}", url);
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to get strategy from Trading System", e);
+            throw new RuntimeException("전략 정보를 가져올 수 없습니다.", e);
+        }
+    }
+
+    /**
+     * 전략 등록
+     */
+    public Map<String, Object> createStrategy(Map<String, Object> strategyData) {
+        String url = "/api/v1/admin/strategies";
+        try {
+            log.debug("Calling Trading API: {}", url);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(strategyData, headers);
+
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    request,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to create strategy in Trading System", e);
+            throw new RuntimeException("전략 등록에 실패했습니다.", e);
+        }
+    }
+
+    /**
+     * 전략 수정
+     */
+    public Map<String, Object> updateStrategy(String strategyId, Map<String, Object> strategyData) {
+        String url = "/api/v1/admin/strategies/" + strategyId;
+        try {
+            log.debug("Calling Trading API: {}", url);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(strategyData, headers);
+
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                    url,
+                    HttpMethod.PUT,
+                    request,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to update strategy in Trading System", e);
+            throw new RuntimeException("전략 수정에 실패했습니다.", e);
+        }
+    }
+
+    /**
+     * 전략 삭제
+     */
+    public void deleteStrategy(String strategyId) {
+        String url = "/api/v1/admin/strategies/" + strategyId;
+        try {
+            log.debug("Calling Trading API: {}", url);
+            tradingApiRestTemplate.exchange(
+                    url,
+                    HttpMethod.DELETE,
+                    null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+        } catch (RestClientException e) {
+            log.error("Failed to delete strategy from Trading System", e);
+            throw new RuntimeException("전략 삭제에 실패했습니다.", e);
+        }
+    }
+
+    /**
+     * 전략 상태 변경
+     */
+    public Map<String, Object> updateStrategyStatus(String strategyId, String status) {
+        String url = "/api/v1/admin/strategies/" + strategyId + "/status";
+        try {
+            log.debug("Calling Trading API: {}", url);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            Map<String, Object> statusData = new HashMap<>();
+            statusData.put("status", status);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(statusData, headers);
+
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                    url,
+                    HttpMethod.PATCH,
+                    request,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to update strategy status in Trading System", e);
+            throw new RuntimeException("전략 상태 변경에 실패했습니다.", e);
         }
     }
 }
