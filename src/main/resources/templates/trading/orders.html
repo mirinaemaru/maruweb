@@ -1,383 +1,351 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>주문 조회 - Maru Web</title>
-    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-    <style>
-        .orders-page {
-            padding: 30px;
-            max-width: 1800px;
-            margin: 0 auto;
-        }
-        .page-header {
-            margin-bottom: 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 40px;
-            border-radius: 16px;
-            color: white;
-            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
-        }
-        .page-header h1 {
-            font-size: 36px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .page-header p {
-            font-size: 16px;
-            opacity: 0.95;
-        }
-        .filter-section {
-            background: white;
-            padding: 28px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            margin-bottom: 30px;
-            border: 1px solid rgba(0,0,0,0.04);
-        }
-        .filter-form {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-        .filter-form label {
-            font-weight: 600;
-            color: #333;
-        }
-        .filter-form select {
-            padding: 10px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 14px;
-            min-width: 200px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .filter-form select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        .filter-form button {
-            padding: 10px 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .filter-form button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        .orders-table-container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            overflow: hidden;
-            border: 1px solid rgba(0,0,0,0.04);
-        }
-        .orders-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .orders-table thead {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .orders-table th {
-            padding: 15px 12px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 13px;
-            text-transform: uppercase;
-        }
-        .orders-table td {
-            padding: 15px 12px;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 14px;
-        }
-        .orders-table tbody tr:hover {
-            background: #f8f9fa;
-        }
-        .orders-table tbody tr:last-child td {
-            border-bottom: none;
-        }
-        .badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-        .badge-buy {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            color: #721c24;
-        }
-        .badge-sell {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .badge-filled {
-            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
-            color: #0a472e;
-        }
-        .badge-pending {
-            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
-            color: #856404;
-        }
-        .badge-cancelled {
-            background: #e8e8e8;
-            color: #666;
-        }
-        .badge-rejected {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            color: #721c24;
-        }
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .empty-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-        }
-        .empty-message {
-            color: #666;
-            font-size: 18px;
-        }
-        .price-positive {
-            color: #dc3545;
-            font-weight: 600;
-        }
-        .price-negative {
-            color: #0066ff;
-            font-weight: 600;
-        }
-        .alert {
-            padding: 20px 28px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            animation: slideDown 0.3s ease-out;
-        }
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        .alert-error {
-            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
-            border: 1px solid #f5c6cb;
-        }
-        .alert-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #721c24;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .alert-message {
-            color: #721c24;
-            font-size: 15px;
-            line-height: 1.6;
-            margin-bottom: 12px;
-        }
-        .alert-detail {
-            background: rgba(255,255,255,0.6);
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 13px;
-            color: #721c24;
-            margin-top: 12px;
-            word-break: break-all;
-        }
-        .alert-help {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            padding: 18px;
-            border-radius: 10px;
-            margin-top: 15px;
-        }
-        .alert-help h4 {
-            color: #856404;
-            font-size: 16px;
-            margin: 0 0 12px 0;
-        }
-        .alert-help ol {
-            color: #856404;
-            margin: 0;
-            padding-left: 20px;
-            line-height: 1.8;
-        }
-        .alert-help pre {
-            background: white;
-            padding: 10px;
-            border-radius: 6px;
-            margin: 8px 0;
-            font-size: 12px;
-            overflow-x: auto;
-        }
-    </style>
+    <title>주문 조회</title>
+    <th:block layout:fragment="extra-css">
+        <style>
+                .orders-page {
+                    padding: 30px;
+                    max-width: 1800px;
+                    margin: 0 auto;
+                }
+                .page-header {
+                    margin-bottom: 40px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    padding: 40px;
+                    border-radius: 16px;
+                    color: white;
+                    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+                }
+                .page-header h1 {
+                    font-size: 36px;
+                    font-weight: 700;
+                    margin-bottom: 10px;
+                    display: flex;
+                    align-items: center;
+                    gap: 15px;
+                }
+                .page-header p {
+                    font-size: 16px;
+                    opacity: 0.95;
+                }
+                .filter-section {
+                    background: white;
+                    padding: 28px;
+                    border-radius: 16px;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+                    margin-bottom: 30px;
+                    border: 1px solid rgba(0,0,0,0.04);
+                }
+                .filter-form {
+                    display: flex;
+                    gap: 15px;
+                    align-items: center;
+                }
+                .filter-form label {
+                    font-weight: 600;
+                    color: #333;
+                }
+                .filter-form select {
+                    padding: 10px 15px;
+                    border: 2px solid #e0e0e0;
+                    border-radius: 6px;
+                    font-size: 14px;
+                    min-width: 200px;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                }
+                .filter-form select:focus {
+                    outline: none;
+                    border-color: #667eea;
+                    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+                }
+                .filter-form button {
+                    padding: 10px 24px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 6px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                }
+                .filter-form button:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+                }
+                .orders-table-container {
+                    background: white;
+                    border-radius: 16px;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+                    overflow: hidden;
+                    border: 1px solid rgba(0,0,0,0.04);
+                }
+                .orders-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                }
+                .orders-table thead {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                }
+                .orders-table th {
+                    padding: 15px 12px;
+                    text-align: left;
+                    font-weight: 600;
+                    font-size: 13px;
+                    text-transform: uppercase;
+                }
+                .orders-table td {
+                    padding: 15px 12px;
+                    border-bottom: 1px solid #f0f0f0;
+                    font-size: 14px;
+                }
+                .orders-table tbody tr:hover {
+                    background: #f8f9fa;
+                }
+                .orders-table tbody tr:last-child td {
+                    border-bottom: none;
+                }
+                .badge {
+                    display: inline-block;
+                    padding: 6px 12px;
+                    border-radius: 6px;
+                    font-size: 11px;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.3px;
+                }
+                .badge-buy {
+                    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+                    color: #721c24;
+                }
+                .badge-sell {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                }
+                .badge-filled {
+                    background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+                    color: #0a472e;
+                }
+                .badge-pending {
+                    background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+                    color: #856404;
+                }
+                .badge-cancelled {
+                    background: #e8e8e8;
+                    color: #666;
+                }
+                .badge-rejected {
+                    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+                    color: #721c24;
+                }
+                .empty-state {
+                    text-align: center;
+                    padding: 60px 20px;
+                    background: white;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+                .empty-icon {
+                    font-size: 64px;
+                    margin-bottom: 20px;
+                }
+                .empty-message {
+                    color: #666;
+                    font-size: 18px;
+                }
+                .price-positive {
+                    color: #dc3545;
+                    font-weight: 600;
+                }
+                .price-negative {
+                    color: #0066ff;
+                    font-weight: 600;
+                }
+                .alert {
+                    padding: 20px 28px;
+                    border-radius: 12px;
+                    margin-bottom: 30px;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                    animation: slideDown 0.3s ease-out;
+                }
+                @keyframes slideDown {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-10px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                .alert-error {
+                    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+                    border: 1px solid #f5c6cb;
+                }
+                .alert-title {
+                    font-size: 20px;
+                    font-weight: 700;
+                    color: #721c24;
+                    margin-bottom: 10px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+                .alert-message {
+                    color: #721c24;
+                    font-size: 15px;
+                    line-height: 1.6;
+                    margin-bottom: 12px;
+                }
+                .alert-detail {
+                    background: rgba(255,255,255,0.6);
+                    padding: 12px 16px;
+                    border-radius: 8px;
+                    font-family: monospace;
+                    font-size: 13px;
+                    color: #721c24;
+                    margin-top: 12px;
+                    word-break: break-all;
+                }
+                .alert-help {
+                    background: #fff3cd;
+                    border: 1px solid #ffeaa7;
+                    padding: 18px;
+                    border-radius: 10px;
+                    margin-top: 15px;
+                }
+                .alert-help h4 {
+                    color: #856404;
+                    font-size: 16px;
+                    margin: 0 0 12px 0;
+                }
+                .alert-help ol {
+                    color: #856404;
+                    margin: 0;
+                    padding-left: 20px;
+                    line-height: 1.8;
+                }
+                .alert-help pre {
+                    background: white;
+                    padding: 10px;
+                    border-radius: 6px;
+                    margin: 8px 0;
+                    font-size: 12px;
+                    overflow-x: auto;
+                }
+            </style>
+    </th:block>
 </head>
 <body>
-    <div class="app-container">
-        <div class="sidebar-toggle" aria-label="Show menu"></div>
-
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2>Maru Web</h2>
-                <p class="sidebar-subtitle">Management System</p>
-            </div>
-            <nav class="sidebar-nav">
-                <ul>
-                    <li><a th:href="@{/}"><span class="menu-icon">🏠</span><span class="menu-text">Dashboard</span></a></li>
-                    <li><a th:href="@{/todos}"><span class="menu-icon">📝</span><span class="menu-text">Todo</span></a></li>
-                    <li><a th:href="@{/calendar}"><span class="menu-icon">📅</span><span class="menu-text">Calendar</span></a></li>
-                    <li><a th:href="@{/notes}"><span class="menu-icon">📒</span><span class="menu-text">Notes</span></a></li>
-                    <li><a th:href="@{/shortcuts}"><span class="menu-icon">🔗</span><span class="menu-text">Shortcuts</span></a></li>
-                    <li class="has-submenu active">
-                        <a th:href="@{/trading/dashboard}"><span class="menu-icon">📊</span><span class="menu-text">Trading</span></a>
-                        <ul class="submenu">
-                            <li><a th:href="@{/trading/dashboard}">Dashboard</a></li>
-                            <li><a th:href="@{/trading/accounts}">계좌관리</a></li>
-                            <li><a th:href="@{/trading/strategies}">전략 관리</a></li>
-                            <li class="active"><a th:href="@{/trading/orders}">주문조회</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </nav>
-        </aside>
-
-        <main class="main-content">
-            <div class="orders-page">
-                <div class="page-header">
-                    <h1>📈 주문 조회</h1>
-                    <p>계좌별 주문 내역을 조회할 수 있습니다.</p>
-                </div>
-
-                <!-- API Connection Error Alert -->
-                <div th:if="${error}" class="alert alert-error">
-                    <div class="alert-title">⚠️ API 연결 오류</div>
-                    <div class="alert-message" th:text="${error}">
-                        Trading System API에 연결할 수 없습니다.
+    <div layout:fragment="content">
+        <div class="orders-page">
+                        <div class="page-header">
+                            <h1>📈 주문 조회</h1>
+                            <p>계좌별 주문 내역을 조회할 수 있습니다.</p>
+                        </div>
+        
+                        <!-- API Connection Error Alert -->
+                        <div th:if="${error}" class="alert alert-error">
+                            <div class="alert-title">⚠️ API 연결 오류</div>
+                            <div class="alert-message" th:text="${error}">
+                                Trading System API에 연결할 수 없습니다.
+                            </div>
+                            <div th:if="${errorDetail}" class="alert-detail">
+                                <strong>상세 정보:</strong><br>
+                                <span th:text="${errorDetail}">Error details</span>
+                            </div>
+                            <div class="alert-help">
+                                <h4>해결 방법</h4>
+                                <ol>
+                                    <li>Trading System API 서버가 실행 중인지 확인하세요 (포트 8099)</li>
+                                    <li>터미널에서 다음 명령어를 실행하세요:
+                                        <pre>cd /Users/changsupark/projects/cautostock
+        ./run-with-env.sh</pre>
+                                    </li>
+                                    <li>Health Check 확인: <a href="http://localhost:8099/health" target="_blank" style="color: #007bff;">http://localhost:8099/health</a></li>
+                                </ol>
+                            </div>
+                        </div>
+        
+                        <div class="filter-section">
+                            <form class="filter-form" method="get" th:action="@{/trading/orders}">
+                                <label for="accountId">계좌 선택:</label>
+                                <select id="accountId" name="accountId" onchange="this.form.submit()">
+                                    <option value="">-- 계좌를 선택하세요 --</option>
+                                    <option th:each="account : ${accounts}"
+                                            th:value="${account.accountId}"
+                                            th:text="${account.alias} + ' (' + ${account.accountId} + ')'"
+                                            th:selected="${account.accountId == selectedAccountId}">
+                                        Account
+                                    </option>
+                                </select>
+                                <button type="submit">조회</button>
+                            </form>
+                        </div>
+        
+                        <div th:if="${orders != null && !orders.isEmpty()}" class="orders-table-container">
+                            <table class="orders-table">
+                                <thead>
+                                    <tr>
+                                        <th>주문일시</th>
+                                        <th>종목명</th>
+                                        <th>종목코드</th>
+                                        <th>구분</th>
+                                        <th>주문가격</th>
+                                        <th>주문수량</th>
+                                        <th>체결수량</th>
+                                        <th>상태</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="order : ${orders}">
+                                        <td th:text="${order.orderTime != null ? #temporals.format(order.orderTime, 'yyyy-MM-dd HH:mm:ss') : '-'}">2024-01-01 10:00:00</td>
+                                        <td th:text="${order.stockName ?: '-'}">종목명</td>
+                                        <td th:text="${order.stockCode ?: '-'}">000000</td>
+                                        <td>
+                                            <span class="badge"
+                                                  th:classappend="${order.side == 'BUY'} ? 'badge-buy' : 'badge-sell'"
+                                                  th:text="${order.side == 'BUY'} ? '매수' : '매도'">
+                                                매수
+                                            </span>
+                                        </td>
+                                        <td th:class="${order.side == 'BUY'} ? 'price-positive' : 'price-negative'"
+                                            th:text="${order.price != null ? #numbers.formatDecimal(order.price, 0, 'COMMA', 0, 'POINT') + '원' : '-'}">
+                                            0원
+                                        </td>
+                                        <td th:text="${order.quantity != null ? #numbers.formatDecimal(order.quantity, 0, 'COMMA', 0, 'POINT') : '-'}">0</td>
+                                        <td th:text="${order.filledQuantity != null ? #numbers.formatDecimal(order.filledQuantity, 0, 'COMMA', 0, 'POINT') : '-'}">0</td>
+                                        <td>
+                                            <span class="badge"
+                                                  th:classappend="${order.status == 'FILLED'} ? 'badge-filled' :
+                                                                 (${order.status == 'PENDING'} ? 'badge-pending' :
+                                                                 (${order.status == 'CANCELLED'} ? 'badge-cancelled' : 'badge-rejected'))"
+                                                  th:text="${order.status == 'FILLED'} ? '체결' :
+                                                           (${order.status == 'PENDING'} ? '대기' :
+                                                           (${order.status == 'CANCELLED'} ? '취소' : '거부'))">
+                                                체결
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+        
+                        <div th:if="${selectedAccountId != null && (orders == null || orders.isEmpty())}" class="empty-state">
+                            <div class="empty-icon">📭</div>
+                            <div class="empty-message">조회된 주문이 없습니다.</div>
+                        </div>
+        
+                        <div th:if="${selectedAccountId == null}" class="empty-state">
+                            <div class="empty-icon">📊</div>
+                            <div class="empty-message">계좌를 선택하여 주문 내역을 조회하세요.</div>
+                        </div>
                     </div>
-                    <div th:if="${errorDetail}" class="alert-detail">
-                        <strong>상세 정보:</strong><br>
-                        <span th:text="${errorDetail}">Error details</span>
-                    </div>
-                    <div class="alert-help">
-                        <h4>해결 방법</h4>
-                        <ol>
-                            <li>Trading System API 서버가 실행 중인지 확인하세요 (포트 8099)</li>
-                            <li>터미널에서 다음 명령어를 실행하세요:
-                                <pre>cd /Users/changsupark/projects/cautostock
-./run-with-env.sh</pre>
-                            </li>
-                            <li>Health Check 확인: <a href="http://localhost:8099/health" target="_blank" style="color: #007bff;">http://localhost:8099/health</a></li>
-                        </ol>
-                    </div>
-                </div>
-
-                <div class="filter-section">
-                    <form class="filter-form" method="get" th:action="@{/trading/orders}">
-                        <label for="accountId">계좌 선택:</label>
-                        <select id="accountId" name="accountId" onchange="this.form.submit()">
-                            <option value="">-- 계좌를 선택하세요 --</option>
-                            <option th:each="account : ${accounts}"
-                                    th:value="${account.accountId}"
-                                    th:text="${account.alias} + ' (' + ${account.accountId} + ')'"
-                                    th:selected="${account.accountId == selectedAccountId}">
-                                Account
-                            </option>
-                        </select>
-                        <button type="submit">조회</button>
-                    </form>
-                </div>
-
-                <div th:if="${orders != null && !orders.isEmpty()}" class="orders-table-container">
-                    <table class="orders-table">
-                        <thead>
-                            <tr>
-                                <th>주문일시</th>
-                                <th>종목명</th>
-                                <th>종목코드</th>
-                                <th>구분</th>
-                                <th>주문가격</th>
-                                <th>주문수량</th>
-                                <th>체결수량</th>
-                                <th>상태</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="order : ${orders}">
-                                <td th:text="${order.orderTime != null ? #temporals.format(order.orderTime, 'yyyy-MM-dd HH:mm:ss') : '-'}">2024-01-01 10:00:00</td>
-                                <td th:text="${order.stockName ?: '-'}">종목명</td>
-                                <td th:text="${order.stockCode ?: '-'}">000000</td>
-                                <td>
-                                    <span class="badge"
-                                          th:classappend="${order.side == 'BUY'} ? 'badge-buy' : 'badge-sell'"
-                                          th:text="${order.side == 'BUY'} ? '매수' : '매도'">
-                                        매수
-                                    </span>
-                                </td>
-                                <td th:class="${order.side == 'BUY'} ? 'price-positive' : 'price-negative'"
-                                    th:text="${order.price != null ? #numbers.formatDecimal(order.price, 0, 'COMMA', 0, 'POINT') + '원' : '-'}">
-                                    0원
-                                </td>
-                                <td th:text="${order.quantity != null ? #numbers.formatDecimal(order.quantity, 0, 'COMMA', 0, 'POINT') : '-'}">0</td>
-                                <td th:text="${order.filledQuantity != null ? #numbers.formatDecimal(order.filledQuantity, 0, 'COMMA', 0, 'POINT') : '-'}">0</td>
-                                <td>
-                                    <span class="badge"
-                                          th:classappend="${order.status == 'FILLED'} ? 'badge-filled' :
-                                                         (${order.status == 'PENDING'} ? 'badge-pending' :
-                                                         (${order.status == 'CANCELLED'} ? 'badge-cancelled' : 'badge-rejected'))"
-                                          th:text="${order.status == 'FILLED'} ? '체결' :
-                                                   (${order.status == 'PENDING'} ? '대기' :
-                                                   (${order.status == 'CANCELLED'} ? '취소' : '거부'))">
-                                        체결
-                                    </span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div th:if="${selectedAccountId != null && (orders == null || orders.isEmpty())}" class="empty-state">
-                    <div class="empty-icon">📭</div>
-                    <div class="empty-message">조회된 주문이 없습니다.</div>
-                </div>
-
-                <div th:if="${selectedAccountId == null}" class="empty-state">
-                    <div class="empty-icon">📊</div>
-                    <div class="empty-message">계좌를 선택하여 주문 내역을 조회하세요.</div>
-                </div>
-            </div>
-        </main>
     </div>
-
-    <script>
-    </script>
 </body>
 </html>

@@ -1,476 +1,444 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>전략 관리 - Maru Web</title>
-    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-    <style>
-        .strategies-page {
-            padding: 30px;
-            max-width: 1600px;
-            margin: 0 auto;
-        }
-        .page-header {
-            margin-bottom: 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 40px;
-            border-radius: 16px;
-            color: white;
-            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
-        }
-        .page-header h1 {
-            font-size: 36px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .page-header p {
-            font-size: 16px;
-            opacity: 0.95;
-        }
-        .strategies-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .strategy-card {
-            background: white;
-            border-radius: 16px;
-            padding: 28px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(0,0,0,0.04);
-        }
-        .strategy-card:hover {
-            box-shadow: 0 12px 40px rgba(0,0,0,0.12);
-            transform: translateY(-5px);
-        }
-        .strategy-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .strategy-name {
-            font-size: 22px;
-            font-weight: 700;
-            color: #2c3e50;
-            letter-spacing: -0.3px;
-        }
-        .strategy-status {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .strategy-body {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            padding: 15px 0;
-            border-top: 2px solid #f0f0f0;
-        }
-        .strategy-info {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .info-label {
-            color: #666;
-            font-size: 12px;
-            text-transform: uppercase;
-        }
-        .info-value {
-            color: #333;
-            font-weight: 600;
-            font-size: 16px;
-        }
-        .badge {
-            display: inline-block;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-        .badge-active {
-            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
-            color: #0a472e;
-        }
-        .badge-inactive {
-            background: #e8e8e8;
-            color: #666;
-        }
-        .badge-paused {
-            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
-            color: #856404;
-        }
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .empty-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-        }
-        .empty-message {
-            color: #666;
-            font-size: 18px;
-        }
-        .stats-row {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 10px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 10px;
-        }
-        .stat-item {
-            text-align: center;
-        }
-        .stat-label {
-            color: #666;
-            font-size: 11px;
-            margin-bottom: 5px;
-        }
-        .stat-value {
-            color: #007bff;
-            font-size: 18px;
-            font-weight: bold;
-        }
-        .action-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            text-decoration: none;
-            display: inline-block;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        }
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
-        }
-        .btn-secondary:hover {
-            background: #5a6268;
-            transform: translateY(-2px);
-        }
-        .btn-success {
-            background: #28a745;
-            color: white;
-            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-        }
-        .btn-success:hover {
-            background: #218838;
-            transform: translateY(-2px);
-        }
-        .btn-warning {
-            background: #ffc107;
-            color: #856404;
-            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
-        }
-        .btn-warning:hover {
-            background: #e0a800;
-            transform: translateY(-2px);
-        }
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
-        }
-        .btn-danger:hover {
-            background: #c82333;
-            transform: translateY(-2px);
-        }
-        .btn-sm {
-            padding: 8px 16px;
-            font-size: 13px;
-        }
-        .strategy-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 2px solid #f0f0f0;
-            flex-wrap: wrap;
-        }
-        .alert {
-            padding: 16px 24px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            font-weight: 500;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            animation: slideDown 0.3s ease-out;
-        }
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        .alert-success {
-            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .alert-error {
-            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .delete-form {
-            display: inline-block;
-            margin: 0;
-        }
-        .delete-form button {
-            margin: 0;
-        }
-        .alert-title {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .alert-detail {
-            background: rgba(255,255,255,0.6);
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 13px;
-            margin-top: 12px;
-            word-break: break-all;
-        }
-        .alert-help {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            padding: 18px;
-            border-radius: 10px;
-            margin-top: 15px;
-        }
-        .alert-help h4 {
-            color: #856404;
-            font-size: 16px;
-            margin: 0 0 12px 0;
-        }
-        .alert-help ol {
-            color: #856404;
-            margin: 0;
-            padding-left: 20px;
-            line-height: 1.8;
-        }
-        .alert-help pre {
-            background: white;
-            padding: 10px;
-            border-radius: 6px;
-            margin: 8px 0;
-            font-size: 12px;
-            overflow-x: auto;
-        }
-    </style>
+    <title>전략 관리</title>
+    <th:block layout:fragment="extra-css">
+        <style>
+                .strategies-page {
+                    padding: 30px;
+                    max-width: 1600px;
+                    margin: 0 auto;
+                }
+                .page-header {
+                    margin-bottom: 40px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    padding: 40px;
+                    border-radius: 16px;
+                    color: white;
+                    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+                }
+                .page-header h1 {
+                    font-size: 36px;
+                    font-weight: 700;
+                    margin-bottom: 10px;
+                    display: flex;
+                    align-items: center;
+                    gap: 15px;
+                }
+                .page-header p {
+                    font-size: 16px;
+                    opacity: 0.95;
+                }
+                .strategies-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 15px;
+                }
+                .strategy-card {
+                    background: white;
+                    border-radius: 16px;
+                    padding: 28px;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    border: 1px solid rgba(0,0,0,0.04);
+                }
+                .strategy-card:hover {
+                    box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+                    transform: translateY(-5px);
+                }
+                .strategy-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 15px;
+                }
+                .strategy-name {
+                    font-size: 22px;
+                    font-weight: 700;
+                    color: #2c3e50;
+                    letter-spacing: -0.3px;
+                }
+                .strategy-status {
+                    display: flex;
+                    gap: 10px;
+                    align-items: center;
+                }
+                .strategy-body {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    gap: 15px;
+                    padding: 15px 0;
+                    border-top: 2px solid #f0f0f0;
+                }
+                .strategy-info {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 5px;
+                }
+                .info-label {
+                    color: #666;
+                    font-size: 12px;
+                    text-transform: uppercase;
+                }
+                .info-value {
+                    color: #333;
+                    font-weight: 600;
+                    font-size: 16px;
+                }
+                .badge {
+                    display: inline-block;
+                    padding: 8px 16px;
+                    border-radius: 6px;
+                    font-size: 12px;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.3px;
+                }
+                .badge-active {
+                    background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+                    color: #0a472e;
+                }
+                .badge-inactive {
+                    background: #e8e8e8;
+                    color: #666;
+                }
+                .badge-paused {
+                    background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+                    color: #856404;
+                }
+                .empty-state {
+                    text-align: center;
+                    padding: 60px 20px;
+                    background: white;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+                .empty-icon {
+                    font-size: 64px;
+                    margin-bottom: 20px;
+                }
+                .empty-message {
+                    color: #666;
+                    font-size: 18px;
+                }
+                .stats-row {
+                    background: #f8f9fa;
+                    padding: 15px;
+                    border-radius: 6px;
+                    margin-top: 10px;
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                    gap: 10px;
+                }
+                .stat-item {
+                    text-align: center;
+                }
+                .stat-label {
+                    color: #666;
+                    font-size: 11px;
+                    margin-bottom: 5px;
+                }
+                .stat-value {
+                    color: #007bff;
+                    font-size: 18px;
+                    font-weight: bold;
+                }
+                .action-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 25px;
+                }
+                .btn {
+                    padding: 12px 24px;
+                    border: none;
+                    border-radius: 10px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    text-decoration: none;
+                    display: inline-block;
+                }
+                .btn-primary {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+                }
+                .btn-primary:hover {
+                    transform: translateY(-3px);
+                    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+                }
+                .btn-secondary {
+                    background: #6c757d;
+                    color: white;
+                    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+                }
+                .btn-secondary:hover {
+                    background: #5a6268;
+                    transform: translateY(-2px);
+                }
+                .btn-success {
+                    background: #28a745;
+                    color: white;
+                    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+                }
+                .btn-success:hover {
+                    background: #218838;
+                    transform: translateY(-2px);
+                }
+                .btn-warning {
+                    background: #ffc107;
+                    color: #856404;
+                    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+                }
+                .btn-warning:hover {
+                    background: #e0a800;
+                    transform: translateY(-2px);
+                }
+                .btn-danger {
+                    background: #dc3545;
+                    color: white;
+                    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+                }
+                .btn-danger:hover {
+                    background: #c82333;
+                    transform: translateY(-2px);
+                }
+                .btn-sm {
+                    padding: 8px 16px;
+                    font-size: 13px;
+                }
+                .strategy-actions {
+                    display: flex;
+                    gap: 10px;
+                    margin-top: 20px;
+                    padding-top: 15px;
+                    border-top: 2px solid #f0f0f0;
+                    flex-wrap: wrap;
+                }
+                .alert {
+                    padding: 16px 24px;
+                    border-radius: 12px;
+                    margin-bottom: 25px;
+                    font-weight: 500;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                    animation: slideDown 0.3s ease-out;
+                }
+                @keyframes slideDown {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-10px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                .alert-success {
+                    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+                    color: #155724;
+                    border: 1px solid #c3e6cb;
+                }
+                .alert-error {
+                    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+                    color: #721c24;
+                    border: 1px solid #f5c6cb;
+                }
+                .delete-form {
+                    display: inline-block;
+                    margin: 0;
+                }
+                .delete-form button {
+                    margin: 0;
+                }
+                .alert-title {
+                    font-size: 20px;
+                    font-weight: 700;
+                    margin-bottom: 10px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+                .alert-detail {
+                    background: rgba(255,255,255,0.6);
+                    padding: 12px 16px;
+                    border-radius: 8px;
+                    font-family: monospace;
+                    font-size: 13px;
+                    margin-top: 12px;
+                    word-break: break-all;
+                }
+                .alert-help {
+                    background: #fff3cd;
+                    border: 1px solid #ffeaa7;
+                    padding: 18px;
+                    border-radius: 10px;
+                    margin-top: 15px;
+                }
+                .alert-help h4 {
+                    color: #856404;
+                    font-size: 16px;
+                    margin: 0 0 12px 0;
+                }
+                .alert-help ol {
+                    color: #856404;
+                    margin: 0;
+                    padding-left: 20px;
+                    line-height: 1.8;
+                }
+                .alert-help pre {
+                    background: white;
+                    padding: 10px;
+                    border-radius: 6px;
+                    margin: 8px 0;
+                    font-size: 12px;
+                    overflow-x: auto;
+                }
+            </style>
+    </th:block>
 </head>
 <body>
-    <div class="app-container">
-        <div class="sidebar-toggle" aria-label="Show menu"></div>
-
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2>Maru Web</h2>
-                <p class="sidebar-subtitle">Management System</p>
-            </div>
-            <nav class="sidebar-nav">
-                <ul>
-                    <li><a th:href="@{/}"><span class="menu-icon">🏠</span><span class="menu-text">Dashboard</span></a></li>
-                    <li><a th:href="@{/todos}"><span class="menu-icon">📝</span><span class="menu-text">Todo</span></a></li>
-                    <li><a th:href="@{/calendar}"><span class="menu-icon">📅</span><span class="menu-text">Calendar</span></a></li>
-                    <li><a th:href="@{/notes}"><span class="menu-icon">📒</span><span class="menu-text">Notes</span></a></li>
-                    <li><a th:href="@{/shortcuts}"><span class="menu-icon">🔗</span><span class="menu-text">Shortcuts</span></a></li>
-                    <li class="has-submenu active">
-                        <a th:href="@{/trading/dashboard}"><span class="menu-icon">📊</span><span class="menu-text">Trading</span></a>
-                        <ul class="submenu">
-                            <li><a th:href="@{/trading/dashboard}">Dashboard</a></li>
-                            <li><a th:href="@{/trading/accounts}">계좌관리</a></li>
-                            <li class="active"><a th:href="@{/trading/strategies}">전략 관리</a></li>
-                            <li><a th:href="@{/trading/orders}">주문조회</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </nav>
-        </aside>
-
-        <main class="main-content">
-            <div class="strategies-page">
-                <div class="page-header">
-                    <h1>🎯 전략 관리</h1>
-                    <p>Trading System에 등록된 자동매매 전략 정보를 확인할 수 있습니다.</p>
-                </div>
-
-                <!-- Flash Messages -->
-                <div th:if="${message}" class="alert alert-success" th:text="${message}">
-                    성공 메시지
-                </div>
-
-                <!-- API Connection Error Alert -->
-                <div th:if="${error && !apiConnected}" class="alert alert-error">
-                    <div class="alert-title" style="color: #721c24;">⚠️ API 연결 오류</div>
-                    <div style="color: #721c24; font-size: 15px; line-height: 1.6; margin-bottom: 12px;" th:text="${error}">
-                        Trading System API에 연결할 수 없습니다.
-                    </div>
-                    <div th:if="${errorDetail}" class="alert-detail" style="color: #721c24;">
-                        <strong>상세 정보:</strong><br>
-                        <span th:text="${errorDetail}">Error details</span>
-                    </div>
-                    <div class="alert-help">
-                        <h4>해결 방법</h4>
-                        <ol>
-                            <li>Trading System API 서버가 실행 중인지 확인하세요 (포트 8099)</li>
-                            <li>터미널에서 다음 명령어를 실행하세요:
-                                <pre>cd /Users/changsupark/projects/cautostock
-./run-with-env.sh</pre>
-                            </li>
-                            <li>Health Check 확인: <a href="http://localhost:8099/health" target="_blank" style="color: #007bff;">http://localhost:8099/health</a></li>
-                        </ol>
-                    </div>
-                </div>
-
-                <!-- Error message for other errors -->
-                <div th:if="${error && apiConnected}" class="alert alert-error" th:text="${error}">
-                    오류 메시지
-                </div>
-
-                <!-- Action Header -->
-                <div class="action-header">
-                    <h2 style="font-size: 20px; color: #2c3e50; margin: 0;">전략 목록</h2>
-                    <a th:href="@{/trading/strategies/new}" class="btn btn-primary">+ 전략 등록</a>
-                </div>
-
-                <div th:if="${strategies != null && !strategies.isEmpty()}" class="strategies-list">
-                    <div th:each="strategy : ${strategies}" class="strategy-card">
-                        <div class="strategy-header">
-                            <div class="strategy-name" th:text="${strategy.name}">Strategy Name</div>
-                            <div class="strategy-status">
-                                <span class="badge"
-                                      th:classappend="${strategy.status == 'ACTIVE'} ? 'badge-active' : (${strategy.status == 'PAUSED'} ? 'badge-paused' : 'badge-inactive')"
-                                      th:text="${strategy.status}">ACTIVE</span>
+    <div layout:fragment="content">
+        <div class="strategies-page">
+                        <div class="page-header">
+                            <h1>🎯 전략 관리</h1>
+                            <p>Trading System에 등록된 자동매매 전략 정보를 확인할 수 있습니다.</p>
+                        </div>
+        
+                        <!-- Flash Messages -->
+                        <div th:if="${message}" class="alert alert-success" th:text="${message}">
+                            성공 메시지
+                        </div>
+        
+                        <!-- API Connection Error Alert -->
+                        <div th:if="${error && !apiConnected}" class="alert alert-error">
+                            <div class="alert-title" style="color: #721c24;">⚠️ API 연결 오류</div>
+                            <div style="color: #721c24; font-size: 15px; line-height: 1.6; margin-bottom: 12px;" th:text="${error}">
+                                Trading System API에 연결할 수 없습니다.
+                            </div>
+                            <div th:if="${errorDetail}" class="alert-detail" style="color: #721c24;">
+                                <strong>상세 정보:</strong><br>
+                                <span th:text="${errorDetail}">Error details</span>
+                            </div>
+                            <div class="alert-help">
+                                <h4>해결 방법</h4>
+                                <ol>
+                                    <li>Trading System API 서버가 실행 중인지 확인하세요 (포트 8099)</li>
+                                    <li>터미널에서 다음 명령어를 실행하세요:
+                                        <pre>cd /Users/changsupark/projects/cautostock
+        ./run-with-env.sh</pre>
+                                    </li>
+                                    <li>Health Check 확인: <a href="http://localhost:8099/health" target="_blank" style="color: #007bff;">http://localhost:8099/health</a></li>
+                                </ol>
                             </div>
                         </div>
-                        <div class="strategy-body">
-                            <div class="strategy-info" th:if="${strategy.strategyId}">
-                                <span class="info-label">전략 ID</span>
-                                <span class="info-value" th:text="${strategy.strategyId}">ID</span>
-                            </div>
-                            <div class="strategy-info" th:if="${strategy.type}">
-                                <span class="info-label">전략 타입</span>
-                                <span class="info-value" th:text="${strategy.type}">Type</span>
-                            </div>
-                            <div class="strategy-info" th:if="${strategy.accountAlias}">
-                                <span class="info-label">연결 계좌</span>
-                                <span class="info-value" th:text="${strategy.accountAlias}">Account</span>
-                            </div>
-                            <div class="strategy-info" th:if="${strategy.createdAt}">
-                                <span class="info-label">생성일</span>
-                                <span class="info-value" th:text="${#temporals.format(strategy.createdAt, 'yyyy-MM-dd')}">Date</span>
+        
+                        <!-- Error message for other errors -->
+                        <div th:if="${error && apiConnected}" class="alert alert-error" th:text="${error}">
+                            오류 메시지
+                        </div>
+        
+                        <!-- Action Header -->
+                        <div class="action-header">
+                            <h2 style="font-size: 20px; color: #2c3e50; margin: 0;">전략 목록</h2>
+                            <a th:href="@{/trading/strategies/new}" class="btn btn-primary">+ 전략 등록</a>
+                        </div>
+        
+                        <div th:if="${strategies != null && !strategies.isEmpty()}" class="strategies-list">
+                            <div th:each="strategy : ${strategies}" class="strategy-card">
+                                <div class="strategy-header">
+                                    <div class="strategy-name" th:text="${strategy.name}">Strategy Name</div>
+                                    <div class="strategy-status">
+                                        <span class="badge"
+                                              th:classappend="${strategy.status == 'ACTIVE'} ? 'badge-active' : (${strategy.status == 'PAUSED'} ? 'badge-paused' : 'badge-inactive')"
+                                              th:text="${strategy.status}">ACTIVE</span>
+                                    </div>
+                                </div>
+                                <div class="strategy-body">
+                                    <div class="strategy-info" th:if="${strategy.strategyId}">
+                                        <span class="info-label">전략 ID</span>
+                                        <span class="info-value" th:text="${strategy.strategyId}">ID</span>
+                                    </div>
+                                    <div class="strategy-info" th:if="${strategy.type}">
+                                        <span class="info-label">전략 타입</span>
+                                        <span class="info-value" th:text="${strategy.type}">Type</span>
+                                    </div>
+                                    <div class="strategy-info" th:if="${strategy.accountAlias}">
+                                        <span class="info-label">연결 계좌</span>
+                                        <span class="info-value" th:text="${strategy.accountAlias}">Account</span>
+                                    </div>
+                                    <div class="strategy-info" th:if="${strategy.createdAt}">
+                                        <span class="info-label">생성일</span>
+                                        <span class="info-value" th:text="${#temporals.format(strategy.createdAt, 'yyyy-MM-dd')}">Date</span>
+                                    </div>
+                                </div>
+                                <div class="stats-row" th:if="${strategy.stats}">
+                                    <div class="stat-item" th:if="${strategy.stats.totalTrades}">
+                                        <div class="stat-label">총 거래</div>
+                                        <div class="stat-value" th:text="${strategy.stats.totalTrades}">0</div>
+                                    </div>
+                                    <div class="stat-item" th:if="${strategy.stats.winRate}">
+                                        <div class="stat-label">승률</div>
+                                        <div class="stat-value" th:text="${strategy.stats.winRate} + '%'">0%</div>
+                                    </div>
+                                    <div class="stat-item" th:if="${strategy.stats.profitLoss}">
+                                        <div class="stat-label">손익</div>
+                                        <div class="stat-value" th:text="${strategy.stats.profitLoss}">0</div>
+                                    </div>
+                                </div>
+                                <div th:if="${strategy.description}" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #f0f0f0;">
+                                    <div class="info-label" style="margin-bottom: 5px;">설명</div>
+                                    <div style="color: #666; font-size: 14px; line-height: 1.6;" th:text="${strategy.description}">Description</div>
+                                </div>
+        
+                                <!-- Strategy Actions -->
+                                <div class="strategy-actions">
+                                    <a th:href="@{/trading/strategies/{id}/edit(id=${strategy.strategyId})}" class="btn btn-secondary btn-sm">수정</a>
+        
+                                    <!-- Status Toggle Buttons -->
+                                    <form th:if="${strategy.status == 'INACTIVE'}"
+                                          th:action="@{/trading/strategies/{id}/status(id=${strategy.strategyId})}"
+                                          method="post"
+                                          style="display: inline-block; margin: 0;">
+                                        <input type="hidden" name="status" value="ACTIVE"/>
+                                        <button type="submit" class="btn btn-success btn-sm">활성화</button>
+                                    </form>
+        
+                                    <form th:if="${strategy.status == 'ACTIVE'}"
+                                          th:action="@{/trading/strategies/{id}/status(id=${strategy.strategyId})}"
+                                          method="post"
+                                          style="display: inline-block; margin: 0;">
+                                        <input type="hidden" name="status" value="PAUSED"/>
+                                        <button type="submit" class="btn btn-warning btn-sm">일시정지</button>
+                                    </form>
+        
+                                    <form th:if="${strategy.status == 'PAUSED'}"
+                                          th:action="@{/trading/strategies/{id}/status(id=${strategy.strategyId})}"
+                                          method="post"
+                                          style="display: inline-block; margin: 0;">
+                                        <input type="hidden" name="status" value="ACTIVE"/>
+                                        <button type="submit" class="btn btn-success btn-sm">재개</button>
+                                    </form>
+        
+                                    <!-- Delete Button -->
+                                    <form class="delete-form"
+                                          th:action="@{/trading/strategies/{id}/delete(id=${strategy.strategyId})}"
+                                          method="post"
+                                          onsubmit="return confirm('정말로 이 전략을 삭제하시겠습니까?');">
+                                        <button type="submit" class="btn btn-danger btn-sm">삭제</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
-                        <div class="stats-row" th:if="${strategy.stats}">
-                            <div class="stat-item" th:if="${strategy.stats.totalTrades}">
-                                <div class="stat-label">총 거래</div>
-                                <div class="stat-value" th:text="${strategy.stats.totalTrades}">0</div>
-                            </div>
-                            <div class="stat-item" th:if="${strategy.stats.winRate}">
-                                <div class="stat-label">승률</div>
-                                <div class="stat-value" th:text="${strategy.stats.winRate} + '%'">0%</div>
-                            </div>
-                            <div class="stat-item" th:if="${strategy.stats.profitLoss}">
-                                <div class="stat-label">손익</div>
-                                <div class="stat-value" th:text="${strategy.stats.profitLoss}">0</div>
-                            </div>
-                        </div>
-                        <div th:if="${strategy.description}" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #f0f0f0;">
-                            <div class="info-label" style="margin-bottom: 5px;">설명</div>
-                            <div style="color: #666; font-size: 14px; line-height: 1.6;" th:text="${strategy.description}">Description</div>
-                        </div>
-
-                        <!-- Strategy Actions -->
-                        <div class="strategy-actions">
-                            <a th:href="@{/trading/strategies/{id}/edit(id=${strategy.strategyId})}" class="btn btn-secondary btn-sm">수정</a>
-
-                            <!-- Status Toggle Buttons -->
-                            <form th:if="${strategy.status == 'INACTIVE'}"
-                                  th:action="@{/trading/strategies/{id}/status(id=${strategy.strategyId})}"
-                                  method="post"
-                                  style="display: inline-block; margin: 0;">
-                                <input type="hidden" name="status" value="ACTIVE"/>
-                                <button type="submit" class="btn btn-success btn-sm">활성화</button>
-                            </form>
-
-                            <form th:if="${strategy.status == 'ACTIVE'}"
-                                  th:action="@{/trading/strategies/{id}/status(id=${strategy.strategyId})}"
-                                  method="post"
-                                  style="display: inline-block; margin: 0;">
-                                <input type="hidden" name="status" value="PAUSED"/>
-                                <button type="submit" class="btn btn-warning btn-sm">일시정지</button>
-                            </form>
-
-                            <form th:if="${strategy.status == 'PAUSED'}"
-                                  th:action="@{/trading/strategies/{id}/status(id=${strategy.strategyId})}"
-                                  method="post"
-                                  style="display: inline-block; margin: 0;">
-                                <input type="hidden" name="status" value="ACTIVE"/>
-                                <button type="submit" class="btn btn-success btn-sm">재개</button>
-                            </form>
-
-                            <!-- Delete Button -->
-                            <form class="delete-form"
-                                  th:action="@{/trading/strategies/{id}/delete(id=${strategy.strategyId})}"
-                                  method="post"
-                                  onsubmit="return confirm('정말로 이 전략을 삭제하시겠습니까?');">
-                                <button type="submit" class="btn btn-danger btn-sm">삭제</button>
-                            </form>
+        
+                        <div th:if="${strategies == null || strategies.isEmpty()}" class="empty-state">
+                            <div class="empty-icon">📭</div>
+                            <div class="empty-message">등록된 전략이 없습니다.</div>
                         </div>
                     </div>
-                </div>
-
-                <div th:if="${strategies == null || strategies.isEmpty()}" class="empty-state">
-                    <div class="empty-icon">📭</div>
-                    <div class="empty-message">등록된 전략이 없습니다.</div>
-                </div>
-            </div>
-        </main>
     </div>
-
-    <script>
-    </script>
 </body>
 </html>

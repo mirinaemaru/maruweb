@@ -1,91 +1,16 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Maru Web</title>
-    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title>Dashboard</title>
+    <th:block layout:fragment="extra-css">
     <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    </th:block>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Sidebar Toggle Button -->
-        <div class="sidebar-toggle" aria-label="Show menu"></div>
-
-        <!-- Sidebar Menu -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2>Maru Web</h2>
-                <p class="sidebar-subtitle">Management System</p>
-            </div>
-            <nav class="sidebar-nav">
-                <ul>
-                    <li class="active">
-                        <a th:href="@{/}">
-                            <span class="menu-icon">🏠</span>
-                            <span class="menu-text">Dashboard</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a th:href="@{/todos}">
-                            <span class="menu-icon">📝</span>
-                            <span class="menu-text">Todo</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a th:href="@{/calendar}">
-                            <span class="menu-icon">📅</span>
-                            <span class="menu-text">Calendar</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a th:href="@{/dday}">
-                            <span class="menu-icon">⏰</span>
-                            <span class="menu-text">D-Day</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a th:href="@{/notes}">
-                            <span class="menu-icon">📒</span>
-                            <span class="menu-text">Notes</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a th:href="@{/habits}">
-                            <span class="menu-icon">✅</span>
-                            <span class="menu-text">Habits</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a th:href="@{/shortcuts}">
-                            <span class="menu-icon">🔗</span>
-                            <span class="menu-text">Shortcuts</span>
-                        </a>
-                    </li>
-                    <li class="has-submenu">
-                        <a th:href="@{/trading/dashboard}">
-                            <span class="menu-icon">📊</span>
-                            <span class="menu-text">Trading</span>
-                        </a>
-                        <ul class="submenu">
-                            <li><a th:href="@{/trading/dashboard}">Dashboard</a></li>
-                            <li><a th:href="@{/trading/accounts}">계좌관리</a></li>
-                            <li><a th:href="@{/trading/strategies}">전략 관리</a></li>
-                            <li><a th:href="@{/trading/orders}">주문조회</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </nav>
-            <div class="sidebar-footer">
-                <p>&copy; 2024 Maru Web</p>
-            </div>
-        </aside>
-
-        <!-- Main Content Area -->
-        <main class="main-content">
-            <div class="content-wrapper">
-                <div class="container">
+    <div layout:fragment="content">
+<div class="container">
                     <header>
                         <div>
                             <h1>Dashboard</h1>
@@ -229,8 +154,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </main>
     </div>
 </body>
 </html>

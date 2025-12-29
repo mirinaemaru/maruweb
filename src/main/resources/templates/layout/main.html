@@ -1,15 +1,18 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${pageTitle} ?: 'Maru Web'">Maru Web</title>
+    <title layout:title-pattern="$CONTENT_TITLE - $LAYOUT_TITLE">Maru Web</title>
     <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <th:block layout:fragment="extra-css"></th:block>
     <!-- LiveReload Script -->
     <script th:if="${@environment.getProperty('spring.devtools.livereload.enabled') != 'false'}">
         document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>');
     </script>
+    <th:block layout:fragment="extra-scripts-head"></th:block>
 </head>
 <body>
     <div class="app-container">
@@ -71,10 +74,11 @@
 
         <!-- Main Content Area -->
         <main class="main-content">
-            <div class="content-wrapper" th:insert="${contentFragment}">
+            <div layout:fragment="content">
                 <!-- Page content will be inserted here -->
             </div>
         </main>
     </div>
+    <th:block layout:fragment="extra-scripts"></th:block>
 </body>
 </html>

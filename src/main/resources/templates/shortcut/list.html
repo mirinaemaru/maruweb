@@ -1,57 +1,16 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shortcuts - Maru Web</title>
-    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title>Shortcuts</title>
+    <th:block layout:fragment="extra-css">
     <link rel="stylesheet" th:href="@{/css/shortcut.css}">
-    <!-- LiveReload Script -->
-    <script th:if="${@environment.getProperty('spring.devtools.livereload.enabled') != 'false'}">
-        document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>');
-    </script>
+    </th:block>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Sidebar Toggle Button -->
-        <div class="sidebar-toggle" aria-label="Show menu"></div>
-
-        <!-- Sidebar Menu -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2>Maru Web</h2>
-                <p class="sidebar-subtitle">Management System</p>
-            </div>
-            <nav class="sidebar-nav">
-                <ul>
-                    <li><a th:href="@{/}"><span class="menu-icon">🏠</span><span class="menu-text">Dashboard</span></a></li>
-                    <li><a th:href="@{/todos}"><span class="menu-icon">📝</span><span class="menu-text">Todo</span></a></li>
-                    <li><a th:href="@{/calendar}"><span class="menu-icon">📅</span><span class="menu-text">Calendar</span></a></li>
-                    <li><a th:href="@{/dday}"><span class="menu-icon">⏰</span><span class="menu-text">D-Day</span></a></li>
-                    <li><a th:href="@{/notes}"><span class="menu-icon">📒</span><span class="menu-text">Notes</span></a></li>
-                    <li><a th:href="@{/habits}"><span class="menu-icon">✅</span><span class="menu-text">Habits</span></a></li>
-                    <li class="active"><a th:href="@{/shortcuts}"><span class="menu-icon">🔗</span><span class="menu-text">Shortcuts</span></a></li>
-                    <li class="has-submenu">
-                        <a th:href="@{/trading/dashboard}"><span class="menu-icon">📊</span><span class="menu-text">Trading</span></a>
-                        <ul class="submenu">
-                            <li><a th:href="@{/trading/dashboard}">Dashboard</a></li>
-                            <li><a th:href="@{/trading/accounts}">계좌관리</a></li>
-                            <li><a th:href="@{/trading/strategies}">전략 관리</a></li>
-                            <li><a th:href="@{/trading/orders}">주문조회</a></li>
-                        </ul>
-                    </li>
-                
-            </nav>
-            <div class="sidebar-footer">
-                <p>&copy; 2024 Maru Web</p>
-            </div>
-        </aside>
-
-        <!-- Main Content Area -->
-        <main class="main-content">
-            <div class="content-wrapper">
-                <div class="container">
+    <div layout:fragment="content">
+<div class="container">
                     <!-- Header -->
                     <header>
                         <h1>Shortcuts</h1>
@@ -134,129 +93,9 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </main>
     </div>
-
-    <!-- Add Category Modal -->
-    <div id="addCategoryModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="close" onclick="closeAddCategoryModal()">&times;</span>
-            <h2>Add New Category</h2>
-            <form th:action="@{/shortcuts/categories}" method="post">
-                <div class="form-group-vertical">
-                    <label>Category Name *</label>
-                    <input type="text" name="name" required class="form-input">
-                </div>
-                <div class="form-group-vertical">
-                    <label>Description</label>
-                    <textarea name="description" class="form-input" rows="2"></textarea>
-                </div>
-                <div class="form-group-vertical">
-                    <label>Display Order</label>
-                    <input type="number" name="displayOrder" value="0" class="form-input">
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Create Category</button>
-                    <button type="button" onclick="closeAddCategoryModal()" class="btn btn-secondary">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Edit Category Modal -->
-    <div id="editCategoryModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="close" onclick="closeEditCategoryModal()">&times;</span>
-            <h2>Edit Category</h2>
-            <form id="editCategoryForm" method="post">
-                <div class="form-group-vertical">
-                    <label>Category Name *</label>
-                    <input type="text" id="editCategoryName" name="name" required class="form-input">
-                </div>
-                <div class="form-group-vertical">
-                    <label>Description</label>
-                    <textarea id="editCategoryDescription" name="description" class="form-input" rows="2"></textarea>
-                </div>
-                <div class="form-group-vertical">
-                    <label>Display Order</label>
-                    <input type="number" id="editCategoryOrder" name="displayOrder" value="0" class="form-input">
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Update Category</button>
-                    <button type="button" onclick="closeEditCategoryModal()" class="btn btn-secondary">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Add Shortcut Modal -->
-    <div id="addShortcutModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="close" onclick="closeAddShortcutModal()">&times;</span>
-            <h2>Add New Shortcut</h2>
-            <p id="addShortcutCategoryName" class="modal-subtitle">to Category: </p>
-            <form id="addShortcutForm" th:action="@{/shortcuts/items}" method="post">
-                <input type="hidden" id="addShortcutCategoryId" name="categoryId">
-                <div class="form-group-vertical">
-                    <label>Name *</label>
-                    <input type="text" name="name" required class="form-input">
-                </div>
-                <div class="form-group-vertical">
-                    <label>URL *</label>
-                    <input type="url" name="url" required class="form-input" placeholder="https://...">
-                </div>
-                <div class="form-group-vertical">
-                    <label>Description</label>
-                    <textarea name="description" class="form-input" rows="2"></textarea>
-                </div>
-                <div class="form-group-vertical">
-                    <label>Display Order</label>
-                    <select id="addShortcutOrder" name="displayOrder" class="form-input">
-                        <!-- Options will be populated by JavaScript -->
-                    </select>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Create Shortcut</button>
-                    <button type="button" onclick="closeAddShortcutModal()" class="btn btn-secondary">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Edit Shortcut Modal -->
-    <div id="editShortcutModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="close" onclick="closeEditShortcutModal()">&times;</span>
-            <h2>Edit Shortcut</h2>
-            <form id="editShortcutForm" method="post">
-                <input type="hidden" id="editShortcutCategoryId" name="categoryId">
-                <div class="form-group-vertical">
-                    <label>Name *</label>
-                    <input type="text" id="editShortcutName" name="name" required class="form-input">
-                </div>
-                <div class="form-group-vertical">
-                    <label>URL *</label>
-                    <input type="url" id="editShortcutUrl" name="url" required class="form-input">
-                </div>
-                <div class="form-group-vertical">
-                    <label>Description</label>
-                    <textarea id="editShortcutDescription" name="description" class="form-input" rows="2"></textarea>
-                </div>
-                <div class="form-group-vertical">
-                    <label>Display Order</label>
-                    <select id="editShortcutOrder" name="displayOrder" class="form-input">
-                        <!-- Options will be populated by JavaScript -->
-                    </select>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Update Shortcut</button>
-                    <button type="button" onclick="closeEditShortcutModal()" class="btn btn-secondary">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script th:src="@{/js/shortcut.js}"></script>
+    <th:block layout:fragment="extra-scripts">
+<script th:src="@{/js/shortcut.js}"></script>
+    </th:block>
 </body>
 </html>

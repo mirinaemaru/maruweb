@@ -1,230 +1,198 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${account != null ? '계좌 수정' : '계좌 등록'} + ' - Maru Web'">계좌 등록 - Maru Web</title>
-    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-    <style>
-        .form-page {
-            padding: 30px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        .page-header {
-            margin-bottom: 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 40px;
-            border-radius: 16px;
-            color: white;
-            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
-        }
-        .page-header h1 {
-            font-size: 36px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .form-container {
-            background: white;
-            border-radius: 16px;
-            padding: 40px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            border: 1px solid rgba(0,0,0,0.04);
-        }
-        .form-group {
-            margin-bottom: 25px;
-        }
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 10px;
-            font-size: 15px;
-        }
-        .form-group label .required {
-            color: #dc3545;
-            margin-left: 4px;
-        }
-        .form-control {
-            width: 100%;
-            padding: 14px 18px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 15px;
-            transition: all 0.3s;
-            font-family: inherit;
-        }
-        .form-control:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-        }
-        .form-control:disabled {
-            background-color: #f5f5f5;
-            cursor: not-allowed;
-        }
-        textarea.form-control {
-            resize: vertical;
-            min-height: 120px;
-        }
-        .form-actions {
-            display: flex;
-            gap: 15px;
-            margin-top: 35px;
-            padding-top: 25px;
-            border-top: 2px solid #f0f0f0;
-        }
-        .btn {
-            padding: 14px 32px;
-            border: none;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            text-decoration: none;
-            display: inline-block;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        }
-        .btn-secondary {
-            background: #e8e8e8;
-            color: #666;
-        }
-        .btn-secondary:hover {
-            background: #d0d0d0;
-        }
-        .help-text {
-            font-size: 13px;
-            color: #7f8c8d;
-            margin-top: 6px;
-        }
-        .alert {
-            padding: 14px 20px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-            font-weight: 500;
-        }
-        .alert-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-    </style>
+    <title>계좌 등록</title>
+    <th:block layout:fragment="extra-css">
+        <style>
+                .form-page {
+                    padding: 30px;
+                    max-width: 800px;
+                    margin: 0 auto;
+                }
+                .page-header {
+                    margin-bottom: 40px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    padding: 40px;
+                    border-radius: 16px;
+                    color: white;
+                    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+                }
+                .page-header h1 {
+                    font-size: 36px;
+                    font-weight: 700;
+                    margin-bottom: 10px;
+                    display: flex;
+                    align-items: center;
+                    gap: 15px;
+                }
+                .form-container {
+                    background: white;
+                    border-radius: 16px;
+                    padding: 40px;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+                    border: 1px solid rgba(0,0,0,0.04);
+                }
+                .form-group {
+                    margin-bottom: 25px;
+                }
+                .form-group label {
+                    display: block;
+                    font-weight: 600;
+                    color: #2c3e50;
+                    margin-bottom: 10px;
+                    font-size: 15px;
+                }
+                .form-group label .required {
+                    color: #dc3545;
+                    margin-left: 4px;
+                }
+                .form-control {
+                    width: 100%;
+                    padding: 14px 18px;
+                    border: 2px solid #e0e0e0;
+                    border-radius: 10px;
+                    font-size: 15px;
+                    transition: all 0.3s;
+                    font-family: inherit;
+                }
+                .form-control:focus {
+                    outline: none;
+                    border-color: #667eea;
+                    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+                }
+                .form-control:disabled {
+                    background-color: #f5f5f5;
+                    cursor: not-allowed;
+                }
+                textarea.form-control {
+                    resize: vertical;
+                    min-height: 120px;
+                }
+                .form-actions {
+                    display: flex;
+                    gap: 15px;
+                    margin-top: 35px;
+                    padding-top: 25px;
+                    border-top: 2px solid #f0f0f0;
+                }
+                .btn {
+                    padding: 14px 32px;
+                    border: none;
+                    border-radius: 10px;
+                    font-size: 15px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    text-decoration: none;
+                    display: inline-block;
+                }
+                .btn-primary {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+                }
+                .btn-primary:hover {
+                    transform: translateY(-3px);
+                    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+                }
+                .btn-secondary {
+                    background: #e8e8e8;
+                    color: #666;
+                }
+                .btn-secondary:hover {
+                    background: #d0d0d0;
+                }
+                .help-text {
+                    font-size: 13px;
+                    color: #7f8c8d;
+                    margin-top: 6px;
+                }
+                .alert {
+                    padding: 14px 20px;
+                    border-radius: 10px;
+                    margin-bottom: 25px;
+                    font-weight: 500;
+                }
+                .alert-error {
+                    background-color: #f8d7da;
+                    color: #721c24;
+                    border: 1px solid #f5c6cb;
+                }
+            </style>
+    </th:block>
 </head>
 <body>
-    <div class="app-container">
-        <div class="sidebar-toggle" aria-label="Show menu"></div>
-
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2>Maru Web</h2>
-                <p class="sidebar-subtitle">Management System</p>
-            </div>
-            <nav class="sidebar-nav">
-                <ul>
-                    <li><a th:href="@{/}"><span class="menu-icon">🏠</span><span class="menu-text">Dashboard</span></a></li>
-                    <li><a th:href="@{/todos}"><span class="menu-icon">📝</span><span class="menu-text">Todo</span></a></li>
-                    <li><a th:href="@{/calendar}"><span class="menu-icon">📅</span><span class="menu-text">Calendar</span></a></li>
-                    <li><a th:href="@{/notes}"><span class="menu-icon">📒</span><span class="menu-text">Notes</span></a></li>
-                    <li><a th:href="@{/shortcuts}"><span class="menu-icon">🔗</span><span class="menu-text">Shortcuts</span></a></li>
-                    <li class="has-submenu active">
-                        <a th:href="@{/trading/dashboard}"><span class="menu-icon">📊</span><span class="menu-text">Trading</span></a>
-                        <ul class="submenu">
-                            <li><a th:href="@{/trading/dashboard}">Dashboard</a></li>
-                            <li class="active"><a th:href="@{/trading/accounts}">계좌관리</a></li>
-                            <li><a th:href="@{/trading/strategies}">전략 관리</a></li>
-                            <li><a th:href="@{/trading/orders}">주문조회</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </nav>
-        </aside>
-
-        <main class="main-content">
-            <div class="form-page">
-                <div class="page-header">
-                    <h1 th:text="${account != null ? '💼 계좌 수정' : '💼 계좌 등록'}">💼 계좌 등록</h1>
-                    <p th:text="${account != null ? '계좌 정보를 수정합니다.' : '새로운 거래 계좌를 등록합니다.'}">새로운 거래 계좌를 등록합니다.</p>
-                </div>
-
-                <div th:if="${error}" class="alert alert-error" th:text="${error}">
-                    오류 메시지
-                </div>
-
-                <div class="form-container">
-                    <form th:action="${account != null ? '/trading/accounts/' + account.accountId : '/trading/accounts'}"
-                          method="post">
-
-                        <div class="form-group">
-                            <label for="accountId">계좌번호 <span class="required">*</span></label>
-                            <input type="text"
-                                   id="accountId"
-                                   name="accountId"
-                                   class="form-control"
-                                   th:value="${account?.accountId}"
-                                   th:disabled="${account != null}"
-                                   placeholder="예: 01KDM61M1YDZJ4XW1E95YYM2SC"
-                                   required>
-                            <div class="help-text">Trading System에서 발급받은 계좌번호를 입력하세요. (수정 불가)</div>
+    <div layout:fragment="content">
+        <div class="form-page">
+                        <div class="page-header">
+                            <h1 th:text="${account != null ? '💼 계좌 수정' : '💼 계좌 등록'}">💼 계좌 등록</h1>
+                            <p th:text="${account != null ? '계좌 정보를 수정합니다.' : '새로운 거래 계좌를 등록합니다.'}">새로운 거래 계좌를 등록합니다.</p>
                         </div>
-
-                        <div class="form-group">
-                            <label for="alias">계좌 별칭 <span class="required">*</span></label>
-                            <input type="text"
-                                   id="alias"
-                                   name="alias"
-                                   class="form-control"
-                                   th:value="${account?.alias}"
-                                   placeholder="예: 테스트 계좌"
-                                   required>
-                            <div class="help-text">계좌를 식별할 수 있는 이름을 입력하세요.</div>
+        
+                        <div th:if="${error}" class="alert alert-error" th:text="${error}">
+                            오류 메시지
                         </div>
-
-                        <div class="form-group">
-                            <label for="environment">계좌 타입 <span class="required">*</span></label>
-                            <select id="environment" name="environment" class="form-control" required>
-                                <option value="">-- 계좌 타입 선택 --</option>
-                                <option value="PAPER" th:selected="${account?.environment == 'PAPER'}">PAPER (모의 계좌)</option>
-                                <option value="REAL" th:selected="${account?.environment == 'REAL'}">REAL (실전 계좌)</option>
-                            </select>
-                            <div class="help-text">PAPER는 가상 자금으로 테스트, REAL은 실제 자금으로 거래합니다.</div>
+        
+                        <div class="form-container">
+                            <form th:action="${account != null ? '/trading/accounts/' + account.accountId : '/trading/accounts'}"
+                                  method="post">
+        
+                                <div class="form-group">
+                                    <label for="accountId">계좌번호 <span class="required">*</span></label>
+                                    <input type="text"
+                                           id="accountId"
+                                           name="accountId"
+                                           class="form-control"
+                                           th:value="${account?.accountId}"
+                                           th:disabled="${account != null}"
+                                           placeholder="예: 01KDM61M1YDZJ4XW1E95YYM2SC"
+                                           required>
+                                    <div class="help-text">Trading System에서 발급받은 계좌번호를 입력하세요. (수정 불가)</div>
+                                </div>
+        
+                                <div class="form-group">
+                                    <label for="alias">계좌 별칭 <span class="required">*</span></label>
+                                    <input type="text"
+                                           id="alias"
+                                           name="alias"
+                                           class="form-control"
+                                           th:value="${account?.alias}"
+                                           placeholder="예: 테스트 계좌"
+                                           required>
+                                    <div class="help-text">계좌를 식별할 수 있는 이름을 입력하세요.</div>
+                                </div>
+        
+                                <div class="form-group">
+                                    <label for="environment">계좌 타입 <span class="required">*</span></label>
+                                    <select id="environment" name="environment" class="form-control" required>
+                                        <option value="">-- 계좌 타입 선택 --</option>
+                                        <option value="PAPER" th:selected="${account?.environment == 'PAPER'}">PAPER (모의 계좌)</option>
+                                        <option value="REAL" th:selected="${account?.environment == 'REAL'}">REAL (실전 계좌)</option>
+                                    </select>
+                                    <div class="help-text">PAPER는 가상 자금으로 테스트, REAL은 실제 자금으로 거래합니다.</div>
+                                </div>
+        
+                                <div class="form-group">
+                                    <label for="description">설명</label>
+                                    <textarea id="description"
+                                              name="description"
+                                              class="form-control"
+                                              placeholder="계좌에 대한 설명을 입력하세요..."
+                                              th:text="${account?.description}"></textarea>
+                                    <div class="help-text">계좌 용도, 운영 방식 등을 입력하세요.</div>
+                                </div>
+        
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">
+                                        <span th:text="${account != null ? '수정 완료' : '등록하기'}">등록하기</span>
+                                    </button>
+                                    <a th:href="@{/trading/accounts}" class="btn btn-secondary">취소</a>
+                                </div>
+                            </form>
                         </div>
-
-                        <div class="form-group">
-                            <label for="description">설명</label>
-                            <textarea id="description"
-                                      name="description"
-                                      class="form-control"
-                                      placeholder="계좌에 대한 설명을 입력하세요..."
-                                      th:text="${account?.description}"></textarea>
-                            <div class="help-text">계좌 용도, 운영 방식 등을 입력하세요.</div>
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-primary">
-                                <span th:text="${account != null ? '수정 완료' : '등록하기'}">등록하기</span>
-                            </button>
-                            <a th:href="@{/trading/accounts}" class="btn btn-secondary">취소</a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </main>
+                    </div>
     </div>
-
-    <script>
-    </script>
 </body>
 </html>
