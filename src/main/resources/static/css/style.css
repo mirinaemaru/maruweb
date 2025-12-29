@@ -596,7 +596,6 @@ header h1 {
     font-size: 0.9em;
     flex: 1;
     min-width: 0;
-    display: block;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
