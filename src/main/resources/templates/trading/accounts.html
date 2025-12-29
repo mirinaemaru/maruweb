@@ -196,6 +196,90 @@
             font-size: 12px;
             overflow-x: auto;
         }
+        .action-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+        .account-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px solid #f5f5f5;
+            flex-wrap: wrap;
+        }
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            padding: 16px 24px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .delete-form {
+            display: inline-block;
+            margin: 0;
+        }
+        .delete-form button {
+            margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -234,6 +318,11 @@
                     <p>Trading System에 등록된 계좌 정보를 확인할 수 있습니다.</p>
                 </div>
 
+                <!-- Flash Messages -->
+                <div th:if="${message}" class="alert-success" th:text="${message}">
+                    성공 메시지
+                </div>
+
                 <!-- API Connection Error Alert -->
                 <div th:if="${error}" class="alert alert-error">
                     <div class="alert-title">⚠️ API 연결 오류</div>
@@ -255,6 +344,12 @@
                             <li>Health Check 확인: <a href="http://localhost:8099/health" target="_blank" style="color: #007bff;">http://localhost:8099/health</a></li>
                         </ol>
                     </div>
+                </div>
+
+                <!-- Action Header -->
+                <div class="action-header">
+                    <h2 style="font-size: 20px; color: #2c3e50; margin: 0;">계좌 목록</h2>
+                    <a th:href="@{/trading/accounts/new}" class="btn btn-primary">+ 계좌 등록</a>
                 </div>
 
                 <div th:if="${accounts != null && !accounts.isEmpty()}" class="accounts-grid">
@@ -286,6 +381,19 @@
                                 <span class="info-label">등록일</span>
                                 <span class="info-value" th:text="${#temporals.format(account.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01</span>
                             </div>
+                        </div>
+
+                        <!-- Account Actions -->
+                        <div class="account-actions">
+                            <a th:href="@{/trading/accounts/{id}/edit(id=${account.accountId})}" class="btn btn-secondary btn-sm">수정</a>
+
+                            <!-- Delete Button -->
+                            <form class="delete-form"
+                                  th:action="@{/trading/accounts/{id}/delete(id=${account.accountId})}"
+                                  method="post"
+                                  onsubmit="return confirm('정말로 이 계좌를 삭제하시겠습니까?');">
+                                <button type="submit" class="btn btn-danger btn-sm">삭제</button>
+                            </form>
                         </div>
                     </div>
                 </div>

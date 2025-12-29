@@ -102,6 +102,126 @@ public class TradingController {
     }
 
     /**
+     * 계좌 등록 페이지
+     */
+    @GetMapping("/accounts/new")
+    public String newAccount(Model model) {
+        try {
+            log.info("Loading Account Registration page");
+            return "trading/account-form";
+
+        } catch (Exception e) {
+            log.error("Failed to load account registration page", e);
+            model.addAttribute("error", "계좌 등록 페이지를 불러올 수 없습니다.");
+            model.addAttribute("errorDetail", e.getMessage());
+            return "trading/error";
+        }
+    }
+
+    /**
+     * 계좌 등록 처리
+     */
+    @PostMapping("/accounts")
+    public String createAccount(
+            @RequestParam String accountId,
+            @RequestParam String alias,
+            @RequestParam String environment,
+            @RequestParam(required = false) String description,
+            RedirectAttributes redirectAttributes) {
+        try {
+            log.info("Creating new account: {}", alias);
+
+            Map<String, Object> accountData = new HashMap<>();
+            accountData.put("accountId", accountId);
+            accountData.put("alias", alias);
+            accountData.put("environment", environment);
+            accountData.put("description", description);
+            accountData.put("status", "ACTIVE");
+
+            tradingApiService.createAccount(accountData);
+
+            redirectAttributes.addFlashAttribute("message", "계좌가 성공적으로 등록되었습니다.");
+            return "redirect:/trading/accounts";
+
+        } catch (Exception e) {
+            log.error("Failed to create account", e);
+            redirectAttributes.addFlashAttribute("error", "계좌 등록에 실패했습니다: " + e.getMessage());
+            return "redirect:/trading/accounts/new";
+        }
+    }
+
+    /**
+     * 계좌 수정 페이지
+     */
+    @GetMapping("/accounts/{accountId}/edit")
+    public String editAccount(@PathVariable String accountId, Model model) {
+        try {
+            log.info("Loading Account Edit page - accountId: {}", accountId);
+
+            Map<String, Object> account = tradingApiService.getAccount(accountId);
+            model.addAttribute("account", account);
+
+            return "trading/account-form";
+
+        } catch (Exception e) {
+            log.error("Failed to load account edit page", e);
+            model.addAttribute("error", "계좌 수정 페이지를 불러올 수 없습니다.");
+            model.addAttribute("errorDetail", e.getMessage());
+            return "trading/error";
+        }
+    }
+
+    /**
+     * 계좌 수정 처리
+     */
+    @PostMapping("/accounts/{accountId}")
+    public String updateAccount(
+            @PathVariable String accountId,
+            @RequestParam String alias,
+            @RequestParam String environment,
+            @RequestParam(required = false) String description,
+            RedirectAttributes redirectAttributes) {
+        try {
+            log.info("Updating account: {}", accountId);
+
+            Map<String, Object> accountData = new HashMap<>();
+            accountData.put("alias", alias);
+            accountData.put("environment", environment);
+            accountData.put("description", description);
+
+            tradingApiService.updateAccount(accountId, accountData);
+
+            redirectAttributes.addFlashAttribute("message", "계좌가 성공적으로 수정되었습니다.");
+            return "redirect:/trading/accounts";
+
+        } catch (Exception e) {
+            log.error("Failed to update account", e);
+            redirectAttributes.addFlashAttribute("error", "계좌 수정에 실패했습니다: " + e.getMessage());
+            return "redirect:/trading/accounts/" + accountId + "/edit";
+        }
+    }
+
+    /**
+     * 계좌 삭제
+     */
+    @PostMapping("/accounts/{accountId}/delete")
+    public String deleteAccount(@PathVariable String accountId, RedirectAttributes redirectAttributes) {
+        try {
+            log.info("Deleting account: {}", accountId);
+
+            tradingApiService.deleteAccount(accountId);
+
+            redirectAttributes.addFlashAttribute("message", "계좌가 성공적으로 삭제되었습니다.");
+            return "redirect:/trading/accounts";
+
+        } catch (Exception e) {
+            log.error("Failed to delete account", e);
+            redirectAttributes.addFlashAttribute("error", "계좌 삭제에 실패했습니다: " + e.getMessage());
+            return "redirect:/trading/accounts";
+        }
+    }
+
+    /**
      * 전략 관리 페이지
      */
     @GetMapping("/strategies")

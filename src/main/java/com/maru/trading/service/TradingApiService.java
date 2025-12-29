@@ -71,6 +71,93 @@ public class TradingApiService {
     }
 
     /**
+     * 계좌 상세 조회
+     */
+    public Map<String, Object> getAccount(String accountId) {
+        String url = "/api/v1/admin/accounts/" + accountId;
+        try {
+            log.debug("Calling Trading API: {}", url);
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to get account from Trading System", e);
+            throw new RuntimeException("계좌 정보를 가져올 수 없습니다.", e);
+        }
+    }
+
+    /**
+     * 계좌 등록
+     */
+    public Map<String, Object> createAccount(Map<String, Object> accountData) {
+        String url = "/api/v1/admin/accounts";
+        try {
+            log.debug("Calling Trading API: {}", url);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(accountData, headers);
+
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    request,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to create account in Trading System", e);
+            throw new RuntimeException("계좌 등록에 실패했습니다.", e);
+        }
+    }
+
+    /**
+     * 계좌 수정
+     */
+    public Map<String, Object> updateAccount(String accountId, Map<String, Object> accountData) {
+        String url = "/api/v1/admin/accounts/" + accountId;
+        try {
+            log.debug("Calling Trading API: {}", url);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(accountData, headers);
+
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                    url,
+                    HttpMethod.PUT,
+                    request,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to update account in Trading System", e);
+            throw new RuntimeException("계좌 수정에 실패했습니다.", e);
+        }
+    }
+
+    /**
+     * 계좌 삭제
+     */
+    public void deleteAccount(String accountId) {
+        String url = "/api/v1/admin/accounts/" + accountId;
+        try {
+            log.debug("Calling Trading API: {}", url);
+            tradingApiRestTemplate.exchange(
+                    url,
+                    HttpMethod.DELETE,
+                    null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+        } catch (RestClientException e) {
+            log.error("Failed to delete account from Trading System", e);
+            throw new RuntimeException("계좌 삭제에 실패했습니다.", e);
+        }
+    }
+
+    /**
      * Kill Switch 상태 조회
      */
     public Map<String, Object> getKillSwitchStatus() {
