@@ -152,7 +152,7 @@
                 </div>
                 <div class="todo-actions">
                     <button th:if="${filter == 'active'}" type="submit" th:form="'descForm-' + ${todo.id}" class="btn btn-save">Save</button>
-                    <a th:href="@{/todos/{id}/edit(id=${todo.id})}" class="btn btn-edit">Edit</a>
+                    <a th:href="@{/todos/{id}/edit(id=${todo.id}, filter=${filter})}" class="btn btn-edit">Edit</a>
                     <form th:action="@{/todos/{id}/delete(id=${todo.id})}" method="post" style="display: inline;">
                         <button type="submit" class="btn btn-delete" onclick="return confirm('Are you sure?')">Delete</button>
                     </form>

@@ -68,10 +68,13 @@ public class TodoController {
     }
 
     @GetMapping("/{id}/edit")
-    public String editTodoForm(@PathVariable Long id, Model model) {
+    public String editTodoForm(@PathVariable Long id,
+                              @RequestParam(required = false) String filter,
+                              Model model) {
         return todoService.getTodoById(id)
                 .map(todo -> {
                     model.addAttribute("todo", todo);
+                    model.addAttribute("filter", filter);
                     return "todo/edit";
                 })
                 .orElse("redirect:/todos");
@@ -81,17 +84,18 @@ public class TodoController {
     public String updateTodo(@PathVariable Long id,
                            @Valid @ModelAttribute Todo todo,
                            BindingResult result,
+                           @RequestParam(required = false) String filter,
                            RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             redirectAttributes.addFlashAttribute("error", "Title is required");
-            return "redirect:/todos/" + id + "/edit";
+            return "redirect:/todos/" + id + "/edit" + (filter != null ? "?filter=" + filter : "");
         }
         if (todo.getCompleted() == null) {
             todo.setCompleted("N");
         }
         todoService.updateTodo(id, todo);
         redirectAttributes.addFlashAttribute("success", "Todo updated successfully");
-        return "redirect:/todos";
+        return "redirect:/todos" + (filter != null ? "?filter=" + filter : "");
     }
 
     @PostMapping("/{id}/toggle")
