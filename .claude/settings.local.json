@@ -40,6 +40,8 @@
       "Bash(java:*)",
       "Bash(ps:*)",
       "Bash(echo:*)",
+      "Bash(mysql:*)",
+      "Bash(tail:* /Users/changsupark/maruweb.log:*)",
       "Read(/opt/homebrew/Cellar/tomcat@9/9.0.113/libexec/logs/**)",
       "Read(/opt/homebrew/Cellar/tomcat@9/9.0.113/libexec/webapps/ROOT/WEB-INF/**)",
       "Read(//opt/homebrew/Cellar/tomcat@9/9.0.113/libexec/logs/**)",
