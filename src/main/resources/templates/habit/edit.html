@@ -28,7 +28,16 @@
                     <li><a th:href="@{/notes}"><span class="menu-icon">📒</span><span class="menu-text">Notes</span></a></li>
                     <li class="active"><a th:href="@{/habits}"><span class="menu-icon">✅</span><span class="menu-text">Habits</span></a></li>
                     <li><a th:href="@{/shortcuts}"><span class="menu-icon">🔗</span><span class="menu-text">Shortcuts</span></a></li>
-                </ul>
+                    <li class="has-submenu">
+                        <a th:href="@{/trading/dashboard}"><span class="menu-icon">📊</span><span class="menu-text">Trading</span></a>
+                        <ul class="submenu">
+                            <li><a th:href="@{/trading/dashboard}">Dashboard</a></li>
+                            <li><a th:href="@{/trading/accounts}">계좌관리</a></li>
+                            <li><a th:href="@{/trading/strategies}">전략 관리</a></li>
+                            <li><a th:href="@{/trading/orders}">주문조회</a></li>
+                        </ul>
+                    </li>
+                
             </nav>
             <div class="sidebar-footer"><p>&copy; 2024 Maru Web</p></div>
         </aside>
