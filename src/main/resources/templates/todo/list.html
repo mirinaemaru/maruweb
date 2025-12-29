@@ -100,7 +100,10 @@
                         <h3 th:if="${filter == 'active'}" th:text="${todo.title}">Todo Title</h3>
                         <!-- Completed/All 탭: 제목 + description 한 줄 표시 -->
                         <h3 th:if="${filter != 'active'}" class="todo-title-with-desc">
-                            <span class="todo-title-text" th:text="${todo.title}">Todo Title</span><span th:if="${todo.description != null and todo.description != ''}" class="todo-desc-inline"> - <span th:text="${todo.description}"></span></span>
+                            <span class="todo-title-text" th:text="${todo.title}">Todo Title</span>
+                            <span th:if="${todo.description != null and todo.description != ''}"
+                                  class="todo-desc-inline"
+                                  th:text="' - ' + ${todo.description}"></span>
                         </h3>
                         <!-- Active 탭에서는 description 수정 가능 -->
                         <div th:if="${filter == 'active'}">

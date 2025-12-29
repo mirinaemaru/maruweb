@@ -587,22 +587,16 @@ header h1 {
 .todo-title-text {
     flex-shrink: 0;
     white-space: nowrap;
+    margin-right: 8px;
 }
 
 .todo-desc-inline {
     color: #888;
     font-weight: 400;
     font-size: 0.9em;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
     flex: 1;
     min-width: 0;
-}
-
-.todo-desc-inline span {
-    display: inline-block;
-    max-width: 100%;
+    display: block;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
