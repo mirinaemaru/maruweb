@@ -68,10 +68,10 @@
 
                             <div class="form-group">
                                 <label class="checkbox-label">
+                                    <input type="hidden" name="_completed" value="on">
                                     <input type="checkbox" th:checked="${todo.completed == 'Y'}" name="completed" value="Y">
                                     <span>Mark as completed</span>
                                 </label>
-                                <input type="hidden" name="completed" value="N">
                             </div>
 
                             <div class="form-actions">

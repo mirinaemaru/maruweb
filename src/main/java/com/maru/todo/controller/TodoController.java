@@ -86,6 +86,9 @@ public class TodoController {
             redirectAttributes.addFlashAttribute("error", "Title is required");
             return "redirect:/todos/" + id + "/edit";
         }
+        if (todo.getCompleted() == null) {
+            todo.setCompleted("N");
+        }
         todoService.updateTodo(id, todo);
         redirectAttributes.addFlashAttribute("success", "Todo updated successfully");
         return "redirect:/todos";
