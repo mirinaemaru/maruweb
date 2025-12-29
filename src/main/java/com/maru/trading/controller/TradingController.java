@@ -88,14 +88,16 @@ public class TradingController {
             Map<String, Object> accountsData = tradingApiService.getAccounts();
             List<?> accounts = (List<?>) accountsData.get("items");
             model.addAttribute("accounts", accounts);
+            model.addAttribute("apiConnected", true);
 
             return "trading/accounts";
 
         } catch (Exception e) {
             log.error("Failed to load accounts", e);
-            model.addAttribute("error", "계좌 목록을 불러올 수 없습니다.");
+            model.addAttribute("error", "Trading System API에 연결할 수 없습니다. API 서버가 실행 중인지 확인하세요.");
             model.addAttribute("errorDetail", e.getMessage());
-            return "trading/error";
+            model.addAttribute("apiConnected", false);
+            return "trading/accounts";
         }
     }
 
@@ -110,14 +112,16 @@ public class TradingController {
             Map<String, Object> strategiesData = tradingApiService.getStrategies();
             List<?> strategies = (List<?>) strategiesData.get("items");
             model.addAttribute("strategies", strategies);
+            model.addAttribute("apiConnected", true);
 
             return "trading/strategies";
 
         } catch (Exception e) {
             log.error("Failed to load strategies", e);
-            model.addAttribute("error", "전략 목록을 불러올 수 없습니다.");
+            model.addAttribute("error", "Trading System API에 연결할 수 없습니다. API 서버가 실행 중인지 확인하세요.");
             model.addAttribute("errorDetail", e.getMessage());
-            return "trading/error";
+            model.addAttribute("apiConnected", false);
+            return "trading/strategies";
         }
     }
 
@@ -142,13 +146,15 @@ public class TradingController {
                 model.addAttribute("orders", orders);
             }
 
+            model.addAttribute("apiConnected", true);
             return "trading/orders";
 
         } catch (Exception e) {
             log.error("Failed to load orders", e);
-            model.addAttribute("error", "주문 목록을 불러올 수 없습니다.");
+            model.addAttribute("error", "Trading System API에 연결할 수 없습니다. API 서버가 실행 중인지 확인하세요.");
             model.addAttribute("errorDetail", e.getMessage());
-            return "trading/error";
+            model.addAttribute("apiConnected", false);
+            return "trading/orders";
         }
     }
 

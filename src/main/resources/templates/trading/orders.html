@@ -167,6 +167,78 @@
             color: #0066ff;
             font-weight: 600;
         }
+        .alert {
+            padding: 20px 28px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .alert-error {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            border: 1px solid #f5c6cb;
+        }
+        .alert-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #721c24;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .alert-message {
+            color: #721c24;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+        .alert-detail {
+            background: rgba(255,255,255,0.6);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 13px;
+            color: #721c24;
+            margin-top: 12px;
+            word-break: break-all;
+        }
+        .alert-help {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 18px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        .alert-help h4 {
+            color: #856404;
+            font-size: 16px;
+            margin: 0 0 12px 0;
+        }
+        .alert-help ol {
+            color: #856404;
+            margin: 0;
+            padding-left: 20px;
+            line-height: 1.8;
+        }
+        .alert-help pre {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 8px 0;
+            font-size: 12px;
+            overflow-x: auto;
+        }
     </style>
 </head>
 <body>
@@ -203,6 +275,29 @@
                 <div class="page-header">
                     <h1>📈 주문 조회</h1>
                     <p>계좌별 주문 내역을 조회할 수 있습니다.</p>
+                </div>
+
+                <!-- API Connection Error Alert -->
+                <div th:if="${error}" class="alert alert-error">
+                    <div class="alert-title">⚠️ API 연결 오류</div>
+                    <div class="alert-message" th:text="${error}">
+                        Trading System API에 연결할 수 없습니다.
+                    </div>
+                    <div th:if="${errorDetail}" class="alert-detail">
+                        <strong>상세 정보:</strong><br>
+                        <span th:text="${errorDetail}">Error details</span>
+                    </div>
+                    <div class="alert-help">
+                        <h4>해결 방법</h4>
+                        <ol>
+                            <li>Trading System API 서버가 실행 중인지 확인하세요 (포트 8099)</li>
+                            <li>터미널에서 다음 명령어를 실행하세요:
+                                <pre>cd /Users/changsupark/projects/cautostock
+./run-with-env.sh</pre>
+                            </li>
+                            <li>Health Check 확인: <a href="http://localhost:8099/health" target="_blank" style="color: #007bff;">http://localhost:8099/health</a></li>
+                        </ol>
+                    </div>
                 </div>
 
                 <div class="filter-section">
