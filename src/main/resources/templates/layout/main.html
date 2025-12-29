@@ -79,6 +79,31 @@
             </div>
         </main>
     </div>
+    <script>
+        // Submenu toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const submenuItems = document.querySelectorAll('.sidebar-nav li.has-submenu > a');
+
+            submenuItems.forEach(function(item) {
+                item.addEventListener('click', function(e) {
+                    // Trading 링크로 이동하는 것을 방지
+                    e.preventDefault();
+
+                    const parentLi = this.parentElement;
+
+                    // 다른 submenu들을 모두 닫기
+                    document.querySelectorAll('.sidebar-nav li.has-submenu').forEach(function(li) {
+                        if (li !== parentLi) {
+                            li.classList.remove('active');
+                        }
+                    });
+
+                    // 현재 submenu 토글
+                    parentLi.classList.toggle('active');
+                });
+            });
+        });
+    </script>
     <th:block layout:fragment="extra-scripts"></th:block>
 </body>
 </html>
