@@ -149,8 +149,8 @@ function populateOrderSelect(selectId, usedOrders, currentOrder) {
     const select = document.getElementById(selectId);
     select.innerHTML = '';
 
-    // Create options 0-9
-    for (let i = 0; i <= 9; i++) {
+    // Create options 0-30
+    for (let i = 0; i <= 30; i++) {
         const option = document.createElement('option');
         option.value = i;
         option.textContent = i;
@@ -175,7 +175,7 @@ function populateOrderSelect(selectId, usedOrders, currentOrder) {
 
     // If no current order specified, select first available
     if (currentOrder === null) {
-        for (let i = 0; i <= 9; i++) {
+        for (let i = 0; i <= 30; i++) {
             if (!usedOrders.includes(i)) {
                 select.value = i;
                 break;
