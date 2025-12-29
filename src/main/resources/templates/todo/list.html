@@ -130,7 +130,12 @@
                                class="todo-checkbox">
                     </form>
                     <div class="todo-text">
-                        <h3 th:text="${todo.title}">Todo Title</h3>
+                        <!-- Active 탭: 제목만 표시 -->
+                        <h3 th:if="${filter == 'active'}" th:text="${todo.title}">Todo Title</h3>
+                        <!-- Completed/All 탭: 제목 + description 한 줄 표시 -->
+                        <h3 th:if="${filter != 'active'}" class="todo-title-with-desc">
+                            <span class="todo-title-text" th:text="${todo.title}">Todo Title</span><span th:if="${todo.description != null and todo.description != ''}" class="todo-desc-inline"> - <span th:text="${todo.description}"></span></span>
+                        </h3>
                         <!-- Active 탭에서는 description 수정 가능 -->
                         <div th:if="${filter == 'active'}">
                             <form th:id="'descForm-' + ${todo.id}" th:action="@{/todos/{id}/description(id=${todo.id})}" method="post" class="description-form">
@@ -142,10 +147,6 @@
                                 <input type="hidden" name="filter" th:value="${filter}">
                             </form>
                         </div>
-                        <!-- Completed/All 탭에서는 읽기 전용 -->
-                        <p th:if="${filter != 'active' and todo.description != null and todo.description != ''}"
-                           th:text="${todo.description}"
-                           class="todo-description">Description</p>
                         <small class="todo-date" th:text="${#temporals.format(todo.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01</small>
                     </div>
                 </div>

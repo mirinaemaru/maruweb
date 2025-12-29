@@ -514,6 +514,29 @@ header h1 {
     margin-bottom: 5px;
 }
 
+/* Title with description inline (Completed/All tabs) */
+.todo-title-with-desc {
+    display: flex;
+    align-items: baseline;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.todo-title-text {
+    flex-shrink: 0;
+}
+
+.todo-desc-inline {
+    color: #888;
+    font-weight: 400;
+    font-size: 0.9em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .todo-item.completed .todo-text h3 {
     text-decoration: line-through;
     color: #999;
