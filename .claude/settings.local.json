@@ -3,7 +3,24 @@
     "allow": [
       "Bash(tree:*)",
       "Bash(mvn wrapper:wrapper:*)",
-      "Bash(./mvnw spring-boot:run:*)"
+      "Bash(./mvnw spring-boot:run:*)",
+      "Bash(./mvnw compile:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nAdd Shortcuts feature with tab-based category UI\n\n- Add Shortcut entity with category management \\(CRUD\\)\n- Implement tab-based UI for category navigation\n- Add sidebar menu link for Shortcuts in all pages\n- Maintain active tab after link/category operations\n- Improve Todo list UI: align Save button with Edit/Delete buttons\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(curl:*)",
+      "Bash(git push:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nAdd Dashboard feature as landing page\n\n- Create DashboardController with summary data from Todo, Calendar, Shortcuts\n- Add dashboard template with 4 cards: Active Todos, Today''s Events, Upcoming Events, Quick Shortcuts\n- Add clickable links on Todo items to edit page\n- Add Dashboard menu to sidebar in all pages\n- Remove old HomeController that redirected to /todos\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit:*)",
+      "Bash(grep:*)",
+      "Bash(./mvnw clean package:*)",
+      "Bash(ls:*)",
+      "Bash(./mvnw test-compile:*)",
+      "Bash(./mvnw clean compile:*)",
+      "Bash(./mvnw test:*)",
+      "Bash(claude mcp list:*)",
+      "Bash(python3:*)",
+      "Skill(deploy)",
+      "Bash(lsof:*)"
     ]
   }
 }
