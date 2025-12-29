@@ -1,112 +1,197 @@
-# Maru Todo Web Application
+# Maru Web - Management System
 
-Spring Boot 기반의 Todo 관리 웹 애플리케이션입니다.
+A comprehensive web-based management system built with Spring Boot and Thymeleaf.
 
-## 기술 스택
+## Features
 
-- **Backend**: Spring Boot 3.2.1
+- 📝 **Todo Management**: Task tracking with status and description
+- 📅 **Calendar**: Event management with Google Calendar integration
+- 📒 **Notes**: Note-taking and organization
+- 🔗 **Shortcuts**: Quick access links management
+- 📊 **Trading Dashboard**: Trading system monitoring and management
+  - System health monitoring
+  - Account management
+  - Strategy management
+  - Order tracking
+
+## Tech Stack
+
+- **Backend**: Spring Boot 3.x, Java 17
+- **Frontend**: Thymeleaf, HTML5, CSS3
 - **Database**: MariaDB
-- **ORM**: Spring Data JPA
-- **Template Engine**: Thymeleaf
 - **Build Tool**: Maven
-- **Language**: Java 17
 
-## 프로젝트 구조
+## Prerequisites
+
+- Java 17 or higher
+- Maven 3.9 or higher
+- MariaDB 10.x or higher
+
+## Quick Start
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/mirinaemaru/maruweb.git
+cd maruweb
+```
+
+### 2. Setup Environment Variables
+
+```bash
+# Copy the environment template
+cp .env.example .env
+
+# Generate a secure encryption key
+openssl rand -base64 32
+
+# Edit .env and fill in your actual values
+nano .env
+```
+
+Required environment variables:
+- `DB_USERNAME`: Database username
+- `DB_PASSWORD`: Database password (use a strong password)
+- `GOOGLE_CLIENT_ID`: Google OAuth2 client ID
+- `GOOGLE_CLIENT_SECRET`: Google OAuth2 client secret
+- `CALENDAR_ENCRYPTION_KEY`: 32-character encryption key
+
+### 3. Configure Database
+
+Create a MariaDB database:
+
+```sql
+CREATE DATABASE maruweb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'your_username'@'localhost' IDENTIFIED BY 'your_password';
+GRANT ALL PRIVILEGES ON maruweb.* TO 'your_username'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+### 4. Run the Application
+
+**Development mode:**
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+```
+
+**Production mode:**
+```bash
+./mvnw clean package -DskipTests
+java -jar -Dspring.profiles.active=prod target/todo-0.0.1-SNAPSHOT.jar
+```
+
+### 5. Access the Application
+
+- **Development**: http://localhost:8090
+- **Production**: http://localhost:9080
+
+## Project Structure
 
 ```
 maruweb/
 ├── src/
 │   ├── main/
-│   │   ├── java/com/maru/todo/
-│   │   │   ├── controller/      # 컨트롤러 (웹 요청 처리)
-│   │   │   ├── service/          # 비즈니스 로직
-│   │   │   ├── repository/       # 데이터베이스 접근
-│   │   │   ├── entity/           # JPA 엔티티
-│   │   │   └── TodoApplication.java
+│   │   ├── java/com/maru/
+│   │   │   ├── calendar/      # Calendar module
+│   │   │   ├── config/        # Configuration classes
+│   │   │   ├── dday/          # D-Day module
+│   │   │   ├── habit/         # Habit tracking
+│   │   │   ├── note/          # Notes module
+│   │   │   ├── shortcut/      # Shortcuts module
+│   │   │   ├── todo/          # Todo module
+│   │   │   └── trading/       # Trading system integration
 │   │   └── resources/
-│   │       ├── templates/        # Thymeleaf 템플릿
-│   │       ├── static/css/       # CSS 파일
-│   │       └── application.properties
+│   │       ├── static/        # CSS, JS, images
+│   │       ├── templates/     # Thymeleaf templates
+│   │       └── application*.properties
 │   └── test/
-└── pom.xml
+├── .env.example              # Environment variables template
+├── SECURITY.md              # Security guidelines
+└── pom.xml                  # Maven configuration
 ```
 
-## 주요 기능
+## Security
 
-- ✅ Todo 추가 (제목, 설명)
-- ✅ Todo 수정
-- ✅ Todo 삭제
-- ✅ Todo 완료 상태 토글
-- ✅ Todo 필터링 (전체/활성/완료)
-- ✅ 반응형 UI 디자인
+**⚠️ IMPORTANT: Never commit sensitive information to Git!**
 
-## 설치 및 실행 방법
+This project uses environment variables for sensitive data. See [SECURITY.md](SECURITY.md) for:
+- Security best practices
+- Environment setup guide
+- Credential rotation policies
+- Incident response procedures
 
-### 1. MariaDB 설정
+## Development
 
-MariaDB가 설치되어 있어야 합니다. 데이터베이스는 자동으로 생성됩니다.
-
-기본 설정:
-- Host: localhost
-- Port: 3306
-- Database: tododb (자동 생성)
-- Username: root
-- Password: (비어있음)
-
-비밀번호나 사용자명이 다른 경우 `src/main/resources/application.properties` 파일을 수정하세요:
-
-```properties
-spring.datasource.username=your_username
-spring.datasource.password=your_password
-```
-
-### 2. 프로젝트 실행
+### Running Tests
 
 ```bash
-# Maven으로 빌드 및 실행
-./mvnw spring-boot:run
+./mvnw test
+```
 
-# 또는 직접 빌드 후 실행
+### Building
+
+```bash
 ./mvnw clean package
-java -jar target/todo-0.0.1-SNAPSHOT.jar
 ```
 
-### 3. 애플리케이션 접속
+### Profiles
 
-브라우저에서 다음 주소로 접속:
-```
-http://localhost:8080
-```
+- `local`: Local development (uses environment variables)
+- `dev`: Development server
+- `prod`: Production environment
 
-## API 엔드포인트
+## Deployment
 
-### 웹 페이지
-- `GET /` - 홈 (todos로 리다이렉트)
-- `GET /todos` - Todo 목록 (필터: all/active/completed)
-- `GET /todos/{id}/edit` - Todo 수정 페이지
+### Using Jenkins
 
-### Todo 작업
-- `POST /todos` - Todo 생성
-- `POST /todos/{id}` - Todo 수정
-- `POST /todos/{id}/toggle` - Todo 완료 상태 토글
-- `POST /todos/{id}/delete` - Todo 삭제
+The project includes a Jenkins deployment skill. See `.claude/skills/deploy/` for configuration.
 
-## 확장 계획
+### Manual Deployment
 
-이 프로젝트는 추후 다른 기능의 메뉴를 추가할 수 있도록 확장 가능한 구조로 설계되었습니다.
+1. Build the application:
+   ```bash
+   ./mvnw clean package -DskipTests
+   ```
 
-새로운 기능 추가 시:
-1. `com.maru.todo` 패키지에 새로운 기능별 패키지 생성
-2. Entity, Repository, Service, Controller 계층 구조 유지
-3. Thymeleaf 템플릿을 `templates/` 하위에 기능별로 구성
+2. Set environment variables on the server
 
-## 개발 환경
+3. Run the JAR:
+   ```bash
+   java -jar -Dspring.profiles.active=prod target/todo-0.0.1-SNAPSHOT.jar
+   ```
 
-- JDK 17 이상
-- Maven 3.6 이상
-- MariaDB 10.x 이상
-- IDE: IntelliJ IDEA, Eclipse, VS Code 등
+## Trading System Integration
 
-## 라이센스
+The application integrates with an external Trading System API (default: http://localhost:8099).
 
-MIT License
+Features:
+- Real-time system health monitoring
+- Account management (PAPER/REAL accounts)
+- Strategy management with statistics
+- Order tracking and filtering
+
+## Google Calendar Integration
+
+To enable Google Calendar sync:
+
+1. Create OAuth2 credentials at [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+2. Set authorized redirect URIs:
+   - Development: `http://localhost:8090/calendar/oauth2/callback`
+   - Production: `http://localhost:9080/calendar/oauth2/callback`
+3. Add credentials to `.env` file
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+
+This project is private and proprietary.
+
+## Support
+
+For issues and questions, please contact the project maintainer.
