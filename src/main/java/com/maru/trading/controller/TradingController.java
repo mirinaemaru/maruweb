@@ -259,4 +259,49 @@ public class TradingController {
         }
     }
 
+    /**
+     * 포지션 조회 페이지
+     */
+    @GetMapping("/positions")
+    public String positions(@RequestParam(required = false) String accountId, Model model) {
+        try {
+            log.info("Loading Trading Positions page - accountId: {}", accountId);
+
+            // 계좌 목록 (필터용)
+            Map<String, Object> accountsData = tradingApiService.getAccounts();
+            List<?> accounts = (List<?>) accountsData.get("items");
+            model.addAttribute("accounts", accounts);
+            model.addAttribute("selectedAccountId", accountId);
+
+            // 포지션 목록 및 계좌 잔액
+            if (accountId != null && !accountId.isEmpty()) {
+                // 포지션 목록 조회
+                Map<String, Object> positionsData = tradingApiService.getPositions(accountId);
+                List<?> positions = (List<?>) positionsData.get("items");
+                Integer total = (Integer) positionsData.get("total");
+                model.addAttribute("positions", positions);
+                model.addAttribute("totalPositions", total != null ? total : 0);
+
+                // 계좌 잔액 조회
+                try {
+                    Map<String, Object> balanceData = tradingApiService.getAccountBalance(accountId);
+                    model.addAttribute("balance", balanceData);
+                } catch (Exception e) {
+                    log.warn("Failed to fetch account balance for accountId: {}", accountId, e);
+                    model.addAttribute("balanceError", "계좌 잔액을 조회할 수 없습니다.");
+                }
+            }
+
+            model.addAttribute("apiConnected", true);
+            return "trading/positions";
+
+        } catch (Exception e) {
+            log.error("Failed to load positions", e);
+            model.addAttribute("error", "Trading System API에 연결할 수 없습니다. API 서버가 실행 중인지 확인하세요.");
+            model.addAttribute("errorDetail", e.getMessage());
+            model.addAttribute("apiConnected", false);
+            return "trading/positions";
+        }
+    }
+
 }

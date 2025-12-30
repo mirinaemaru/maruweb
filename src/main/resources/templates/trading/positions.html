@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>포지션 관리</title>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .positions-page {
+                padding: 30px;
+                max-width: 1600px;
+                margin: 0 auto;
+            }
+            .page-header {
+                margin-bottom: 40px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 40px;
+                border-radius: 16px;
+                color: white;
+                box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+            }
+            .page-header h1 {
+                font-size: 36px;
+                font-weight: 700;
+                margin-bottom: 10px;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+            .page-header p {
+                font-size: 16px;
+                opacity: 0.95;
+            }
+            .filter-section {
+                background: white;
+                padding: 28px;
+                border-radius: 16px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+                margin-bottom: 30px;
+                border: 1px solid rgba(0,0,0,0.04);
+            }
+            .filter-form {
+                display: flex;
+                gap: 15px;
+                align-items: center;
+            }
+            .filter-form label {
+                font-weight: 600;
+                color: #333;
+            }
+            .filter-form select {
+                padding: 10px 15px;
+                border: 2px solid #e0e0e0;
+                border-radius: 6px;
+                font-size: 14px;
+                min-width: 200px;
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+            .filter-form select:focus {
+                outline: none;
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+            .filter-form button {
+                padding: 10px 24px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                border-radius: 6px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+            .filter-form button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            }
+            .positions-table {
+                background: white;
+                border-radius: 12px;
+                overflow: hidden;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            thead {
+                background: #f8f9fa;
+            }
+            th {
+                padding: 16px;
+                text-align: left;
+                font-weight: 700;
+                color: #2c3e50;
+                font-size: 13px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                border-bottom: 2px solid #e9ecef;
+            }
+            td {
+                padding: 16px;
+                border-bottom: 1px solid #f1f3f5;
+                color: #495057;
+                font-size: 14px;
+            }
+            tbody tr:hover {
+                background: #f8f9fa;
+            }
+            .text-right {
+                text-align: right;
+            }
+            .text-center {
+                text-align: center;
+            }
+            .badge {
+                display: inline-block;
+                padding: 6px 12px;
+                border-radius: 6px;
+                font-size: 12px;
+                font-weight: 700;
+            }
+            .badge-profit {
+                background: #d4edda;
+                color: #155724;
+            }
+            .badge-loss {
+                background: #f8d7da;
+                color: #721c24;
+            }
+            .badge-neutral {
+                background: #e2e3e5;
+                color: #383d41;
+            }
+            .empty-state {
+                text-align: center;
+                padding: 80px 20px;
+            }
+            .empty-icon {
+                font-size: 64px;
+                margin-bottom: 20px;
+            }
+            .empty-message {
+                color: #666;
+                font-size: 18px;
+                margin-bottom: 10px;
+            }
+            .empty-hint {
+                color: #999;
+                font-size: 14px;
+            }
+            .alert {
+                padding: 20px 28px;
+                border-radius: 12px;
+                margin-bottom: 30px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            }
+            .alert-error {
+                background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+                border: 1px solid #f5c6cb;
+                color: #721c24;
+            }
+            .summary-cards {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+                margin-bottom: 30px;
+            }
+            .summary-card {
+                background: white;
+                padding: 25px;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            }
+            .summary-label {
+                font-size: 13px;
+                color: #666;
+                margin-bottom: 8px;
+                font-weight: 600;
+                text-transform: uppercase;
+            }
+            .summary-value {
+                font-size: 28px;
+                font-weight: 700;
+                color: #2c3e50;
+            }
+            .summary-value.text-profit {
+                color: #dc3545;
+            }
+            .summary-value.text-loss {
+                color: #0066ff;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="positions-page">
+            <div class="page-header">
+                <h1>📊 포지션 관리</h1>
+                <p>보유 중인 포지션을 조회하고 관리할 수 있습니다.</p>
+            </div>
+
+            <!-- Error Alert -->
+            <div th:if="${error}" class="alert alert-error">
+                <div th:text="${error}">API 연결 오류</div>
+                <div th:if="${errorDetail}" style="margin-top: 10px; font-size: 13px;" th:text="${errorDetail}">상세 정보</div>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <form class="filter-form" method="get" th:action="@{/trading/positions}">
+                    <label for="accountId">계좌 선택:</label>
+                    <select id="accountId" name="accountId">
+                        <option value="">-- 계좌를 선택하세요 --</option>
+                        <option th:each="account : ${accounts}"
+                                th:value="${account.accountId}"
+                                th:text="${account.alias}"
+                                th:selected="${account.accountId == selectedAccountId}">
+                            Account
+                        </option>
+                    </select>
+                    <button type="submit">조회</button>
+                </form>
+            </div>
+
+            <!-- Summary Cards -->
+            <div th:if="${not #strings.isEmpty(selectedAccountId) and (positions != null or balance != null)}" class="summary-cards">
+                <div class="summary-card" th:if="${totalPositions != null}">
+                    <div class="summary-label">보유 포지션</div>
+                    <div class="summary-value" th:text="${totalPositions ?: 0}">0</div>
+                </div>
+                <div class="summary-card" th:if="${balance != null and balance.totalAssets != null}">
+                    <div class="summary-label">총 자산</div>
+                    <div class="summary-value" th:text="${#numbers.formatDecimal(balance.totalAssets, 0, 'COMMA', 0, 'POINT')} + '원'">0원</div>
+                </div>
+                <div class="summary-card" th:if="${balance != null and balance.cashBalance != null}">
+                    <div class="summary-label">현금 잔고</div>
+                    <div class="summary-value" th:text="${#numbers.formatDecimal(balance.cashBalance, 0, 'COMMA', 0, 'POINT')} + '원'">0원</div>
+                </div>
+                <div class="summary-card" th:if="${balance != null and balance.stockValue != null}">
+                    <div class="summary-label">주식 평가액</div>
+                    <div class="summary-value" th:text="${#numbers.formatDecimal(balance.stockValue, 0, 'COMMA', 0, 'POINT')} + '원'">0원</div>
+                </div>
+                <div class="summary-card" th:if="${balance != null and balance.totalProfitLoss != null}">
+                    <div class="summary-label">총 손익</div>
+                    <div class="summary-value"
+                         th:classappend="${balance.totalProfitLoss >= 0} ? 'text-profit' : 'text-loss'"
+                         th:text="${(balance.totalProfitLoss >= 0 ? '+' : '') + #numbers.formatDecimal(balance.totalProfitLoss, 0, 'COMMA', 0, 'POINT')} + '원'">0원</div>
+                </div>
+            </div>
+
+            <!-- Balance Error -->
+            <div th:if="${balanceError}" class="alert alert-error" style="margin-bottom: 30px;">
+                <div th:text="${balanceError}">계좌 잔액 조회 오류</div>
+            </div>
+
+            <!-- Positions Table -->
+            <div th:if="${positions != null and !positions.isEmpty()}" class="positions-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>종목코드</th>
+                            <th class="text-right">수량</th>
+                            <th class="text-right">평균단가</th>
+                            <th class="text-right">현재가</th>
+                            <th class="text-right">평가금액</th>
+                            <th class="text-right">실현손익</th>
+                            <th class="text-right">미실현손익</th>
+                            <th class="text-center">수익률</th>
+                            <th class="text-center">수정일시</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="position : ${positions}">
+                            <td>
+                                <strong th:text="${position.symbol}">AAPL</strong>
+                            </td>
+                            <td class="text-right" th:text="${#numbers.formatDecimal(position.qty, 0, 'COMMA', 2, 'POINT')}">100.00</td>
+                            <td class="text-right" th:text="${#numbers.formatDecimal(position.avgPrice, 0, 'COMMA', 2, 'POINT')}">150.00</td>
+                            <td class="text-right" th:text="${#numbers.formatDecimal(position.currentPrice, 0, 'COMMA', 2, 'POINT')}">155.00</td>
+                            <td class="text-right" th:text="${#numbers.formatDecimal(position.totalValue, 0, 'COMMA', 0, 'POINT')}">15,500</td>
+                            <td class="text-right">
+                                <span th:classappend="${position.realizedPnl > 0} ? 'badge-profit' : (${position.realizedPnl < 0} ? 'badge-loss' : 'badge-neutral')"
+                                      th:text="${#numbers.formatDecimal(position.realizedPnl, 0, 'COMMA', 0, 'POINT')}">0</span>
+                            </td>
+                            <td class="text-right">
+                                <span th:classappend="${position.unrealizedPnl > 0} ? 'badge-profit' : (${position.unrealizedPnl < 0} ? 'badge-loss' : 'badge-neutral')"
+                                      th:text="${#numbers.formatDecimal(position.unrealizedPnl, 0, 'COMMA', 0, 'POINT')}">500</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge"
+                                      th:classappend="${position.unrealizedPnl > 0} ? 'badge-profit' : (${position.unrealizedPnl < 0} ? 'badge-loss' : 'badge-neutral')"
+                                      th:text="${#numbers.formatDecimal((position.unrealizedPnl / (position.qty * position.avgPrice) * 100), 0, 'COMMA', 2, 'POINT')} + '%'">+3.33%</span>
+                            </td>
+                            <td class="text-center" th:text="${#strings.substring(position.updatedAt, 0, 19)}">2024-12-31 12:00:00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${not #strings.isEmpty(selectedAccountId) and (positions == null or positions.isEmpty())}" class="empty-state">
+                <div class="empty-icon">📭</div>
+                <div class="empty-message">보유 중인 포지션이 없습니다</div>
+                <div class="empty-hint">계좌를 선택하여 포지션을 조회하세요</div>
+            </div>
+
+            <div th:if="${#strings.isEmpty(selectedAccountId)}" class="empty-state">
+                <div class="empty-icon">🔍</div>
+                <div class="empty-message">계좌를 선택하여 조회하세요</div>
+                <div class="empty-hint">위에서 계좌를 선택하면 해당 계좌의 포지션을 확인할 수 있습니다</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

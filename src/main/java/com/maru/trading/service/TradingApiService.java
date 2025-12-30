@@ -244,6 +244,26 @@ public class TradingApiService {
     }
 
     /**
+     * 계좌 잔액 조회
+     */
+    public Map<String, Object> getAccountBalance(String accountId) {
+        String url = "/api/v1/query/balance?accountId=" + accountId;
+        try {
+            log.debug("Calling Trading API: {}", url);
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to get account balance from Trading System", e);
+            throw new RuntimeException("계좌 잔액을 가져올 수 없습니다.", e);
+        }
+    }
+
+    /**
      * 전략 상세 조회
      */
     public Map<String, Object> getStrategy(String strategyId) {
