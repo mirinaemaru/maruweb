@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>계좌 상세보기</title>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .account-detail-page {
+                padding: 30px;
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+            .page-header {
+                margin-bottom: 40px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 40px;
+                border-radius: 16px;
+                color: white;
+                box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+            }
+            .page-header h1 {
+                font-size: 36px;
+                font-weight: 700;
+                margin-bottom: 10px;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+            .page-header p {
+                font-size: 16px;
+                opacity: 0.95;
+            }
+            .detail-card {
+                background: white;
+                border-radius: 16px;
+                padding: 40px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+                border: 1px solid rgba(0,0,0,0.04);
+            }
+            .detail-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 30px;
+                padding-bottom: 20px;
+                border-bottom: 2px solid #f5f5f5;
+            }
+            .account-title {
+                font-size: 28px;
+                font-weight: 700;
+                color: #2c3e50;
+            }
+            .detail-section {
+                margin-bottom: 30px;
+            }
+            .section-title {
+                font-size: 18px;
+                font-weight: 700;
+                color: #2c3e50;
+                margin-bottom: 20px;
+                padding-bottom: 10px;
+                border-bottom: 2px solid #f5f5f5;
+            }
+            .info-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 20px;
+            }
+            .info-item {
+                padding: 20px;
+                background: #f8f9fa;
+                border-radius: 10px;
+                border-left: 4px solid #667eea;
+            }
+            .info-label {
+                font-size: 13px;
+                color: #666;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-bottom: 8px;
+            }
+            .info-value {
+                font-size: 16px;
+                color: #2c3e50;
+                font-weight: 700;
+                word-break: break-all;
+            }
+            .badge {
+                display: inline-block;
+                padding: 8px 16px;
+                border-radius: 8px;
+                font-size: 12px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.3px;
+            }
+            .badge-paper {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+            .badge-real {
+                background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+                color: #721c24;
+            }
+            .badge-active {
+                background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+                color: #0a472e;
+            }
+            .badge-inactive {
+                background: #e8e8e8;
+                color: #666;
+            }
+            .action-buttons {
+                display: flex;
+                gap: 15px;
+                margin-top: 30px;
+                padding-top: 30px;
+                border-top: 2px solid #f5f5f5;
+            }
+            .btn {
+                padding: 14px 28px;
+                border: none;
+                border-radius: 10px;
+                font-size: 15px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                text-decoration: none;
+                display: inline-block;
+            }
+            .btn-primary {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            }
+            .btn-primary:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            }
+            .btn-secondary {
+                background: #6c757d;
+                color: white;
+                box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+            }
+            .btn-secondary:hover {
+                background: #5a6268;
+                transform: translateY(-2px);
+            }
+            .btn-danger {
+                background: #dc3545;
+                color: white;
+                box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+            }
+            .btn-danger:hover {
+                background: #c82333;
+                transform: translateY(-2px);
+            }
+            .btn-outline {
+                background: white;
+                color: #667eea;
+                border: 2px solid #667eea;
+                box-shadow: none;
+            }
+            .btn-outline:hover {
+                background: #667eea;
+                color: white;
+                transform: translateY(-2px);
+            }
+            .alert {
+                padding: 20px 28px;
+                border-radius: 12px;
+                margin-bottom: 30px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                animation: slideDown 0.3s ease-out;
+            }
+            @keyframes slideDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            .alert-error {
+                background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+                border: 1px solid #f5c6cb;
+                color: #721c24;
+            }
+            .alert-success {
+                background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
+            .delete-form {
+                display: inline-block;
+                margin: 0;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="account-detail-page">
+            <div class="page-header">
+                <h1>📋 계좌 상세보기</h1>
+                <p>계좌의 상세 정보를 확인하고 관리할 수 있습니다.</p>
+            </div>
+
+            <!-- Flash Messages -->
+            <div th:if="${message}" class="alert alert-success" th:text="${message}">
+                성공 메시지
+            </div>
+
+            <div th:if="${error}" class="alert alert-error">
+                <div th:text="${error}">에러 메시지</div>
+                <div th:if="${errorDetail}" style="margin-top: 10px; font-size: 13px;" th:text="${errorDetail}">상세 정보</div>
+            </div>
+
+            <!-- Account Detail Card -->
+            <div th:if="${account}" class="detail-card">
+                <div class="detail-header">
+                    <div class="account-title" th:text="${account.alias}">Account Name</div>
+                    <div>
+                        <span class="badge"
+                              th:classappend="${account.environment == 'PAPER'} ? 'badge-paper' : 'badge-real'"
+                              th:text="${account.environment}">PAPER</span>
+                    </div>
+                </div>
+
+                <!-- Basic Information Section -->
+                <div class="detail-section">
+                    <div class="section-title">기본 정보</div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">계좌번호 (Account ID)</div>
+                            <div class="info-value" th:text="${account.accountId}">Account ID</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">상태 (Status)</div>
+                            <div class="info-value">
+                                <span class="badge"
+                                      th:classappend="${account.status == 'ACTIVE'} ? 'badge-active' : 'badge-inactive'"
+                                      th:text="${account.status}">ACTIVE</span>
+                            </div>
+                        </div>
+                        <div class="info-item" th:if="${account.broker}">
+                            <div class="info-label">증권사 (Broker)</div>
+                            <div class="info-value" th:text="${account.broker}">Broker</div>
+                        </div>
+                        <div class="info-item" th:if="${account.cano}">
+                            <div class="info-label">종합계좌번호 (CANO)</div>
+                            <div class="info-value" th:text="${account.cano}">CANO</div>
+                        </div>
+                        <div class="info-item" th:if="${account.acntPrdtCd}">
+                            <div class="info-label">계좌상품코드</div>
+                            <div class="info-value" th:text="${account.acntPrdtCd}">Account Product Code</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timestamp Information Section -->
+                <div class="detail-section">
+                    <div class="section-title">시간 정보</div>
+                    <div class="info-grid">
+                        <div class="info-item" th:if="${account.createdAt}">
+                            <div class="info-label">등록일시</div>
+                            <div class="info-value" th:text="${#strings.substring(account.createdAt, 0, 19)}">2024-01-01 00:00:00</div>
+                        </div>
+                        <div class="info-item" th:if="${account.updatedAt}">
+                            <div class="info-label">수정일시</div>
+                            <div class="info-value" th:text="${#strings.substring(account.updatedAt, 0, 19)}">2024-01-01 00:00:00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <a th:href="@{/trading/accounts}" class="btn btn-outline">← 목록으로</a>
+                    <a th:href="@{/trading/accounts/{id}/edit(id=${account.accountId})}" class="btn btn-secondary">수정</a>
+
+                    <!-- Delete Button with Confirmation -->
+                    <form class="delete-form"
+                          th:action="@{/trading/accounts/{id}/delete(id=${account.accountId})}"
+                          method="post"
+                          onsubmit="return confirm('정말로 이 계좌를 삭제하시겠습니까?\n\n이 작업은 소프트 삭제(delyn=\'Y\')로 처리됩니다.');">
+                        <button type="submit" class="btn btn-danger">삭제</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

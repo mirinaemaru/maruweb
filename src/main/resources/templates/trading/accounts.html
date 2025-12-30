@@ -43,10 +43,16 @@
                     box-shadow: 0 4px 20px rgba(0,0,0,0.08);
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                     border: 1px solid rgba(0,0,0,0.04);
+                    cursor: pointer;
                 }
                 .account-card:hover {
                     box-shadow: 0 12px 40px rgba(0,0,0,0.12);
                     transform: translateY(-5px);
+                }
+                .account-card-link {
+                    text-decoration: none;
+                    color: inherit;
+                    display: block;
                 }
                 .account-header {
                     display: flex;
@@ -325,7 +331,9 @@
                         </div>
         
                         <div th:if="${accounts != null && !accounts.isEmpty()}" class="accounts-grid">
-                            <div th:each="account : ${accounts}" class="account-card">
+                            <div th:each="account : ${accounts}" class="account-card"
+                                 th:data-account-id="${account.accountId}"
+                                 onclick="window.location.href='/trading/accounts/' + this.getAttribute('data-account-id')">
                                 <div class="account-header">
                                     <div class="account-name" th:text="${account.alias}">Account Name</div>
                                     <div>
@@ -345,20 +353,17 @@
                                               th:classappend="${account.status == 'ACTIVE'} ? 'badge-active' : 'badge-inactive'"
                                               th:text="${account.status}">ACTIVE</span>
                                     </div>
-                                    <div class="info-row" th:if="${account.description}">
-                                        <span class="info-label">설명</span>
-                                        <span class="info-value" th:text="${account.description}">Description</span>
-                                    </div>
                                     <div class="info-row" th:if="${account.createdAt}">
                                         <span class="info-label">등록일</span>
-                                        <span class="info-value" th:text="${#temporals.format(account.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01</span>
+                                        <span class="info-value" th:text="${#strings.substring(account.createdAt, 0, 16)}">2024-01-01</span>
                                     </div>
                                 </div>
-        
+
                                 <!-- Account Actions -->
-                                <div class="account-actions">
+                                <div class="account-actions" onclick="event.stopPropagation()">
+                                    <a th:href="@{/trading/accounts/{id}(id=${account.accountId})}" class="btn btn-primary btn-sm">상세보기</a>
                                     <a th:href="@{/trading/accounts/{id}/edit(id=${account.accountId})}" class="btn btn-secondary btn-sm">수정</a>
-        
+
                                     <!-- Delete Button -->
                                     <form class="delete-form"
                                           th:action="@{/trading/accounts/{id}/delete(id=${account.accountId})}"

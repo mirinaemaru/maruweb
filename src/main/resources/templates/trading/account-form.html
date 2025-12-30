@@ -138,20 +138,50 @@
                         <div class="form-container">
                             <form th:action="${account != null ? '/trading/accounts/' + account.accountId : '/trading/accounts'}"
                                   method="post">
-        
+
                                 <div class="form-group">
-                                    <label for="accountId">계좌번호 <span class="required">*</span></label>
-                                    <input type="text"
-                                           id="accountId"
-                                           name="accountId"
-                                           class="form-control"
-                                           th:value="${account?.accountId}"
-                                           th:disabled="${account != null}"
-                                           placeholder="예: 01KDM61M1YDZJ4XW1E95YYM2SC"
-                                           required>
-                                    <div class="help-text">Trading System에서 발급받은 계좌번호를 입력하세요. (수정 불가)</div>
+                                    <label for="broker">증권사 <span class="required">*</span></label>
+                                    <select id="broker"
+                                            name="broker"
+                                            class="form-control"
+                                            th:disabled="${account != null}"
+                                            required>
+                                        <option value="">-- 증권사 선택 --</option>
+                                        <option value="KIS" th:selected="${account?.broker == 'KIS'}">한국투자증권 (KIS)</option>
+                                    </select>
+                                    <div class="help-text">거래할 증권사를 선택하세요. (수정 불가)</div>
                                 </div>
-        
+
+                                <div class="form-group">
+                                    <label for="cano">계좌번호 (앞 8자리) <span class="required">*</span></label>
+                                    <input type="text"
+                                           id="cano"
+                                           name="cano"
+                                           class="form-control"
+                                           th:value="${account?.cano}"
+                                           th:disabled="${account != null}"
+                                           placeholder="예: 50068923"
+                                           maxlength="8"
+                                           pattern="[0-9]{8}"
+                                           required>
+                                    <div class="help-text">계좌번호 앞 8자리를 입력하세요. (수정 불가)</div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="acntPrdtCd">계좌상품코드 (뒤 2자리) <span class="required">*</span></label>
+                                    <input type="text"
+                                           id="acntPrdtCd"
+                                           name="acntPrdtCd"
+                                           class="form-control"
+                                           th:value="${account?.acntPrdtCd}"
+                                           th:disabled="${account != null}"
+                                           placeholder="예: 01"
+                                           maxlength="2"
+                                           pattern="[0-9]{2}"
+                                           required>
+                                    <div class="help-text">계좌번호 뒤 2자리를 입력하세요. (수정 불가)</div>
+                                </div>
+
                                 <div class="form-group">
                                     <label for="alias">계좌 별칭 <span class="required">*</span></label>
                                     <input type="text"
@@ -163,25 +193,15 @@
                                            required>
                                     <div class="help-text">계좌를 식별할 수 있는 이름을 입력하세요.</div>
                                 </div>
-        
+
                                 <div class="form-group">
                                     <label for="environment">계좌 타입 <span class="required">*</span></label>
                                     <select id="environment" name="environment" class="form-control" required>
                                         <option value="">-- 계좌 타입 선택 --</option>
-                                        <option value="PAPER" th:selected="${account?.environment == 'PAPER'}">PAPER (모의 계좌)</option>
-                                        <option value="REAL" th:selected="${account?.environment == 'REAL'}">REAL (실전 계좌)</option>
+                                        <option value="PAPER" th:selected="${account?.environment == 'PAPER'}">PAPER (모의투자)</option>
+                                        <option value="LIVE" th:selected="${account?.environment == 'LIVE'}">LIVE (실전투자)</option>
                                     </select>
-                                    <div class="help-text">PAPER는 가상 자금으로 테스트, REAL은 실제 자금으로 거래합니다.</div>
-                                </div>
-        
-                                <div class="form-group">
-                                    <label for="description">설명</label>
-                                    <textarea id="description"
-                                              name="description"
-                                              class="form-control"
-                                              placeholder="계좌에 대한 설명을 입력하세요..."
-                                              th:text="${account?.description}"></textarea>
-                                    <div class="help-text">계좌 용도, 운영 방식 등을 입력하세요.</div>
+                                    <div class="help-text">PAPER는 가상 자금으로 테스트, LIVE는 실제 자금으로 거래합니다.</div>
                                 </div>
         
                                 <div class="form-actions">

@@ -52,21 +52,6 @@ public class TradingController {
             model.addAttribute("accounts", accounts);
             model.addAttribute("accountCount", accounts != null ? accounts.size() : 0);
 
-            // 4. Strategies
-            Map<String, Object> strategiesData = tradingApiService.getStrategies();
-            List<?> strategies = (List<?>) strategiesData.get("items");
-            model.addAttribute("strategies", strategies);
-            model.addAttribute("strategyCount", strategies != null ? strategies.size() : 0);
-
-            // Active strategies count
-            long activeStrategyCount = 0;
-            if (strategies != null) {
-                activeStrategyCount = strategies.stream()
-                        .filter(s -> "ACTIVE".equals(((Map<?, ?>) s).get("status")))
-                        .count();
-            }
-            model.addAttribute("activeStrategyCount", activeStrategyCount);
-
             return "trading/dashboard";
 
         } catch (Exception e) {
@@ -123,20 +108,21 @@ public class TradingController {
      */
     @PostMapping("/accounts")
     public String createAccount(
-            @RequestParam String accountId,
+            @RequestParam String broker,
+            @RequestParam String cano,
+            @RequestParam String acntPrdtCd,
             @RequestParam String alias,
             @RequestParam String environment,
-            @RequestParam(required = false) String description,
             RedirectAttributes redirectAttributes) {
         try {
-            log.info("Creating new account: {}", alias);
+            log.info("Creating new account: broker={}, cano={}, alias={}", broker, cano, alias);
 
             Map<String, Object> accountData = new HashMap<>();
-            accountData.put("accountId", accountId);
-            accountData.put("alias", alias);
+            accountData.put("broker", broker);
             accountData.put("environment", environment);
-            accountData.put("description", description);
-            accountData.put("status", "ACTIVE");
+            accountData.put("cano", cano);
+            accountData.put("acntPrdtCd", acntPrdtCd);
+            accountData.put("alias", alias);
 
             tradingApiService.createAccount(accountData);
 
@@ -147,6 +133,27 @@ public class TradingController {
             log.error("Failed to create account", e);
             redirectAttributes.addFlashAttribute("error", "계좌 등록에 실패했습니다: " + e.getMessage());
             return "redirect:/trading/accounts/new";
+        }
+    }
+
+    /**
+     * 계좌 상세보기 페이지
+     */
+    @GetMapping("/accounts/{accountId}")
+    public String viewAccount(@PathVariable String accountId, Model model) {
+        try {
+            log.info("Loading Account Detail page - accountId: {}", accountId);
+
+            Map<String, Object> account = tradingApiService.getAccount(accountId);
+            model.addAttribute("account", account);
+
+            return "trading/account-detail";
+
+        } catch (Exception e) {
+            log.error("Failed to load account detail page", e);
+            model.addAttribute("error", "계좌 상세 정보를 불러올 수 없습니다.");
+            model.addAttribute("errorDetail", e.getMessage());
+            return "trading/error";
         }
     }
 
@@ -179,15 +186,13 @@ public class TradingController {
             @PathVariable String accountId,
             @RequestParam String alias,
             @RequestParam String environment,
-            @RequestParam(required = false) String description,
             RedirectAttributes redirectAttributes) {
         try {
-            log.info("Updating account: {}", accountId);
+            log.info("Updating account: accountId={}, alias={}, environment={}", accountId, alias, environment);
 
             Map<String, Object> accountData = new HashMap<>();
             accountData.put("alias", alias);
             accountData.put("environment", environment);
-            accountData.put("description", description);
 
             tradingApiService.updateAccount(accountId, accountData);
 
@@ -218,30 +223,6 @@ public class TradingController {
             log.error("Failed to delete account", e);
             redirectAttributes.addFlashAttribute("error", "계좌 삭제에 실패했습니다: " + e.getMessage());
             return "redirect:/trading/accounts";
-        }
-    }
-
-    /**
-     * 전략 관리 페이지
-     */
-    @GetMapping("/strategies")
-    public String strategies(Model model) {
-        try {
-            log.info("Loading Trading Strategies page");
-
-            Map<String, Object> strategiesData = tradingApiService.getStrategies();
-            List<?> strategies = (List<?>) strategiesData.get("items");
-            model.addAttribute("strategies", strategies);
-            model.addAttribute("apiConnected", true);
-
-            return "trading/strategies";
-
-        } catch (Exception e) {
-            log.error("Failed to load strategies", e);
-            model.addAttribute("error", "Trading System API에 연결할 수 없습니다. API 서버가 실행 중인지 확인하세요.");
-            model.addAttribute("errorDetail", e.getMessage());
-            model.addAttribute("apiConnected", false);
-            return "trading/strategies";
         }
     }
 
@@ -278,160 +259,4 @@ public class TradingController {
         }
     }
 
-    /**
-     * 전략 등록 페이지
-     */
-    @GetMapping("/strategies/new")
-    public String newStrategy(Model model) {
-        try {
-            log.info("Loading Strategy Registration page");
-
-            // 계좌 목록 (전략 등록 시 선택용)
-            Map<String, Object> accountsData = tradingApiService.getAccounts();
-            List<?> accounts = (List<?>) accountsData.get("items");
-            model.addAttribute("accounts", accounts);
-
-            return "trading/strategy-form";
-
-        } catch (Exception e) {
-            log.error("Failed to load strategy registration page", e);
-            model.addAttribute("error", "전략 등록 페이지를 불러올 수 없습니다.");
-            model.addAttribute("errorDetail", e.getMessage());
-            return "trading/error";
-        }
-    }
-
-    /**
-     * 전략 등록 처리
-     */
-    @PostMapping("/strategies")
-    public String createStrategy(
-            @RequestParam String name,
-            @RequestParam String type,
-            @RequestParam String accountId,
-            @RequestParam(required = false) String description,
-            RedirectAttributes redirectAttributes) {
-        try {
-            log.info("Creating new strategy: {}", name);
-
-            Map<String, Object> strategyData = new HashMap<>();
-            strategyData.put("name", name);
-            strategyData.put("type", type);
-            strategyData.put("accountId", accountId);
-            strategyData.put("description", description);
-            strategyData.put("status", "INACTIVE");
-
-            tradingApiService.createStrategy(strategyData);
-
-            redirectAttributes.addFlashAttribute("message", "전략이 성공적으로 등록되었습니다.");
-            return "redirect:/trading/strategies";
-
-        } catch (Exception e) {
-            log.error("Failed to create strategy", e);
-            redirectAttributes.addFlashAttribute("error", "전략 등록에 실패했습니다: " + e.getMessage());
-            return "redirect:/trading/strategies/new";
-        }
-    }
-
-    /**
-     * 전략 수정 페이지
-     */
-    @GetMapping("/strategies/{strategyId}/edit")
-    public String editStrategy(@PathVariable String strategyId, Model model) {
-        try {
-            log.info("Loading Strategy Edit page - strategyId: {}", strategyId);
-
-            // 전략 상세 정보
-            Map<String, Object> strategy = tradingApiService.getStrategy(strategyId);
-            model.addAttribute("strategy", strategy);
-
-            // 계좌 목록
-            Map<String, Object> accountsData = tradingApiService.getAccounts();
-            List<?> accounts = (List<?>) accountsData.get("items");
-            model.addAttribute("accounts", accounts);
-
-            return "trading/strategy-form";
-
-        } catch (Exception e) {
-            log.error("Failed to load strategy edit page", e);
-            model.addAttribute("error", "전략 수정 페이지를 불러올 수 없습니다.");
-            model.addAttribute("errorDetail", e.getMessage());
-            return "trading/error";
-        }
-    }
-
-    /**
-     * 전략 수정 처리
-     */
-    @PostMapping("/strategies/{strategyId}")
-    public String updateStrategy(
-            @PathVariable String strategyId,
-            @RequestParam String name,
-            @RequestParam String type,
-            @RequestParam String accountId,
-            @RequestParam(required = false) String description,
-            RedirectAttributes redirectAttributes) {
-        try {
-            log.info("Updating strategy: {}", strategyId);
-
-            Map<String, Object> strategyData = new HashMap<>();
-            strategyData.put("name", name);
-            strategyData.put("type", type);
-            strategyData.put("accountId", accountId);
-            strategyData.put("description", description);
-
-            tradingApiService.updateStrategy(strategyId, strategyData);
-
-            redirectAttributes.addFlashAttribute("message", "전략이 성공적으로 수정되었습니다.");
-            return "redirect:/trading/strategies";
-
-        } catch (Exception e) {
-            log.error("Failed to update strategy", e);
-            redirectAttributes.addFlashAttribute("error", "전략 수정에 실패했습니다: " + e.getMessage());
-            return "redirect:/trading/strategies/" + strategyId + "/edit";
-        }
-    }
-
-    /**
-     * 전략 삭제
-     */
-    @PostMapping("/strategies/{strategyId}/delete")
-    public String deleteStrategy(@PathVariable String strategyId, RedirectAttributes redirectAttributes) {
-        try {
-            log.info("Deleting strategy: {}", strategyId);
-
-            tradingApiService.deleteStrategy(strategyId);
-
-            redirectAttributes.addFlashAttribute("message", "전략이 성공적으로 삭제되었습니다.");
-            return "redirect:/trading/strategies";
-
-        } catch (Exception e) {
-            log.error("Failed to delete strategy", e);
-            redirectAttributes.addFlashAttribute("error", "전략 삭제에 실패했습니다: " + e.getMessage());
-            return "redirect:/trading/strategies";
-        }
-    }
-
-    /**
-     * 전략 상태 변경
-     */
-    @PostMapping("/strategies/{strategyId}/status")
-    public String updateStrategyStatus(
-            @PathVariable String strategyId,
-            @RequestParam String status,
-            RedirectAttributes redirectAttributes) {
-        try {
-            log.info("Updating strategy status: {} -> {}", strategyId, status);
-
-            tradingApiService.updateStrategyStatus(strategyId, status);
-
-            redirectAttributes.addFlashAttribute("message", "전략 상태가 변경되었습니다.");
-            return "redirect:/trading/strategies";
-
-        } catch (Exception e) {
-            log.error("Failed to update strategy status", e);
-            redirectAttributes.addFlashAttribute("error", "전략 상태 변경에 실패했습니다: " + e.getMessage());
-            return "redirect:/trading/strategies";
-        }
-    }
 }
