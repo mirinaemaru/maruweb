@@ -238,6 +238,149 @@
                     font-size: 12px;
                     overflow-x: auto;
                 }
+                .action-buttons {
+                    display: flex;
+                    gap: 5px;
+                }
+                .btn-cancel {
+                    padding: 6px 12px;
+                    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                }
+                .btn-cancel:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 10px rgba(245, 87, 108, 0.4);
+                }
+                .btn-modify {
+                    padding: 6px 12px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                }
+                .btn-modify:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+                }
+                .modal {
+                    display: none;
+                    position: fixed;
+                    z-index: 1000;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.5);
+                    align-items: center;
+                    justify-content: center;
+                }
+                .modal.active {
+                    display: flex;
+                }
+                .modal-content {
+                    background: white;
+                    padding: 30px;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+                    max-width: 500px;
+                    width: 90%;
+                }
+                .modal-header {
+                    font-size: 20px;
+                    font-weight: 700;
+                    margin-bottom: 20px;
+                    color: #333;
+                }
+                .modal-form-group {
+                    margin-bottom: 15px;
+                }
+                .modal-form-group label {
+                    display: block;
+                    font-weight: 600;
+                    margin-bottom: 5px;
+                    color: #333;
+                }
+                .modal-form-group input {
+                    width: 100%;
+                    padding: 10px;
+                    border: 2px solid #e0e0e0;
+                    border-radius: 6px;
+                    font-size: 14px;
+                    box-sizing: border-box;
+                }
+                .modal-form-group input:focus {
+                    outline: none;
+                    border-color: #667eea;
+                }
+                .modal-actions {
+                    display: flex;
+                    gap: 10px;
+                    margin-top: 20px;
+                }
+                .btn-submit {
+                    flex: 1;
+                    padding: 12px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 6px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                }
+                .btn-submit:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+                }
+                .btn-close {
+                    flex: 1;
+                    padding: 12px;
+                    background: #e0e0e0;
+                    color: #333;
+                    border: none;
+                    border-radius: 6px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                }
+                .btn-close:hover {
+                    background: #d0d0d0;
+                }
+                .alert-success {
+                    padding: 20px 28px;
+                    border-radius: 12px;
+                    margin-bottom: 30px;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+                    border: 1px solid #c3e6cb;
+                    animation: slideDown 0.3s ease-out;
+                }
+                .alert-success .alert-title {
+                    font-size: 20px;
+                    font-weight: 700;
+                    color: #155724;
+                    margin-bottom: 10px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+                .alert-success .alert-message {
+                    color: #155724;
+                    font-size: 15px;
+                    line-height: 1.6;
+                }
             </style>
     </th:block>
 </head>
@@ -249,6 +392,12 @@
                             <p>계좌별 주문 내역을 조회할 수 있습니다.</p>
                         </div>
         
+                        <!-- Success Message -->
+                        <div th:if="${message}" class="alert alert-success">
+                            <div class="alert-title">✅ 성공</div>
+                            <div class="alert-message" th:text="${message}">Operation successful</div>
+                        </div>
+
                         <!-- API Connection Error Alert -->
                         <div th:if="${error}" class="alert alert-error">
                             <div class="alert-title">⚠️ API 연결 오류</div>
@@ -300,6 +449,7 @@
                                         <th>주문수량</th>
                                         <th>체결수량</th>
                                         <th>상태</th>
+                                        <th>관리</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -331,10 +481,62 @@
                                                 체결
                                             </span>
                                         </td>
+                                        <td>
+                                            <div class="action-buttons" th:if="${order.status == 'PENDING'}">
+                                                <button class="btn-modify" th:onclick="'openModifyModal(\'' + ${order.orderId} + '\', \'' + ${order.price} + '\', \'' + ${order.quantity} + '\')'">수정</button>
+                                                <form th:action="@{/trading/orders/{orderId}/cancel(orderId=${order.orderId})}" method="post" style="display: inline;">
+                                                    <input type="hidden" name="accountId" th:value="${selectedAccountId}"/>
+                                                    <button type="submit" class="btn-cancel" onclick="return confirm('정말 이 주문을 취소하시겠습니까?')">취소</button>
+                                                </form>
+                                            </div>
+                                            <span th:if="${order.status != 'PENDING'}" style="color: #999;">-</span>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
+
+                        <!-- Modify Order Modal -->
+                        <div id="modifyModal" class="modal">
+                            <div class="modal-content">
+                                <div class="modal-header">주문 수정</div>
+                                <form id="modifyForm" th:action="@{/trading/orders/{orderId}/modify(orderId='')}" method="post">
+                                    <input type="hidden" name="accountId" th:value="${selectedAccountId}"/>
+                                    <div class="modal-form-group">
+                                        <label for="newPrice">새로운 가격 (원)</label>
+                                        <input type="number" id="newPrice" name="newPrice" step="1" placeholder="변경할 가격을 입력하세요"/>
+                                    </div>
+                                    <div class="modal-form-group">
+                                        <label for="newQuantity">새로운 수량</label>
+                                        <input type="number" id="newQuantity" name="newQuantity" step="1" placeholder="변경할 수량을 입력하세요"/>
+                                    </div>
+                                    <div class="modal-actions">
+                                        <button type="submit" class="btn-submit">수정</button>
+                                        <button type="button" class="btn-close" onclick="closeModifyModal()">취소</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <script>
+                            function openModifyModal(orderId, currentPrice, currentQty) {
+                                document.getElementById('modifyModal').classList.add('active');
+                                document.getElementById('modifyForm').action = '/trading/orders/' + orderId + '/modify';
+                                document.getElementById('newPrice').value = currentPrice;
+                                document.getElementById('newQuantity').value = currentQty;
+                            }
+
+                            function closeModifyModal() {
+                                document.getElementById('modifyModal').classList.remove('active');
+                            }
+
+                            // Click outside modal to close
+                            document.getElementById('modifyModal').addEventListener('click', function(e) {
+                                if (e.target === this) {
+                                    closeModifyModal();
+                                }
+                            });
+                        </script>
         
                         <div th:if="${selectedAccountId != null && (orders == null || orders.isEmpty())}" class="empty-state">
                             <div class="empty-icon">📭</div>

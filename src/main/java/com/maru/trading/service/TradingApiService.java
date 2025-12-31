@@ -466,4 +466,66 @@ public class TradingApiService {
             throw new RuntimeException("계좌 잔고를 가져올 수 없습니다.", e);
         }
     }
+
+    /**
+     * 주문 취소
+     */
+    public Map<String, Object> cancelOrder(String orderId) {
+        String url = "/api/v1/admin/orders/cancel";
+        try {
+            log.info("Cancelling order: {}", orderId);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            Map<String, Object> requestData = new HashMap<>();
+            requestData.put("orderId", orderId);
+
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestData, headers);
+
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    request,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to cancel order in Trading System", e);
+            throw new RuntimeException("주문 취소에 실패했습니다.", e);
+        }
+    }
+
+    /**
+     * 주문 수정
+     */
+    public Map<String, Object> modifyOrder(String orderId, Double newPrice, Integer newQuantity) {
+        String url = "/api/v1/admin/orders/modify";
+        try {
+            log.info("Modifying order: orderId={}, newPrice={}, newQuantity={}", orderId, newPrice, newQuantity);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            Map<String, Object> requestData = new HashMap<>();
+            requestData.put("orderId", orderId);
+            if (newPrice != null) {
+                requestData.put("newPrice", newPrice);
+            }
+            if (newQuantity != null) {
+                requestData.put("newQuantity", newQuantity);
+            }
+
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestData, headers);
+
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    request,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to modify order in Trading System", e);
+            throw new RuntimeException("주문 수정에 실패했습니다.", e);
+        }
+    }
 }

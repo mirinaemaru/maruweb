@@ -465,4 +465,57 @@ public class TradingController {
         }
     }
 
+    /**
+     * 주문 취소 처리
+     */
+    @PostMapping("/orders/{orderId}/cancel")
+    public String cancelOrder(
+            @PathVariable String orderId,
+            @RequestParam String accountId,
+            RedirectAttributes redirectAttributes) {
+        try {
+            log.info("Cancelling order: orderId={}", orderId);
+
+            Map<String, Object> result = tradingApiService.cancelOrder(orderId);
+
+            redirectAttributes.addFlashAttribute("message", "주문이 성공적으로 취소되었습니다.");
+            return "redirect:/trading/orders?accountId=" + accountId;
+
+        } catch (Exception e) {
+            log.error("Failed to cancel order: {}", orderId, e);
+            redirectAttributes.addFlashAttribute("error", "주문 취소에 실패했습니다: " + e.getMessage());
+            return "redirect:/trading/orders?accountId=" + accountId;
+        }
+    }
+
+    /**
+     * 주문 수정 처리
+     */
+    @PostMapping("/orders/{orderId}/modify")
+    public String modifyOrder(
+            @PathVariable String orderId,
+            @RequestParam String accountId,
+            @RequestParam(required = false) Double newPrice,
+            @RequestParam(required = false) Integer newQuantity,
+            RedirectAttributes redirectAttributes) {
+        try {
+            log.info("Modifying order: orderId={}, newPrice={}, newQuantity={}", orderId, newPrice, newQuantity);
+
+            if (newPrice == null && newQuantity == null) {
+                redirectAttributes.addFlashAttribute("error", "수정할 가격 또는 수량을 입력하세요.");
+                return "redirect:/trading/orders?accountId=" + accountId;
+            }
+
+            Map<String, Object> result = tradingApiService.modifyOrder(orderId, newPrice, newQuantity);
+
+            redirectAttributes.addFlashAttribute("message", "주문이 성공적으로 수정되었습니다.");
+            return "redirect:/trading/orders?accountId=" + accountId;
+
+        } catch (Exception e) {
+            log.error("Failed to modify order: {}", orderId, e);
+            redirectAttributes.addFlashAttribute("error", "주문 수정에 실패했습니다: " + e.getMessage());
+            return "redirect:/trading/orders?accountId=" + accountId;
+        }
+    }
+
 }

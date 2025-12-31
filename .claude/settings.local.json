@@ -61,7 +61,22 @@
       "Bash(git fetch:*)",
       "Bash(git remote:*)",
       "Bash(git config:*)",
-      "Bash(git tag:*)"
+      "Bash(git tag:*)",
+      "Bash(kill:*)",
+      "Bash(./gradlew clean build:*)",
+      "Bash(./run-with-env.sh)",
+      "Bash(git -C /Users/changsupark/projects/maruweb status --short)",
+      "Bash(npm search:*)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_evaluate",
+      "mcp__playwright__browser_run_code",
+      "mcp__playwright__browser_close",
+      "mcp__playwright__browser_click"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "playwright"
+  ]
 }
