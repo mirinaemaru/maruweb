@@ -249,6 +249,24 @@
                     padding: 8px 16px;
                     font-size: 13px;
                 }
+                .btn-success {
+                    background: #28a745;
+                    color: white;
+                    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+                }
+                .btn-success:hover {
+                    background: #218838;
+                    transform: translateY(-2px);
+                }
+                .btn-warning {
+                    background: #ffc107;
+                    color: #212529;
+                    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+                }
+                .btn-warning:hover {
+                    background: #e0a800;
+                    transform: translateY(-2px);
+                }
                 .account-actions {
                     display: flex;
                     gap: 10px;
@@ -363,6 +381,22 @@
                                 <div class="account-actions" onclick="event.stopPropagation()">
                                     <a th:href="@{/trading/accounts/{id}(id=${account.accountId})}" class="btn btn-primary btn-sm">상세보기</a>
                                     <a th:href="@{/trading/accounts/{id}/edit(id=${account.accountId})}" class="btn btn-secondary btn-sm">수정</a>
+
+                                    <!-- Status Toggle Buttons -->
+                                    <form th:if="${account.status == 'INACTIVE'}" class="delete-form"
+                                          th:action="@{/trading/accounts/{id}/status(id=${account.accountId})}"
+                                          method="post">
+                                        <input type="hidden" name="status" value="ACTIVE"/>
+                                        <button type="submit" class="btn btn-success btn-sm">활성화</button>
+                                    </form>
+
+                                    <form th:if="${account.status == 'ACTIVE'}" class="delete-form"
+                                          th:action="@{/trading/accounts/{id}/status(id=${account.accountId})}"
+                                          method="post"
+                                          onsubmit="return confirm('이 계좌를 비활성화하시겠습니까?');">
+                                        <input type="hidden" name="status" value="INACTIVE"/>
+                                        <button type="submit" class="btn btn-warning btn-sm">비활성화</button>
+                                    </form>
 
                                     <!-- Delete Button -->
                                     <form class="delete-form"

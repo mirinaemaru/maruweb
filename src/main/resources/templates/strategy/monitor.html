@@ -34,6 +34,29 @@
         .monitor-actions { margin-top: 30px; }
         .alert { padding: 12px 20px; border-radius: 4px; margin-bottom: 15px; }
         .alert-warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .btn-success { background: #27ae60; color: white; }
+        .btn-success:hover { background: #229954; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
+                background: rgba(0, 0, 0, 0.5); align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+                        max-width: 500px; width: 90%; }
+        .modal-header { font-size: 20px; font-weight: 700; margin-bottom: 20px; color: #333; }
+        .modal-form-group { margin-bottom: 15px; }
+        .modal-form-group label { display: block; font-weight: 600; margin-bottom: 5px; color: #333; }
+        .modal-form-group input { width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 6px;
+                                  font-size: 14px; box-sizing: border-box; }
+        .modal-form-group input:focus { outline: none; border-color: #667eea; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-submit { flex: 1; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                     color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: 600;
+                     cursor: pointer; transition: all 0.3s; }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4); }
+        .btn-close { flex: 1; padding: 12px; background: #e0e0e0; color: #333; border: none; border-radius: 6px;
+                    font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .btn-close:hover { background: #d0d0d0; }
     </style>
 </head>
 <body>
@@ -46,6 +69,12 @@
 
             <!-- Status Error Alert -->
             <div th:if="${statusError}" class="alert alert-warning" th:text="${statusError}"></div>
+
+            <!-- Success Message -->
+            <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+            <!-- Error Message -->
+            <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
             <!-- Status Overview -->
             <div class="status-grid">
@@ -172,6 +201,10 @@
 
             <!-- Actions -->
             <div class="monitor-actions">
+                <button type="button" class="btn btn-success" onclick="openExecuteModal()">
+                    수동 실행 (Execute Strategy)
+                </button>
+
                 <a th:href="@{/trading/strategies/{id}/trading(id=${strategy.id})}"
                    class="btn btn-primary">설정 수정 (Edit Configuration)</a>
 
@@ -186,6 +219,48 @@
 
                 <a th:href="@{/trading/strategies}" class="btn btn-secondary">목록으로 (Back to List)</a>
             </div>
+
+            <!-- Execute Strategy Modal -->
+            <div id="executeModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">전략 수동 실행</div>
+                    <form th:action="@{/trading/strategies/{id}/execute(id=${strategy.id})}" method="post">
+                        <div class="modal-form-group">
+                            <label for="symbol">종목 코드 <span style="color: red;">*</span></label>
+                            <input type="text" id="symbol" name="symbol" required
+                                   th:value="${strategy.symbol}"
+                                   placeholder="예: 005930">
+                        </div>
+                        <div class="modal-form-group">
+                            <label for="accountId">계좌 ID <span style="color: red;">*</span></label>
+                            <input type="text" id="accountId" name="accountId" required
+                                   th:value="${strategy.targetAccountId}"
+                                   placeholder="예: ACC_001">
+                        </div>
+                        <div class="modal-actions">
+                            <button type="submit" class="btn-submit">실행</button>
+                            <button type="button" class="btn-close" onclick="closeExecuteModal()">취소</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <script>
+                function openExecuteModal() {
+                    document.getElementById('executeModal').classList.add('active');
+                }
+
+                function closeExecuteModal() {
+                    document.getElementById('executeModal').classList.remove('active');
+                }
+
+                // Click outside modal to close
+                document.getElementById('executeModal').addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeExecuteModal();
+                    }
+                });
+            </script>
         </div>
     </div>
 </body>

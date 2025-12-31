@@ -518,4 +518,28 @@ public class TradingController {
         }
     }
 
+    /**
+     * 계좌 상태 업데이트 처리
+     */
+    @PostMapping("/accounts/{accountId}/status")
+    public String updateAccountStatus(
+            @PathVariable String accountId,
+            @RequestParam String status,
+            RedirectAttributes redirectAttributes) {
+        try {
+            log.info("Updating account status: accountId={}, status={}", accountId, status);
+
+            Map<String, Object> result = tradingApiService.updateAccountStatus(accountId, status);
+
+            String message = "ACTIVE".equals(status) ? "계좌가 활성화되었습니다." : "계좌가 비활성화되었습니다.";
+            redirectAttributes.addFlashAttribute("message", message);
+            return "redirect:/trading/accounts";
+
+        } catch (Exception e) {
+            log.error("Failed to update account status: {}", accountId, e);
+            redirectAttributes.addFlashAttribute("error", "계좌 상태 업데이트에 실패했습니다: " + e.getMessage());
+            return "redirect:/trading/accounts";
+        }
+    }
+
 }

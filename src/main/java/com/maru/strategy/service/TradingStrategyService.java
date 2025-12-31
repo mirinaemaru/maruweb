@@ -224,4 +224,14 @@ public class TradingStrategyService {
             return Collections.emptyList();
         }
     }
+
+    /**
+     * Execute strategy manually
+     */
+    public Map<String, Object> executeStrategy(String externalStrategyId, String symbol, String accountId) {
+        log.info("Executing strategy manually: externalStrategyId={}, symbol={}, accountId={}",
+                externalStrategyId, symbol, accountId);
+
+        return tradingApiService.executeStrategy(externalStrategyId, symbol, accountId);
+    }
 }

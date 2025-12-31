@@ -663,4 +663,52 @@ public class TradingApiService {
             throw new RuntimeException("데모 신호 주입에 실패했습니다.", e);
         }
     }
+
+    /**
+     * 전략 수동 실행
+     */
+    public Map<String, Object> executeStrategy(String strategyId, String symbol, String accountId) {
+        String url = "/api/v1/admin/strategies/" + strategyId + "/execute?symbol=" + symbol + "&accountId=" + accountId;
+        try {
+            log.info("Executing strategy manually: strategyId={}, symbol={}, accountId={}", strategyId, symbol, accountId);
+
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to execute strategy in Trading System", e);
+            throw new RuntimeException("전략 수동 실행에 실패했습니다.", e);
+        }
+    }
+
+    /**
+     * 계좌 상태 업데이트
+     */
+    public Map<String, Object> updateAccountStatus(String accountId, String status) {
+        String url = "/api/v1/admin/accounts/" + accountId + "/status";
+        try {
+            log.info("Updating account status: accountId={}, status={}", accountId, status);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            Map<String, Object> statusData = new HashMap<>();
+            statusData.put("status", status);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(statusData, headers);
+
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                    url,
+                    HttpMethod.PUT,
+                    request,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to update account status in Trading System", e);
+            throw new RuntimeException("계좌 상태 업데이트에 실패했습니다.", e);
+        }
+    }
 }

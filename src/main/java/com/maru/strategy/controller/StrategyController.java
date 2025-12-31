@@ -377,4 +377,40 @@ public class StrategyController {
 
         return "strategy/monitor";
     }
+
+    /**
+     * 전략 수동 실행
+     */
+    @PostMapping("/{id}/execute")
+    public String executeStrategy(@PathVariable Long id,
+                                  @RequestParam String symbol,
+                                  @RequestParam String accountId,
+                                  RedirectAttributes redirectAttributes) {
+        try {
+            log.info("Executing strategy manually: id={}, symbol={}, accountId={}", id, symbol, accountId);
+
+            Strategy strategy = strategyService.getStrategyById(id);
+
+            // externalStrategyId가 있는지 확인
+            if (strategy.getExternalStrategyId() == null || strategy.getExternalStrategyId().isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "전략이 Trading System에 동기화되지 않았습니다. 먼저 동기화하세요.");
+                return "redirect:/trading/strategies/" + id + "/monitor";
+            }
+
+            // Trading System API 호출
+            Map<String, Object> result = tradingStrategyService.executeStrategy(
+                    strategy.getExternalStrategyId(),
+                    symbol,
+                    accountId
+            );
+
+            redirectAttributes.addFlashAttribute("message", "전략이 성공적으로 실행되었습니다.");
+            return "redirect:/trading/strategies/" + id + "/monitor";
+
+        } catch (Exception e) {
+            log.error("Failed to execute strategy", e);
+            redirectAttributes.addFlashAttribute("error", "전략 실행에 실패했습니다: " + e.getMessage());
+            return "redirect:/trading/strategies/" + id + "/monitor";
+        }
+    }
 }
