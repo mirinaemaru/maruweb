@@ -238,6 +238,14 @@ public class TradingController {
             Map<String, Object> accountsData = tradingApiService.getAccounts();
             List<?> accounts = (List<?>) accountsData.get("items");
             model.addAttribute("accounts", accounts);
+
+            // accountId가 없으면 첫 번째 계좌 자동 선택
+            if ((accountId == null || accountId.isEmpty()) && accounts != null && !accounts.isEmpty()) {
+                Map<String, Object> firstAccount = (Map<String, Object>) accounts.get(0);
+                accountId = (String) firstAccount.get("accountId");
+                log.info("Auto-selecting first account: {}", accountId);
+            }
+
             model.addAttribute("selectedAccountId", accountId);
 
             // 주문 목록
@@ -271,6 +279,14 @@ public class TradingController {
             Map<String, Object> accountsData = tradingApiService.getAccounts();
             List<?> accounts = (List<?>) accountsData.get("items");
             model.addAttribute("accounts", accounts);
+
+            // accountId가 없으면 첫 번째 계좌 자동 선택
+            if ((accountId == null || accountId.isEmpty()) && accounts != null && !accounts.isEmpty()) {
+                Map<String, Object> firstAccount = (Map<String, Object>) accounts.get(0);
+                accountId = (String) firstAccount.get("accountId");
+                log.info("Auto-selecting first account: {}", accountId);
+            }
+
             model.addAttribute("selectedAccountId", accountId);
 
             // 포지션 목록 및 계좌 잔액
@@ -377,6 +393,14 @@ public class TradingController {
             Map<String, Object> accountsData = tradingApiService.getAccounts();
             List<?> accounts = (List<?>) accountsData.get("items");
             model.addAttribute("accounts", accounts);
+
+            // accountId가 없으면 첫 번째 계좌 자동 선택
+            if ((accountId == null || accountId.isEmpty()) && accounts != null && !accounts.isEmpty()) {
+                Map<String, Object> firstAccount = (Map<String, Object>) accounts.get(0);
+                accountId = (String) firstAccount.get("accountId");
+                log.info("Auto-selecting first account: {}", accountId);
+            }
+
             model.addAttribute("selectedAccountId", accountId);
             model.addAttribute("selectedOrderId", orderId);
             model.addAttribute("selectedSymbol", symbol);
@@ -413,6 +437,14 @@ public class TradingController {
             Map<String, Object> accountsData = tradingApiService.getAccounts();
             List<?> accounts = (List<?>) accountsData.get("items");
             model.addAttribute("accounts", accounts);
+
+            // accountId가 없으면 첫 번째 계좌 자동 선택
+            if ((accountId == null || accountId.isEmpty()) && accounts != null && !accounts.isEmpty()) {
+                Map<String, Object> firstAccount = (Map<String, Object>) accounts.get(0);
+                accountId = (String) firstAccount.get("accountId");
+                log.info("Auto-selecting first account: {}", accountId);
+            }
+
             model.addAttribute("selectedAccountId", accountId);
 
             // 잔고 조회
