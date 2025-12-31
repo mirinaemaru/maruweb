@@ -389,7 +389,8 @@ public class StrategyController {
         try {
             log.info("Executing strategy manually: id={}, symbol={}, accountId={}", id, symbol, accountId);
 
-            Strategy strategy = strategyService.getStrategyById(id);
+            Strategy strategy = strategyService.getStrategyById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Strategy not found: " + id));
 
             // externalStrategyId가 있는지 확인
             if (strategy.getExternalStrategyId() == null || strategy.getExternalStrategyId().isEmpty()) {
