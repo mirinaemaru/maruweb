@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>데모 신호 주입</title>
+    <style>
+        .demo-signal-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            border-radius: 16px;
+            color: white;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        header .subtitle {
+            font-size: 16px;
+            opacity: 0.95;
+        }
+
+        .alert {
+            padding: 20px 28px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .form-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-group .help-text {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #2196f3;
+            margin-bottom: 20px;
+        }
+
+        .info-box h3 {
+            margin-top: 0;
+            color: #1976d2;
+            font-size: 16px;
+        }
+
+        .info-box p {
+            margin: 5px 0;
+            color: #424242;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .info-box ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .info-box li {
+            margin: 5px 0;
+            color: #424242;
+            font-size: 14px;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 18px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .warning-box h4 {
+            color: #856404;
+            font-size: 16px;
+            margin: 0 0 12px 0;
+        }
+
+        .warning-box p {
+            color: #856404;
+            margin: 5px 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="demo-signal-container">
+            <header>
+                <h1>🚀 데모 신호 주입</h1>
+                <p class="subtitle">테스트용 매매 신호를 수동으로 주입할 수 있습니다</p>
+            </header>
+
+            <!-- Success Message -->
+            <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+            <!-- Error Message -->
+            <div th:if="${error}" class="alert alert-error">
+                <div th:text="${error}"></div>
+                <div th:if="${errorDetail}" style="margin-top: 10px; font-size: 13px;" th:text="${errorDetail}"></div>
+            </div>
+
+            <div class="warning-box">
+                <h4>⚠️ 주의사항</h4>
+                <p>이 기능은 <strong>테스트 전용</strong>입니다. 실제 계좌에서 사용할 경우 실제 주문이 발생할 수 있습니다.</p>
+                <p>반드시 테스트 환경이나 모의투자 계좌에서만 사용하세요.</p>
+            </div>
+
+            <div class="form-card">
+                <div class="info-box">
+                    <h3>ℹ️ 데모 신호란?</h3>
+                    <p>데모 신호는 자동매매 전략 없이도 수동으로 매매 신호를 생성할 수 있는 기능입니다.</p>
+                    <p><strong>주요 용도:</strong></p>
+                    <ul>
+                        <li>매매 시스템 테스트</li>
+                        <li>주문 실행 로직 검증</li>
+                        <li>리스크 관리 기능 테스트</li>
+                        <li>알림 및 모니터링 기능 확인</li>
+                    </ul>
+                </div>
+
+                <form th:action="@{/trading/demo-signal}" method="post">
+                    <div class="form-group">
+                        <label for="accountId">계좌 선택 (선택사항)</label>
+                        <select id="accountId" name="accountId" class="form-control">
+                            <option value="">-- 계좌 선택 (선택사항) --</option>
+                            <option th:each="account : ${accounts}"
+                                    th:value="${account.accountId}"
+                                    th:text="${account.alias} + ' (' + ${account.cano} + ')'">
+                                Account
+                            </option>
+                        </select>
+                        <span class="help-text">계좌를 지정하지 않으면 전략에 설정된 기본 계좌가 사용됩니다</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="symbol">종목 코드 <span style="color: red;">*</span></label>
+                        <input type="text" id="symbol" name="symbol" class="form-control" required placeholder="예: 005930">
+                        <span class="help-text">거래할 종목의 코드를 입력하세요 (예: 삼성전자 005930)</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="side">매매 구분 <span style="color: red;">*</span></label>
+                        <select id="side" name="side" class="form-control" required>
+                            <option value="">-- 선택하세요 --</option>
+                            <option value="BUY">매수 (BUY)</option>
+                            <option value="SELL">매도 (SELL)</option>
+                        </select>
+                        <span class="help-text">매수 또는 매도를 선택하세요</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="targetType">목표 타입</label>
+                        <select id="targetType" name="targetType" class="form-control">
+                            <option value="QTY">수량 (QTY)</option>
+                            <option value="WEIGHT">비중 (WEIGHT)</option>
+                        </select>
+                        <span class="help-text">QTY: 주식 수량, WEIGHT: 포트폴리오 비중 (기본값: QTY)</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="targetValue">목표 값 <span style="color: red;">*</span></label>
+                        <input type="number" id="targetValue" name="targetValue" class="form-control" step="0.01" required placeholder="예: 10">
+                        <span class="help-text">수량 타입: 주식 수량 / 비중 타입: 0~1 사이의 비중 값</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ttlSeconds">신호 유효 시간 (초)</label>
+                        <input type="number" id="ttlSeconds" name="ttlSeconds" class="form-control" step="1" placeholder="60">
+                        <span class="help-text">신호가 유효한 시간 (기본값: 60초)</span>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">신호 주입</button>
+                        <button type="reset" class="btn btn-secondary">초기화</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

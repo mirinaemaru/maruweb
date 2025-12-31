@@ -639,4 +639,28 @@ public class TradingApiService {
             throw new RuntimeException("리스크 룰 삭제에 실패했습니다.", e);
         }
     }
+
+    /**
+     * 데모 신호 주입
+     */
+    public Map<String, Object> injectDemoSignal(Map<String, Object> signalData) {
+        String url = "/api/v1/demo/signal";
+        try {
+            log.info("Injecting demo signal: {}", signalData);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(signalData, headers);
+
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    request,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to inject demo signal in Trading System", e);
+            throw new RuntimeException("데모 신호 주입에 실패했습니다.", e);
+        }
+    }
 }
