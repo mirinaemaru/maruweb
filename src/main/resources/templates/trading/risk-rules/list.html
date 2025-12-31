@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>리스크 룰 관리</title>
+    <style>
+        .risk-rules-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            border-radius: 16px;
+            color: white;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        header .subtitle {
+            font-size: 16px;
+            opacity: 0.95;
+        }
+
+        .alert {
+            padding: 20px 28px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .account-selector {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .selector-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            white-space: nowrap;
+            height: 42px;
+            line-height: 42px;
+        }
+
+        .form-select {
+            min-width: 300px;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            height: 42px;
+            box-sizing: border-box;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            height: 42px;
+            box-sizing: border-box;
+            transform: translateY(-8px);
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-10px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            color: #0a472e;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(132, 250, 176, 0.4);
+        }
+
+        .btn-danger {
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(245, 87, 108, 0.4);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .rules-table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .rules-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .rules-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .rules-table th {
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        .rules-table td {
+            padding: 15px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+
+        .rules-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .rules-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .badge-global {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .badge-account {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            color: #856404;
+        }
+
+        .badge-symbol {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: #721c24;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .empty-message {
+            color: #666;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="risk-rules-container">
+            <header>
+                <h1>⚙️ 리스크 룰 관리</h1>
+                <p class="subtitle">전역, 계좌별, 종목별 리스크 룰을 설정하고 관리합니다</p>
+            </header>
+
+            <!-- Success Message -->
+            <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+            <!-- Error Message -->
+            <div th:if="${error}" class="alert alert-error">
+                <div th:text="${error}"></div>
+                <div th:if="${errorDetail}" style="margin-top: 10px; font-size: 13px;" th:text="${errorDetail}"></div>
+            </div>
+
+            <!-- Account Selector -->
+            <div th:if="${apiConnected}" class="account-selector">
+                <form th:action="@{/trading/risk-rules}" method="get" class="selector-form">
+                    <div class="form-group">
+                        <label for="accountId">계좌 선택</label>
+                        <select id="accountId" name="accountId" class="form-select" required onchange="this.form.submit()">
+                            <option value="">계좌를 선택하세요</option>
+                            <option th:each="account : ${accounts}"
+                                    th:value="${account.accountId}"
+                                    th:text="${account.alias} + ' (' + ${account.cano} + ')'"
+                                    th:selected="${account.accountId == selectedAccountId}">
+                                Account
+                            </option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Action Buttons -->
+            <div th:if="${selectedAccountId != null}" class="action-buttons">
+                <a th:href="@{/trading/risk-rules/global/edit}" class="btn btn-primary">전역 룰 설정</a>
+                <a th:href="@{/trading/risk-rules/account/{accountId}/edit(accountId=${selectedAccountId})}" class="btn btn-success">계좌 룰 설정</a>
+                <a th:href="@{/trading/risk-rules/account/{accountId}/symbol/edit(accountId=${selectedAccountId})}" class="btn btn-success">종목 룰 설정</a>
+            </div>
+
+            <!-- Risk Rules Table -->
+            <div th:if="${rules != null && !rules.isEmpty()}" class="rules-table-container">
+                <table class="rules-table">
+                    <thead>
+                        <tr>
+                            <th>범위</th>
+                            <th>계좌 ID</th>
+                            <th>종목</th>
+                            <th>최대 포지션 금액</th>
+                            <th>최대 주문 수</th>
+                            <th>분당 최대 주문</th>
+                            <th>일일 손실 한도</th>
+                            <th>연속 실패 한도</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="rule : ${rules}">
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${rule.scope == 'GLOBAL'} ? 'badge-global' :
+                                                     (${rule.scope == 'ACCOUNT'} ? 'badge-account' : 'badge-symbol')"
+                                      th:text="${rule.scope == 'GLOBAL'} ? '전역' :
+                                               (${rule.scope == 'ACCOUNT'} ? '계좌' : '종목')">
+                                    전역
+                                </span>
+                            </td>
+                            <td th:text="${rule.accountId ?: '-'}">-</td>
+                            <td th:text="${rule.symbol ?: '-'}">-</td>
+                            <td th:text="${rule.maxPositionValuePerSymbol != null ? #numbers.formatDecimal(rule.maxPositionValuePerSymbol, 0, 'COMMA', 0, 'POINT') + '원' : '-'}">-</td>
+                            <td th:text="${rule.maxOpenOrders ?: '-'}">-</td>
+                            <td th:text="${rule.maxOrdersPerMinute ?: '-'}">-</td>
+                            <td th:text="${rule.dailyLossLimit != null ? #numbers.formatDecimal(rule.dailyLossLimit, 0, 'COMMA', 0, 'POINT') + '원' : '-'}">-</td>
+                            <td th:text="${rule.consecutiveOrderFailuresLimit ?: '-'}">-</td>
+                            <td>
+                                <form th:action="@{/trading/risk-rules/{ruleId}/delete(ruleId=${rule.riskRuleId})}" method="post" style="display: inline;">
+                                    <input type="hidden" name="accountId" th:value="${selectedAccountId}"/>
+                                    <button type="submit" class="btn-danger" onclick="return confirm('정말 이 리스크 룰을 삭제하시겠습니까?')">삭제</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${selectedAccountId != null && (rules == null || rules.isEmpty())}" class="empty-state">
+                <div class="empty-icon">📋</div>
+                <div class="empty-message">조회된 리스크 룰이 없습니다. 새로운 룰을 추가하세요.</div>
+            </div>
+
+            <div th:if="${selectedAccountId == null}" class="empty-state">
+                <div class="empty-icon">📊</div>
+                <div class="empty-message">계좌를 선택하여 리스크 룰을 조회하세요.</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

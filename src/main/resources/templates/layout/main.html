@@ -75,6 +75,9 @@
                             <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/kill-switch')} ? 'active' : ''">
                                 <a th:href="@{/trading/kill-switch}">⚡ Kill Switch</a>
                             </li>
+                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/risk-rules')} ? 'active' : ''">
+                                <a th:href="@{/trading/risk-rules}">⚙️ 리스크 룰</a>
+                            </li>
                         </ul>
                     </li>
                 </ul>

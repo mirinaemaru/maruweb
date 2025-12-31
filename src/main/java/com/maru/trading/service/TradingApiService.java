@@ -528,4 +528,115 @@ public class TradingApiService {
             throw new RuntimeException("주문 수정에 실패했습니다.", e);
         }
     }
+
+    /**
+     * 리스크 룰 조회 (계좌별)
+     */
+    public Map<String, Object> getRiskRulesForAccount(String accountId) {
+        String url = "/api/v1/admin/risk-rules/account/" + accountId;
+        try {
+            log.debug("Calling Trading API: {}", url);
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to get risk rules from Trading System", e);
+            throw new RuntimeException("리스크 룰을 가져올 수 없습니다.", e);
+        }
+    }
+
+    /**
+     * 전역 리스크 룰 업데이트
+     */
+    public Map<String, Object> updateGlobalRiskRule(Map<String, Object> ruleData) {
+        String url = "/api/v1/admin/risk-rules/global";
+        try {
+            log.info("Updating global risk rule");
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(ruleData, headers);
+
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    request,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to update global risk rule in Trading System", e);
+            throw new RuntimeException("전역 리스크 룰 업데이트에 실패했습니다.", e);
+        }
+    }
+
+    /**
+     * 계좌별 리스크 룰 업데이트
+     */
+    public Map<String, Object> updateAccountRiskRule(String accountId, Map<String, Object> ruleData) {
+        String url = "/api/v1/admin/risk-rules/account/" + accountId;
+        try {
+            log.info("Updating risk rule for account: {}", accountId);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(ruleData, headers);
+
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    request,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to update account risk rule in Trading System", e);
+            throw new RuntimeException("계좌 리스크 룰 업데이트에 실패했습니다.", e);
+        }
+    }
+
+    /**
+     * 종목별 리스크 룰 업데이트
+     */
+    public Map<String, Object> updateSymbolRiskRule(String accountId, String symbol, Map<String, Object> ruleData) {
+        String url = "/api/v1/admin/risk-rules/account/" + accountId + "/symbol/" + symbol;
+        try {
+            log.info("Updating risk rule for account: {}, symbol: {}", accountId, symbol);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(ruleData, headers);
+
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    request,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to update symbol risk rule in Trading System", e);
+            throw new RuntimeException("종목 리스크 룰 업데이트에 실패했습니다.", e);
+        }
+    }
+
+    /**
+     * 리스크 룰 삭제
+     */
+    public void deleteRiskRule(String ruleId) {
+        String url = "/api/v1/admin/risk-rules/" + ruleId;
+        try {
+            log.info("Deleting risk rule: {}", ruleId);
+            tradingApiRestTemplate.exchange(
+                    url,
+                    HttpMethod.DELETE,
+                    null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+        } catch (RestClientException e) {
+            log.error("Failed to delete risk rule in Trading System", e);
+            throw new RuntimeException("리스크 룰 삭제에 실패했습니다.", e);
+        }
+    }
 }

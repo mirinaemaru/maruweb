@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title th:text="${pageTitle}">리스크 룰 설정</title>
+    <style>
+        .edit-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            border-radius: 16px;
+            color: white;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .form-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-group .help-text {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+            flex: 1;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #2196f3;
+            margin-bottom: 20px;
+        }
+
+        .info-box h3 {
+            margin-top: 0;
+            color: #1976d2;
+            font-size: 16px;
+        }
+
+        .info-box p {
+            margin: 5px 0;
+            color: #424242;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .scope-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+        }
+
+        .scope-global {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .scope-account {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            color: #856404;
+        }
+
+        .scope-symbol {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="edit-container">
+            <header>
+                <h1 th:text="${pageTitle}">리스크 룰 설정</h1>
+            </header>
+
+            <div class="form-card">
+                <div class="scope-badge"
+                     th:classappend="${scope == 'GLOBAL'} ? 'scope-global' :
+                                    (${scope == 'ACCOUNT'} ? 'scope-account' : 'scope-symbol')"
+                     th:text="${scope == 'GLOBAL'} ? '전역 룰' :
+                              (${scope == 'ACCOUNT'} ? '계좌 룰' : '종목 룰')">
+                    범위
+                </div>
+
+                <div class="info-box">
+                    <h3>ℹ️ 리스크 룰 안내</h3>
+                    <p><strong>전역 룰:</strong> 모든 계좌와 종목에 적용되는 기본 설정입니다.</p>
+                    <p><strong>계좌 룰:</strong> 특정 계좌에 적용되며 전역 룰을 덮어씁니다.</p>
+                    <p><strong>종목 룰:</strong> 특정 계좌의 특정 종목에만 적용되며 계좌 룰과 전역 룰을 덮어씁니다.</p>
+                    <p style="margin-top: 10px; color: #e74c3c;"><strong>주의:</strong> 값을 입력하지 않으면 해당 규칙이 적용되지 않습니다.</p>
+                </div>
+
+                <form th:action="${scope == 'GLOBAL'} ? @{/trading/risk-rules/global} :
+                                 (${scope == 'ACCOUNT'} ? @{/trading/risk-rules/account/{accountId}(accountId=${account.accountId})} :
+                                  @{/trading/risk-rules/account/{accountId}/symbol(accountId=${account.accountId})})"
+                      method="post">
+
+                    <!-- Symbol field for SYMBOL scope -->
+                    <div th:if="${scope == 'SYMBOL'}" class="form-group">
+                        <label for="symbol">종목 코드 <span style="color: red;">*</span></label>
+                        <input type="text" id="symbol" name="symbol" class="form-control" th:value="${symbol}" required placeholder="예: 005930">
+                        <span class="help-text">리스크 룰을 적용할 종목 코드를 입력하세요 (예: 삼성전자 005930)</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="maxPositionValuePerSymbol">종목당 최대 포지션 금액 (원)</label>
+                        <input type="number" id="maxPositionValuePerSymbol" name="maxPositionValuePerSymbol" class="form-control" step="1000" placeholder="예: 10000000">
+                        <span class="help-text">각 종목당 보유할 수 있는 최대 금액입니다</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="maxOpenOrders">최대 열린 주문 수</label>
+                        <input type="number" id="maxOpenOrders" name="maxOpenOrders" class="form-control" step="1" placeholder="예: 10">
+                        <span class="help-text">동시에 열려 있을 수 있는 최대 주문 개수입니다</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="maxOrdersPerMinute">분당 최대 주문 수</label>
+                        <input type="number" id="maxOrdersPerMinute" name="maxOrdersPerMinute" class="form-control" step="1" placeholder="예: 5">
+                        <span class="help-text">1분 동안 발생할 수 있는 최대 주문 개수입니다</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dailyLossLimit">일일 손실 한도 (원)</label>
+                        <input type="number" id="dailyLossLimit" name="dailyLossLimit" class="form-control" step="1000" placeholder="예: 1000000">
+                        <span class="help-text">하루 최대 손실 금액입니다. 이 금액에 도달하면 거래가 중단됩니다</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="consecutiveOrderFailuresLimit">연속 주문 실패 한도</label>
+                        <input type="number" id="consecutiveOrderFailuresLimit" name="consecutiveOrderFailuresLimit" class="form-control" step="1" placeholder="예: 3">
+                        <span class="help-text">연속으로 실패할 수 있는 최대 주문 횟수입니다</span>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">저장</button>
+                        <a th:href="@{/trading/risk-rules}" class="btn btn-secondary">취소</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
