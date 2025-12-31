@@ -184,13 +184,6 @@ function populateOrderSelect(selectId, usedOrders, currentOrder) {
     }
 }
 
-// ========== Close modals when clicking outside ==========
-window.onclick = function(event) {
-    if (event.target.classList.contains('modal')) {
-        event.target.style.display = 'none';
-    }
-}
-
 // ========== Close modals with Escape key ==========
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') {

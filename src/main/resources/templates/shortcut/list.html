@@ -93,6 +93,187 @@
                         </div>
                     </div>
                 </div>
+
+    <!-- Add Category Modal -->
+    <div id="addCategoryModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddCategoryModal()">&times;</span>
+            <h2>Add New Category</h2>
+            <form th:action="@{/shortcuts/categories}" method="post" th:object="${newCategory}">
+                <div class="form-group-vertical">
+                    <label for="addCategoryName">Category Name *</label>
+                    <input type="text"
+                           id="addCategoryName"
+                           th:field="*{name}"
+                           placeholder="Enter category name"
+                           class="form-input"
+                           required>
+                </div>
+                <div class="form-group-vertical">
+                    <label for="addCategoryDescription">Description</label>
+                    <textarea id="addCategoryDescription"
+                              th:field="*{description}"
+                              placeholder="Optional description"
+                              class="form-input"
+                              rows="3"></textarea>
+                </div>
+                <div class="form-group-vertical">
+                    <label for="addCategoryOrder">Display Order</label>
+                    <input type="number"
+                           id="addCategoryOrder"
+                           th:field="*{displayOrder}"
+                           placeholder="0"
+                           class="form-input"
+                           value="0"
+                           min="0">
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Add Category</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeAddCategoryModal()" style="flex: 1;">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Category Modal -->
+    <div id="editCategoryModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditCategoryModal()">&times;</span>
+            <h2>Edit Category</h2>
+            <form id="editCategoryForm" method="post">
+                <div class="form-group-vertical">
+                    <label for="editCategoryName">Category Name *</label>
+                    <input type="text"
+                           id="editCategoryName"
+                           name="name"
+                           placeholder="Enter category name"
+                           class="form-input"
+                           required>
+                </div>
+                <div class="form-group-vertical">
+                    <label for="editCategoryDescription">Description</label>
+                    <textarea id="editCategoryDescription"
+                              name="description"
+                              placeholder="Optional description"
+                              class="form-input"
+                              rows="3"></textarea>
+                </div>
+                <div class="form-group-vertical">
+                    <label for="editCategoryOrder">Display Order</label>
+                    <input type="number"
+                           id="editCategoryOrder"
+                           name="displayOrder"
+                           placeholder="0"
+                           class="form-input"
+                           value="0"
+                           min="0">
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Update Category</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditCategoryModal()" style="flex: 1;">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Shortcut Modal -->
+    <div id="addShortcutModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddShortcutModal()">&times;</span>
+            <h2>Add New Shortcut</h2>
+            <p class="modal-subtitle" id="addShortcutCategoryName">to Category: </p>
+            <form th:action="@{/shortcuts/items}" method="post" th:object="${newShortcut}">
+                <input type="hidden" id="addShortcutCategoryId" name="categoryId">
+                <div class="form-group-vertical">
+                    <label for="addShortcutName">Shortcut Name *</label>
+                    <input type="text"
+                           id="addShortcutName"
+                           th:field="*{name}"
+                           placeholder="Enter shortcut name"
+                           class="form-input"
+                           required>
+                </div>
+                <div class="form-group-vertical">
+                    <label for="addShortcutUrl">URL *</label>
+                    <input type="url"
+                           id="addShortcutUrl"
+                           th:field="*{url}"
+                           placeholder="https://example.com"
+                           class="form-input"
+                           required>
+                </div>
+                <div class="form-group-vertical">
+                    <label for="addShortcutDescription">Description</label>
+                    <textarea id="addShortcutDescription"
+                              th:field="*{description}"
+                              placeholder="Optional description"
+                              class="form-input"
+                              rows="2"></textarea>
+                </div>
+                <div class="form-group-vertical">
+                    <label for="addShortcutOrder">Display Order</label>
+                    <select id="addShortcutOrder"
+                            th:field="*{displayOrder}"
+                            class="form-input">
+                        <!-- Populated by JavaScript -->
+                    </select>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Add Shortcut</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeAddShortcutModal()" style="flex: 1;">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Shortcut Modal -->
+    <div id="editShortcutModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditShortcutModal()">&times;</span>
+            <h2>Edit Shortcut</h2>
+            <form id="editShortcutForm" method="post">
+                <input type="hidden" id="editShortcutCategoryId" name="categoryId">
+                <div class="form-group-vertical">
+                    <label for="editShortcutName">Shortcut Name *</label>
+                    <input type="text"
+                           id="editShortcutName"
+                           name="name"
+                           placeholder="Enter shortcut name"
+                           class="form-input"
+                           required>
+                </div>
+                <div class="form-group-vertical">
+                    <label for="editShortcutUrl">URL *</label>
+                    <input type="url"
+                           id="editShortcutUrl"
+                           name="url"
+                           placeholder="https://example.com"
+                           class="form-input"
+                           required>
+                </div>
+                <div class="form-group-vertical">
+                    <label for="editShortcutDescription">Description</label>
+                    <textarea id="editShortcutDescription"
+                              name="description"
+                              placeholder="Optional description"
+                              class="form-input"
+                              rows="2"></textarea>
+                </div>
+                <div class="form-group-vertical">
+                    <label for="editShortcutOrder">Display Order</label>
+                    <select id="editShortcutOrder"
+                            name="displayOrder"
+                            class="form-input">
+                        <!-- Populated by JavaScript -->
+                    </select>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Update Shortcut</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditShortcutModal()" style="flex: 1;">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
     </div>
     <th:block layout:fragment="extra-scripts">
 <script th:src="@{/js/shortcut.js}"></script>
