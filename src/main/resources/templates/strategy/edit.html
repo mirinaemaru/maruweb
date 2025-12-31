@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Edit Strategy</title>
+    <style>
+        .edit-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .edit-form {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-date {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="edit-container">
+            <header>
+                <h1>전략 수정</h1>
+                <p class="subtitle">Edit your trading strategy</p>
+            </header>
+
+            <div class="edit-form">
+                <form th:action="@{/trading/strategies/{id}(id=${strategy.id})}"
+                      method="post"
+                      th:object="${strategy}">
+
+                    <div class="form-group">
+                        <label for="title">제목 *</label>
+                        <input type="text"
+                               id="title"
+                               th:field="*{title}"
+                               class="form-input"
+                               placeholder="전략 제목을 입력하세요"
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="categoryId">카테고리</label>
+                        <select id="categoryId" name="categoryId" class="form-select">
+                            <option value="">선택 안함</option>
+                            <option th:each="cat : ${categories}"
+                                    th:value="${cat.id}"
+                                    th:text="${cat.name}"
+                                    th:selected="${strategy.category != null && strategy.category.id == cat.id}">
+                                Category
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="strategyType">전략 유형 (Strategy Type)</label>
+                        <select id="strategyType" th:field="*{strategyType}" class="form-select">
+                            <option value="GENERAL">일반 전략 (General)</option>
+                            <option value="AUTO_TRADING">자동매매 전략 (Auto-Trading)</option>
+                        </select>
+                        <p style="font-size: 12px; color: #666; margin-top: 5px;">
+                            자동매매를 사용하려면 "자동매매 전략"을 선택한 후 저장하고,
+                            전략 목록에서 "Configure Trading" 버튼을 클릭하세요.
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">설명</label>
+                        <textarea id="description"
+                                  th:field="*{description}"
+                                  class="form-textarea"
+                                  placeholder="전략에 대한 상세한 설명을 입력하세요"></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="status">상태</label>
+                            <select id="status" th:field="*{status}" class="form-select">
+                                <option value="PLANNING">계획중</option>
+                                <option value="EXECUTING">실행중</option>
+                                <option value="COMPLETED">완료</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="priority">우선순위</label>
+                            <select id="priority" th:field="*{priority}" class="form-select">
+                                <option value="HIGH">높음</option>
+                                <option value="MEDIUM">중간</option>
+                                <option value="LOW">낮음</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="startDate">시작일</label>
+                            <input type="date"
+                                   id="startDate"
+                                   th:field="*{startDate}"
+                                   class="form-date">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="endDate">종료일</label>
+                            <input type="date"
+                                   id="endDate"
+                                   th:field="*{endDate}"
+                                   class="form-date">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="targetDate">목표일</label>
+                        <input type="date"
+                               id="targetDate"
+                               th:field="*{targetDate}"
+                               class="form-date">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Update</button>
+                        <a th:href="@{/trading/strategies}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

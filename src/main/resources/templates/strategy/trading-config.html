@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Auto-Trading Configuration</title>
+    <style>
+        .config-container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .config-section { background: #fff; padding: 30px; margin-bottom: 20px;
+                         border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .section-title { font-size: 20px; font-weight: 600; margin-bottom: 20px;
+                        border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: #333; }
+        .form-input, .form-select { width: 100%; padding: 10px; border: 1px solid #ddd;
+                                    border-radius: 4px; font-size: 14px; box-sizing: border-box; }
+        .form-textarea { width: 100%; padding: 10px; border: 1px solid #ddd;
+                        border-radius: 4px; resize: vertical; min-height: 100px; box-sizing: border-box; }
+        .btn { padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer;
+              font-size: 14px; text-decoration: none; display: inline-block; }
+        .btn-primary { background: #3498db; color: white; }
+        .btn-primary:hover { background: #2980b9; }
+        .btn-secondary { background: #95a5a6; color: white; }
+        .btn-secondary:hover { background: #7f8c8d; }
+        .form-actions { display: flex; gap: 10px; margin-top: 30px; }
+        .info-text { color: #666; font-size: 14px; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="config-container">
+            <header>
+                <h1>자동매매 설정 (Auto-Trading Configuration)</h1>
+                <p class="subtitle" th:text="${strategy.title}"></p>
+            </header>
+
+            <form th:action="@{/trading/strategies/{id}/trading(id=${strategy.id})}"
+                  method="post">
+
+                <!-- Basic Settings -->
+                <div class="config-section">
+                    <h2 class="section-title">기본 설정 (Basic Settings)</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>거래 계좌 *</label>
+                            <select name="targetAccountId" class="form-select" required>
+                                <option value="">Select Account</option>
+                                <option th:each="account : ${accounts}"
+                                        th:value="${account.accountId}"
+                                        th:text="${account.alias} + ' (' + ${account.cano} + ')'"
+                                        th:selected="${strategy.targetAccountId == account.accountId}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>자산 유형 *</label>
+                            <select name="assetType" class="form-select" required>
+                                <option value="KR_STOCK"
+                                        th:selected="${strategy.assetType == 'KR_STOCK' or strategy.assetType == null}">
+                                    국내 주식 (Korean Stock)
+                                </option>
+                                <option value="US_STOCK"
+                                        th:selected="${strategy.assetType == 'US_STOCK'}">
+                                    해외 주식 (US Stock)
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>종목 코드 (Symbol) *</label>
+                            <input type="text" name="symbol" class="form-input"
+                                   th:value="${strategy.symbol}"
+                                   placeholder="예: 005930 (삼성전자)" required>
+                            <p class="info-text">국내 주식: 6자리 코드 (예: 005930), 해외 주식: 티커 (예: AAPL)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Entry Conditions -->
+                <div class="config-section">
+                    <h2 class="section-title">진입 조건 (Entry Conditions)</h2>
+                    <div class="form-group">
+                        <label>진입 조건 (JSON 형식)</label>
+                        <textarea name="entryConditions" class="form-textarea"
+                                  th:text="${strategy.entryConditions}"
+                                  placeholder='예: [{"type":"PRICE","operator":">=","value":50000}]'></textarea>
+                        <p class="info-text">조건이 충족되면 매수를 실행합니다. JSON 배열 형식으로 입력하세요.</p>
+                    </div>
+                </div>
+
+                <!-- Exit Conditions -->
+                <div class="config-section">
+                    <h2 class="section-title">청산 조건 (Exit Conditions)</h2>
+                    <div class="form-group">
+                        <label>청산 조건 (JSON 형식)</label>
+                        <textarea name="exitConditions" class="form-textarea"
+                                  th:text="${strategy.exitConditions}"
+                                  placeholder='예: [{"type":"PRICE","operator":"<=","value":45000}]'></textarea>
+                        <p class="info-text">조건이 충족되면 매도를 실행합니다. JSON 배열 형식으로 입력하세요.</p>
+                    </div>
+                </div>
+
+                <!-- Risk Management -->
+                <div class="config-section">
+                    <h2 class="section-title">리스크 관리 (Risk Management)</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>손절 유형 (Stop Loss Type)</label>
+                            <select name="stopLossType" class="form-select">
+                                <option value="NONE"
+                                        th:selected="${strategy.stopLossType == 'NONE' or strategy.stopLossType == null}">
+                                    없음 (None)
+                                </option>
+                                <option value="PERCENTAGE"
+                                        th:selected="${strategy.stopLossType == 'PERCENTAGE'}">
+                                    퍼센트 (Percentage)
+                                </option>
+                                <option value="FIXED_PRICE"
+                                        th:selected="${strategy.stopLossType == 'FIXED_PRICE'}">
+                                    고정 가격 (Fixed Price)
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>손절 값 (Stop Loss Value)</label>
+                            <input type="number" name="stopLossValue" class="form-input"
+                                   th:value="${strategy.stopLossValue}"
+                                   step="0.01" placeholder="예: 5 (5% 손실 시)">
+                        </div>
+
+                        <div class="form-group">
+                            <label>익절 유형 (Take Profit Type)</label>
+                            <select name="takeProfitType" class="form-select">
+                                <option value="NONE"
+                                        th:selected="${strategy.takeProfitType == 'NONE' or strategy.takeProfitType == null}">
+                                    없음 (None)
+                                </option>
+                                <option value="PERCENTAGE"
+                                        th:selected="${strategy.takeProfitType == 'PERCENTAGE'}">
+                                    퍼센트 (Percentage)
+                                </option>
+                                <option value="FIXED_PRICE"
+                                        th:selected="${strategy.takeProfitType == 'FIXED_PRICE'}">
+                                    고정 가격 (Fixed Price)
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>익절 값 (Take Profit Value)</label>
+                            <input type="number" name="takeProfitValue" class="form-input"
+                                   th:value="${strategy.takeProfitValue}"
+                                   step="0.01" placeholder="예: 10 (10% 이익 시)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Position Sizing -->
+                <div class="config-section">
+                    <h2 class="section-title">포지션 크기 (Position Sizing)</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>포지션 크기 유형 *</label>
+                            <select name="positionSizeType" class="form-select" required>
+                                <option value="FIXED_AMOUNT"
+                                        th:selected="${strategy.positionSizeType == 'FIXED_AMOUNT' or strategy.positionSizeType == null}">
+                                    고정 금액 (Fixed Amount KRW)
+                                </option>
+                                <option value="PERCENTAGE_OF_BALANCE"
+                                        th:selected="${strategy.positionSizeType == 'PERCENTAGE_OF_BALANCE'}">
+                                    잔액 퍼센트 (% of Balance)
+                                </option>
+                                <option value="SHARES"
+                                        th:selected="${strategy.positionSizeType == 'SHARES'}">
+                                    주식 수 (Number of Shares)
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>포지션 크기 값 *</label>
+                            <input type="number" name="positionSizeValue" class="form-input"
+                                   th:value="${strategy.positionSizeValue}"
+                                   step="0.01" required placeholder="예: 1000000">
+                        </div>
+
+                        <div class="form-group">
+                            <label>최대 동시 포지션 수</label>
+                            <input type="number" name="maxPositions" class="form-input"
+                                   th:value="${strategy.maxPositions}"
+                                   min="1" value="1" placeholder="예: 1">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">저장 (Save Configuration)</button>
+                    <a th:href="@{/trading/strategies}" class="btn btn-secondary">취소 (Cancel)</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

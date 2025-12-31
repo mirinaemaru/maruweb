@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Strategy Management</title>
+    <style>
+        .strategy-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .filter-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .filter-form {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-select, .filter-input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .filter-select {
+            min-width: 150px;
+        }
+
+        .filter-input {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .add-section {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-input {
+            flex: 2;
+            min-width: 200px;
+        }
+
+        .form-select {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .form-textarea {
+            width: 100%;
+            resize: vertical;
+        }
+
+        .form-date {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .category-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .category-list {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .category-item {
+            background: #fff;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .strategy-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .strategy-item {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .strategy-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .strategy-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .strategy-badges {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-planning { background: #3498db; color: white; }
+        .badge-executing { background: #f39c12; color: white; }
+        .badge-completed { background: #27ae60; color: white; }
+
+        .badge-high { background: #e74c3c; color: white; }
+        .badge-medium { background: #f1c40f; color: #333; }
+        .badge-low { background: #95a5a6; color: white; }
+
+        .badge-category { background: #9b59b6; color: white; }
+        .badge-trading-active { background: #27ae60; color: white; }
+        .badge-trading-inactive { background: #95a5a6; color: white; }
+        .badge-success { background: #2ecc71; color: white; }
+        .badge-warning { background: #f39c12; color: white; }
+        .badge-danger { background: #e74c3c; color: white; }
+
+        .strategy-description {
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .strategy-dates {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .strategy-dates span {
+            margin-right: 15px;
+        }
+
+        .strategy-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .strategy-meta {
+            display: block;
+            font-size: 12px;
+            color: #999;
+            margin-top: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-edit {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="strategy-container">
+            <header>
+                <h1>전략관리 (Strategy Management)</h1>
+                <p class="subtitle">투자/트레이딩 전략을 관리하세요</p>
+            </header>
+
+            <!-- Flash Messages -->
+            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+            <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <form th:action="@{/trading/strategies}" method="get" class="filter-form">
+                    <select name="status" class="filter-select">
+                        <option value="">All Status</option>
+                        <option value="PLANNING" th:selected="${status == 'PLANNING'}">계획중 (Planning)</option>
+                        <option value="EXECUTING" th:selected="${status == 'EXECUTING'}">실행중 (Executing)</option>
+                        <option value="COMPLETED" th:selected="${status == 'COMPLETED'}">완료 (Completed)</option>
+                    </select>
+
+                    <select name="priority" class="filter-select">
+                        <option value="">All Priority</option>
+                        <option value="HIGH" th:selected="${priority == 'HIGH'}">높음 (High)</option>
+                        <option value="MEDIUM" th:selected="${priority == 'MEDIUM'}">중간 (Medium)</option>
+                        <option value="LOW" th:selected="${priority == 'LOW'}">낮음 (Low)</option>
+                    </select>
+
+                    <select name="categoryId" class="filter-select">
+                        <option value="">All Categories</option>
+                        <option th:each="cat : ${categories}"
+                                th:value="${cat.id}"
+                                th:text="${cat.name}"
+                                th:selected="${categoryId == cat.id}">Category</option>
+                    </select>
+
+                    <input type="text"
+                           name="keyword"
+                           th:value="${keyword}"
+                           placeholder="Search keyword..."
+                           class="filter-input">
+
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                    <a th:href="@{/trading/strategies}" class="btn btn-secondary">Reset</a>
+                </form>
+            </div>
+
+            <!-- Add Strategy Form -->
+            <div class="add-section">
+                <h2>새 전략 추가</h2>
+                <form th:action="@{/trading/strategies}" method="post" th:object="${newStrategy}">
+                    <div class="form-row">
+                        <input type="text"
+                               th:field="*{title}"
+                               placeholder="전략 제목 *"
+                               class="form-input"
+                               required>
+
+                        <select name="categoryId" class="form-select">
+                            <option value="">카테고리 선택</option>
+                            <option th:each="cat : ${categories}"
+                                    th:value="${cat.id}"
+                                    th:text="${cat.name}">Category</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <textarea th:field="*{description}"
+                                  placeholder="전략 설명 (optional)"
+                                  class="form-textarea"
+                                  rows="3"></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <select th:field="*{status}" class="form-select">
+                            <option value="PLANNING">계획중</option>
+                            <option value="EXECUTING">실행중</option>
+                            <option value="COMPLETED">완료</option>
+                        </select>
+
+                        <select th:field="*{priority}" class="form-select">
+                            <option value="HIGH">높음</option>
+                            <option value="MEDIUM" selected>중간</option>
+                            <option value="LOW">낮음</option>
+                        </select>
+
+                        <select th:field="*{strategyType}" class="form-select">
+                            <option value="GENERAL" selected>일반 전략</option>
+                            <option value="AUTO_TRADING">자동매매 전략</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <label>시작일:
+                            <input type="date" th:field="*{startDate}" class="form-date">
+                        </label>
+                        <label>종료일:
+                            <input type="date" th:field="*{endDate}" class="form-date">
+                        </label>
+                        <label>목표일:
+                            <input type="date" th:field="*{targetDate}" class="form-date">
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Add Strategy</button>
+                </form>
+            </div>
+
+            <!-- Category Management -->
+            <div class="category-section">
+                <h2>카테고리 관리</h2>
+                <form th:action="@{/trading/strategies/categories}" method="post" th:object="${newCategory}" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input type="text"
+                           th:field="*{name}"
+                           placeholder="New category name"
+                           class="form-input"
+                           style="flex: 1;">
+                    <button type="submit" class="btn btn-primary">Add Category</button>
+                </form>
+
+                <div class="category-list">
+                    <div th:each="cat : ${categories}" class="category-item">
+                        <span th:text="${cat.name}">Category Name</span>
+                        <form th:action="@{/trading/strategies/categories/{id}/delete(id=${cat.id})}"
+                              method="post" style="display:inline; margin: 0;">
+                            <button type="submit" class="btn btn-delete" style="padding: 4px 8px; font-size: 12px;"
+                                    onclick="return confirm('Delete category?')">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Strategies List -->
+            <div class="strategy-list">
+                <div th:if="${#lists.isEmpty(strategies)}" class="empty-state">
+                    <p>No strategies found. Add one to get started!</p>
+                </div>
+
+                <div th:each="strategy : ${strategies}" class="strategy-item">
+                    <div class="strategy-header">
+                        <h3>
+                            <span th:text="${strategy.title}">Strategy Title</span>
+                            <small style="color: #999; font-size: 14px; margin-left: 10px;">
+                                (Type: <span th:text="${strategy.strategyType}">-</span>)
+                            </small>
+                        </h3>
+                        <div class="strategy-badges">
+                            <span class="badge badge-status"
+                                  th:classappend="${strategy.status == 'PLANNING'} ? 'badge-planning' :
+                                                  (${strategy.status == 'EXECUTING'} ? 'badge-executing' : 'badge-completed')"
+                                  th:text="${strategy.status == 'PLANNING'} ? '계획중' :
+                                           (${strategy.status == 'EXECUTING'} ? '실행중' : '완료')">Status</span>
+                            <span class="badge badge-priority"
+                                  th:classappend="${strategy.priority == 'HIGH'} ? 'badge-high' :
+                                                  (${strategy.priority == 'MEDIUM'} ? 'badge-medium' : 'badge-low')"
+                                  th:text="${strategy.priority == 'HIGH'} ? '높음' :
+                                           (${strategy.priority == 'MEDIUM'} ? '중간' : '낮음')">Priority</span>
+                            <span th:if="${strategy.category}"
+                                  class="badge badge-category"
+                                  th:text="${strategy.category.name}">Category</span>
+                            <!-- Auto-trading status badge -->
+                            <span th:if="${strategy.strategyType == 'AUTO_TRADING'}"
+                                  class="badge"
+                                  th:classappend="${strategy.tradingStatus == 'ACTIVE'} ? 'badge-trading-active' : 'badge-trading-inactive'"
+                                  th:text="${strategy.tradingStatus == 'ACTIVE'} ? '자동매매 활성' : '자동매매 비활성'">Trading Status</span>
+                            <!-- Sync status badge -->
+                            <span th:if="${strategy.strategyType == 'AUTO_TRADING' && strategy.syncStatus != null}"
+                                  class="badge"
+                                  th:classappend="${strategy.syncStatus == 'SYNCED'} ? 'badge-success' :
+                                                 (${strategy.syncStatus == 'ERROR'} ? 'badge-danger' : 'badge-warning')"
+                                  th:text="${strategy.syncStatus}">Sync Status</span>
+                        </div>
+                    </div>
+
+                    <p th:if="${strategy.description}"
+                       class="strategy-description"
+                       th:text="${strategy.description}">Description</p>
+
+                    <div class="strategy-dates">
+                        <span th:if="${strategy.startDate}">
+                            시작: <span th:text="${#temporals.format(strategy.startDate, 'yyyy-MM-dd')}"></span>
+                        </span>
+                        <span th:if="${strategy.endDate}">
+                            종료: <span th:text="${#temporals.format(strategy.endDate, 'yyyy-MM-dd')}"></span>
+                        </span>
+                        <span th:if="${strategy.targetDate}">
+                            목표: <span th:text="${#temporals.format(strategy.targetDate, 'yyyy-MM-dd')}"></span>
+                        </span>
+                    </div>
+
+                    <div class="strategy-actions">
+                        <a th:href="@{/trading/strategies/{id}/edit(id=${strategy.id})}"
+                           class="btn btn-edit">Edit</a>
+
+                        <!-- Auto-trading controls -->
+                        <div th:if="${strategy.strategyType == 'AUTO_TRADING'}" style="display:inline;">
+                            <a th:href="@{/trading/strategies/{id}/trading(id=${strategy.id})}"
+                               class="btn btn-primary">Configure Trading</a>
+
+                            <form th:if="${strategy.tradingStatus != 'ACTIVE'}"
+                                  th:action="@{/trading/strategies/{id}/activate(id=${strategy.id})}"
+                                  method="post" style="display:inline; margin: 0;">
+                                <button type="submit" class="btn btn-primary"
+                                        onclick="return confirm('Activate auto-trading for this strategy?')">
+                                    Activate
+                                </button>
+                            </form>
+
+                            <form th:if="${strategy.tradingStatus == 'ACTIVE'}"
+                                  th:action="@{/trading/strategies/{id}/deactivate(id=${strategy.id})}"
+                                  method="post" style="display:inline; margin: 0;">
+                                <button type="submit" class="btn btn-secondary"
+                                        onclick="return confirm('Deactivate auto-trading?')">
+                                    Deactivate
+                                </button>
+                            </form>
+
+                            <a th:href="@{/trading/strategies/{id}/monitor(id=${strategy.id})}"
+                               class="btn btn-edit">Monitor</a>
+                        </div>
+
+                        <form th:action="@{/trading/strategies/{id}/delete(id=${strategy.id})}"
+                              method="post" style="display:inline; margin: 0;">
+                            <button type="submit" class="btn btn-delete"
+                                    onclick="return confirm('Delete strategy?')">Delete</button>
+                        </form>
+                    </div>
+
+                    <small class="strategy-meta">
+                        Created: <span th:text="${#temporals.format(strategy.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
