@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Kill Switch 관리</title>
+    <style>
+        .kill-switch-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        .status-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .kill-switch-indicator {
+            font-size: 72px;
+            margin-bottom: 20px;
+        }
+
+        .status-text {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .status-OFF {
+            color: #27ae60;
+        }
+
+        .status-ON {
+            color: #e74c3c;
+        }
+
+        .status-UNKNOWN {
+            color: #95a5a6;
+        }
+
+        .status-description {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .reason-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .reason-box strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .control-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .control-section h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .form-select, .form-input, .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-select:focus, .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #2196f3;
+        }
+
+        .info-box h3 {
+            margin-top: 0;
+            color: #1976d2;
+        }
+
+        .info-box ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .info-box li {
+            margin-bottom: 5px;
+            color: #424242;
+        }
+
+        .api-error {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="kill-switch-container">
+            <header>
+                <h1>⚡ Kill Switch 관리</h1>
+                <p class="subtitle">긴급 매매 중단 스위치 - 모든 자동매매를 즉시 중단합니다</p>
+            </header>
+
+            <!-- Flash Messages -->
+            <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+            <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+            <!-- API Connection Error -->
+            <div th:if="${!apiConnected}" class="api-error">
+                <h2>⚠️ Trading System에 연결할 수 없습니다</h2>
+                <p>API 서버(포트 8099)가 실행 중인지 확인하세요.</p>
+                <p th:if="${errorDetail}" th:text="${errorDetail}"></p>
+            </div>
+
+            <!-- Kill Switch Status -->
+            <div th:if="${apiConnected}" class="status-card">
+                <div class="kill-switch-indicator">
+                    <span th:if="${killSwitchStatus == 'OFF'}">✅</span>
+                    <span th:if="${killSwitchStatus == 'ON'}">🛑</span>
+                    <span th:if="${killSwitchStatus == 'UNKNOWN'}">❓</span>
+                </div>
+                <div class="status-text" th:classappend="'status-' + ${killSwitchStatus}">
+                    <span th:if="${killSwitchStatus == 'OFF'}">정상 운영 중</span>
+                    <span th:if="${killSwitchStatus == 'ON'}">매매 중단됨</span>
+                    <span th:if="${killSwitchStatus == 'UNKNOWN'}">상태 알 수 없음</span>
+                </div>
+                <div class="status-description">
+                    <span th:if="${killSwitchStatus == 'OFF'}">모든 자동매매가 정상적으로 작동 중입니다.</span>
+                    <span th:if="${killSwitchStatus == 'ON'}">모든 자동매매가 중단되었습니다. 새로운 주문이 생성되지 않습니다.</span>
+                    <span th:if="${killSwitchStatus == 'UNKNOWN'}">Kill Switch 상태를 확인할 수 없습니다.</span>
+                </div>
+
+                <!-- Reason Display -->
+                <div th:if="${killSwitch.reason != null && killSwitch.reason != ''}" class="reason-box">
+                    <strong>중단 사유:</strong>
+                    <p th:text="${killSwitch.reason}"></p>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div th:if="${apiConnected}" class="control-section">
+                <h2>Kill Switch 제어</h2>
+
+                <form th:action="@{/trading/kill-switch/toggle}" method="post">
+                    <div class="form-group">
+                        <label for="scope">적용 범위</label>
+                        <select id="scope" name="accountId" class="form-select">
+                            <option value="">전역 (모든 계좌)</option>
+                            <option th:each="account : ${accounts}"
+                                    th:value="${account.accountId}"
+                                    th:text="${account.alias} + ' (' + ${account.cano} + ')'">
+                                Account
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reason">중단 사유 (선택)</label>
+                        <textarea id="reason"
+                                  name="reason"
+                                  class="form-textarea"
+                                  placeholder="예: 시장 급락, 시스템 점검, 전략 오작동 등"></textarea>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit"
+                                name="status"
+                                value="ON"
+                                class="btn btn-danger"
+                                onclick="return confirm('정말로 Kill Switch를 활성화하시겠습니까?\n\n모든 자동매매가 즉시 중단됩니다.')">
+                            🛑 Kill Switch 활성화 (매매 중단)
+                        </button>
+                        <button type="submit"
+                                name="status"
+                                value="OFF"
+                                class="btn btn-success"
+                                onclick="return confirm('Kill Switch를 비활성화하시겠습니까?\n\n자동매매가 재개됩니다.')">
+                            ✅ Kill Switch 해제 (매매 재개)
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Information Box -->
+            <div th:if="${apiConnected}" class="info-box">
+                <h3>ℹ️ Kill Switch란?</h3>
+                <ul>
+                    <li><strong>전역 Kill Switch:</strong> 모든 계좌의 자동매매를 즉시 중단합니다.</li>
+                    <li><strong>계좌별 Kill Switch:</strong> 특정 계좌의 자동매매만 중단합니다.</li>
+                    <li><strong>효과:</strong> Kill Switch가 활성화되면 새로운 주문이 생성되지 않습니다. 이미 체결된 포지션은 유지됩니다.</li>
+                    <li><strong>사용 시기:</strong> 시장 급락, 시스템 오작동, 전략 검토 필요 시 등</li>
+                    <li><strong>해제:</strong> 문제가 해결된 후 Kill Switch를 해제하면 자동매매가 재개됩니다.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

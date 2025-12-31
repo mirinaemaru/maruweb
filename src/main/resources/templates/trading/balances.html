@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>잔고 조회</title>
+    <style>
+        .balances-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .account-selector {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .selector-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            white-space: nowrap;
+            height: 42px;
+            line-height: 42px;
+        }
+
+        .form-select {
+            min-width: 300px;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            height: 42px;
+            box-sizing: border-box;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            height: 42px;
+            box-sizing: border-box;
+            transform: translateY(-8px);
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-10px);
+        }
+
+        .balance-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .balance-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .balance-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .card-title {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .card-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            font-family: 'Courier New', monospace;
+        }
+
+        .card-unit {
+            font-size: 16px;
+            color: #999;
+            margin-left: 5px;
+        }
+
+        .card-positive {
+            color: #27ae60;
+        }
+
+        .card-negative {
+            color: #e74c3c;
+        }
+
+        .card-neutral {
+            color: #3498db;
+        }
+
+        .balance-summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .summary-item {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        .summary-label {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .summary-value {
+            font-size: 24px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .api-error {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #2196f3;
+            margin-top: 20px;
+        }
+
+        .info-box h3 {
+            margin-top: 0;
+            color: #1976d2;
+        }
+
+        .info-box p {
+            margin: 5px 0;
+            color: #424242;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="balances-container">
+            <header>
+                <h1>💰 잔고 조회</h1>
+                <p class="subtitle">계좌별 예수금, 주식 평가액, 손익 현황을 확인합니다</p>
+            </header>
+
+            <!-- Flash Messages -->
+            <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+            <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+            <!-- API Connection Error -->
+            <div th:if="${!apiConnected}" class="api-error">
+                <h2>⚠️ Trading System에 연결할 수 없습니다</h2>
+                <p>API 서버(포트 8099)가 실행 중인지 확인하세요.</p>
+                <p th:if="${errorDetail}" th:text="${errorDetail}"></p>
+            </div>
+
+            <!-- Account Selector -->
+            <div th:if="${apiConnected}" class="account-selector">
+                <form th:action="@{/trading/balances}" method="get" class="selector-form">
+                    <div class="form-group">
+                        <label for="accountId">계좌 선택</label>
+                        <select id="accountId" name="accountId" class="form-select" required>
+                            <option value="">계좌를 선택하세요</option>
+                            <option th:each="account : ${accounts}"
+                                    th:value="${account.accountId}"
+                                    th:text="${account.alias} + ' (' + ${account.cano} + ')'"
+                                    th:selected="${account.accountId == selectedAccountId}">
+                                Account
+                            </option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">조회</button>
+                </form>
+            </div>
+
+            <!-- Balance Display -->
+            <div th:if="${balance != null}">
+                <!-- Summary Card -->
+                <div class="balance-summary">
+                    <h2 style="margin-top: 0;">계좌 요약</h2>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <div class="summary-label">총 자산</div>
+                            <div class="summary-value" th:text="${#numbers.formatDecimal(balance.totalAssets, 0, 'COMMA', 0, 'POINT')} + '원'">0원</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">현금 잔고</div>
+                            <div class="summary-value" th:text="${#numbers.formatDecimal(balance.cashBalance, 0, 'COMMA', 0, 'POINT')} + '원'">0원</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">주식 평가액</div>
+                            <div class="summary-value" th:text="${#numbers.formatDecimal(balance.stockValue, 0, 'COMMA', 0, 'POINT')} + '원'">0원</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detail Cards -->
+                <div class="balance-cards">
+                    <div class="balance-card">
+                        <div class="card-title">💵 현금 잔고</div>
+                        <div class="card-value card-neutral">
+                            <span th:text="${#numbers.formatDecimal(balance.cashBalance, 0, 'COMMA', 0, 'POINT')}">0</span>
+                            <span class="card-unit">원</span>
+                        </div>
+                    </div>
+
+                    <div class="balance-card">
+                        <div class="card-title">📊 주식 평가액</div>
+                        <div class="card-value card-neutral">
+                            <span th:text="${#numbers.formatDecimal(balance.stockValue, 0, 'COMMA', 0, 'POINT')}">0</span>
+                            <span class="card-unit">원</span>
+                        </div>
+                    </div>
+
+                    <div class="balance-card">
+                        <div class="card-title">💰 총 자산</div>
+                        <div class="card-value">
+                            <span th:text="${#numbers.formatDecimal(balance.totalAssets, 0, 'COMMA', 0, 'POINT')}">0</span>
+                            <span class="card-unit">원</span>
+                        </div>
+                    </div>
+
+                    <div class="balance-card">
+                        <div class="card-title">📈 총 손익</div>
+                        <div class="card-value"
+                             th:classappend="${balance.totalProfitLoss > 0} ? 'card-positive' : (${balance.totalProfitLoss < 0} ? 'card-negative' : '')">
+                            <span th:text="${balance.totalProfitLoss > 0 ? '+' : ''} + ${#numbers.formatDecimal(balance.totalProfitLoss, 0, 'COMMA', 0, 'POINT')}">0</span>
+                            <span class="card-unit">원</span>
+                        </div>
+                    </div>
+
+                    <div class="balance-card">
+                        <div class="card-title">✅ 실현 손익</div>
+                        <div class="card-value"
+                             th:classappend="${balance.realizedPnl > 0} ? 'card-positive' : (${balance.realizedPnl < 0} ? 'card-negative' : '')">
+                            <span th:text="${balance.realizedPnl > 0 ? '+' : ''} + ${#numbers.formatDecimal(balance.realizedPnl, 0, 'COMMA', 0, 'POINT')}">0</span>
+                            <span class="card-unit">원</span>
+                        </div>
+                    </div>
+
+                    <div class="balance-card">
+                        <div class="card-title">⏳ 미실현 손익</div>
+                        <div class="card-value"
+                             th:classappend="${balance.unrealizedPnl > 0} ? 'card-positive' : (${balance.unrealizedPnl < 0} ? 'card-negative' : '')">
+                            <span th:text="${balance.unrealizedPnl > 0 ? '+' : ''} + ${#numbers.formatDecimal(balance.unrealizedPnl, 0, 'COMMA', 0, 'POINT')}">0</span>
+                            <span class="card-unit">원</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Box -->
+                <div class="info-box">
+                    <h3>ℹ️ 잔고 정보 안내</h3>
+                    <p><strong>현금 잔고:</strong> 주문 가능한 현금 (임시 값: 1,000,000원)</p>
+                    <p><strong>주식 평가액:</strong> 보유 중인 주식의 평균 매입가 기준 평가액</p>
+                    <p><strong>총 자산:</strong> 현금 잔고 + 주식 평가액</p>
+                    <p><strong>실현 손익:</strong> 매도를 통해 확정된 손익</p>
+                    <p><strong>미실현 손익:</strong> 보유 중인 주식의 평가 손익 (현재가 기준, 임시 값: 0원)</p>
+                    <p style="margin-top: 10px; color: #e74c3c;"><strong>주의:</strong> 현재 현금 잔고와 미실현 손익은 임시 값입니다. 실제 KIS API 연동 시 정확한 값이 표시됩니다.</p>
+                </div>
+            </div>
+
+            <!-- Initial State -->
+            <div th:if="${apiConnected && balance == null && selectedAccountId == null}" class="empty-state">
+                <div class="empty-state-icon">💳</div>
+                <p>계좌를 선택하고 조회 버튼을 클릭하세요.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

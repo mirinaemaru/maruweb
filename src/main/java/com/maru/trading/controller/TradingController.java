@@ -304,4 +304,133 @@ public class TradingController {
         }
     }
 
+    /**
+     * Kill Switch 관리 페이지
+     */
+    @GetMapping("/kill-switch")
+    public String killSwitch(Model model) {
+        try {
+            log.info("Loading Kill Switch Management page");
+
+            // Kill Switch 상태 조회
+            Map<String, Object> killSwitch = tradingApiService.getKillSwitchStatus();
+            model.addAttribute("killSwitch", killSwitch);
+            model.addAttribute("killSwitchStatus", killSwitch.get("status"));
+
+            // 계좌 목록 (계좌별 Kill Switch 설정용)
+            Map<String, Object> accountsData = tradingApiService.getAccounts();
+            List<?> accounts = (List<?>) accountsData.get("items");
+            model.addAttribute("accounts", accounts);
+
+            model.addAttribute("apiConnected", true);
+            return "trading/kill-switch";
+
+        } catch (Exception e) {
+            log.error("Failed to load Kill Switch page", e);
+            model.addAttribute("error", "Trading System API에 연결할 수 없습니다. API 서버가 실행 중인지 확인하세요.");
+            model.addAttribute("errorDetail", e.getMessage());
+            model.addAttribute("apiConnected", false);
+            return "trading/kill-switch";
+        }
+    }
+
+    /**
+     * Kill Switch 토글 처리
+     */
+    @PostMapping("/kill-switch/toggle")
+    public String toggleKillSwitch(
+            @RequestParam String status,
+            @RequestParam(required = false) String reason,
+            @RequestParam(required = false) String accountId,
+            RedirectAttributes redirectAttributes) {
+        try {
+            log.info("Toggling Kill Switch: status={}, reason={}, accountId={}", status, reason, accountId);
+
+            tradingApiService.toggleKillSwitch(status, reason, accountId);
+
+            String scope = (accountId != null && !accountId.isEmpty()) ? "계좌별" : "전역";
+            String message = String.format("Kill Switch가 %s로 설정되었습니다. (%s)", status, scope);
+            redirectAttributes.addFlashAttribute("message", message);
+
+            return "redirect:/trading/kill-switch";
+
+        } catch (Exception e) {
+            log.error("Failed to toggle Kill Switch", e);
+            redirectAttributes.addFlashAttribute("error", "Kill Switch 설정에 실패했습니다: " + e.getMessage());
+            return "redirect:/trading/kill-switch";
+        }
+    }
+
+    /**
+     * 체결 내역 조회 페이지
+     */
+    @GetMapping("/fills")
+    public String fills(
+            @RequestParam(required = false) String accountId,
+            @RequestParam(required = false) String orderId,
+            @RequestParam(required = false) String symbol,
+            Model model) {
+        try {
+            log.info("Loading Trading Fills page - accountId: {}, orderId: {}, symbol: {}", accountId, orderId, symbol);
+
+            // 계좌 목록 (필터용)
+            Map<String, Object> accountsData = tradingApiService.getAccounts();
+            List<?> accounts = (List<?>) accountsData.get("items");
+            model.addAttribute("accounts", accounts);
+            model.addAttribute("selectedAccountId", accountId);
+            model.addAttribute("selectedOrderId", orderId);
+            model.addAttribute("selectedSymbol", symbol);
+
+            // 체결 내역 조회
+            if (accountId != null && !accountId.isEmpty()) {
+                Map<String, Object> fillsData = tradingApiService.getFills(accountId, orderId, symbol);
+                List<?> fills = (List<?>) fillsData.get("items");
+                model.addAttribute("fills", fills);
+                model.addAttribute("fillCount", fills != null ? fills.size() : 0);
+            }
+
+            model.addAttribute("apiConnected", true);
+            return "trading/fills";
+
+        } catch (Exception e) {
+            log.error("Failed to load fills", e);
+            model.addAttribute("error", "Trading System API에 연결할 수 없습니다. API 서버가 실행 중인지 확인하세요.");
+            model.addAttribute("errorDetail", e.getMessage());
+            model.addAttribute("apiConnected", false);
+            return "trading/fills";
+        }
+    }
+
+    /**
+     * 잔고 조회 페이지
+     */
+    @GetMapping("/balances")
+    public String balances(@RequestParam(required = false) String accountId, Model model) {
+        try {
+            log.info("Loading Trading Balances page - accountId: {}", accountId);
+
+            // 계좌 목록 (선택용)
+            Map<String, Object> accountsData = tradingApiService.getAccounts();
+            List<?> accounts = (List<?>) accountsData.get("items");
+            model.addAttribute("accounts", accounts);
+            model.addAttribute("selectedAccountId", accountId);
+
+            // 잔고 조회
+            if (accountId != null && !accountId.isEmpty()) {
+                Map<String, Object> balanceData = tradingApiService.getBalance(accountId);
+                model.addAttribute("balance", balanceData);
+            }
+
+            model.addAttribute("apiConnected", true);
+            return "trading/balances";
+
+        } catch (Exception e) {
+            log.error("Failed to load balances", e);
+            model.addAttribute("error", "Trading System API에 연결할 수 없습니다. API 서버가 실행 중인지 확인하세요.");
+            model.addAttribute("errorDetail", e.getMessage());
+            model.addAttribute("apiConnected", false);
+            return "trading/balances";
+        }
+    }
+
 }

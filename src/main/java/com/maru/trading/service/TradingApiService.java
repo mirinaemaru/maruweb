@@ -181,6 +181,40 @@ public class TradingApiService {
     }
 
     /**
+     * Kill Switch 토글 (ON/OFF)
+     */
+    public Map<String, Object> toggleKillSwitch(String status, String reason, String accountId) {
+        String url = "/api/v1/admin/kill-switch";
+        try {
+            log.info("Toggling Kill Switch: status={}, reason={}, accountId={}", status, reason, accountId);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            Map<String, Object> requestData = new HashMap<>();
+            requestData.put("status", status);
+            if (reason != null && !reason.isEmpty()) {
+                requestData.put("reason", reason);
+            }
+            if (accountId != null && !accountId.isEmpty()) {
+                requestData.put("accountId", accountId);
+            }
+
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestData, headers);
+
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    request,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to toggle kill switch in Trading System", e);
+            throw new RuntimeException("Kill Switch 변경에 실패했습니다.", e);
+        }
+    }
+
+    /**
      * 전략 목록 조회
      */
     public Map<String, Object> getStrategies() {
@@ -374,6 +408,62 @@ public class TradingApiService {
         } catch (RestClientException e) {
             log.error("Failed to update strategy status in Trading System", e);
             throw new RuntimeException("전략 상태 변경에 실패했습니다.", e);
+        }
+    }
+
+    /**
+     * 체결 내역 조회
+     */
+    public Map<String, Object> getFills(String accountId, String orderId, String symbol) {
+        StringBuilder url = new StringBuilder("/api/v1/query/fills?");
+
+        boolean hasParam = false;
+        if (accountId != null && !accountId.isEmpty()) {
+            url.append("accountId=").append(accountId);
+            hasParam = true;
+        }
+        if (orderId != null && !orderId.isEmpty()) {
+            if (hasParam) url.append("&");
+            url.append("orderId=").append(orderId);
+            hasParam = true;
+        }
+        if (symbol != null && !symbol.isEmpty()) {
+            if (hasParam) url.append("&");
+            url.append("symbol=").append(symbol);
+        }
+
+        try {
+            log.debug("Calling Trading API: {}", url);
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                    url.toString(),
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to get fills from Trading System", e);
+            throw new RuntimeException("체결 내역을 가져올 수 없습니다.", e);
+        }
+    }
+
+    /**
+     * 계좌 잔고 조회
+     */
+    public Map<String, Object> getBalance(String accountId) {
+        String url = "/api/v1/query/balance?accountId=" + accountId;
+        try {
+            log.debug("Calling Trading API: {}", url);
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to get balance from Trading System", e);
+            throw new RuntimeException("계좌 잔고를 가져올 수 없습니다.", e);
         }
     }
 }

@@ -63,6 +63,18 @@
                             <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/orders')} ? 'active' : ''">
                                 <a th:href="@{/trading/orders}">주문조회</a>
                             </li>
+                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/positions')} ? 'active' : ''">
+                                <a th:href="@{/trading/positions}">포지션 관리</a>
+                            </li>
+                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/fills')} ? 'active' : ''">
+                                <a th:href="@{/trading/fills}">체결 내역</a>
+                            </li>
+                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/balances')} ? 'active' : ''">
+                                <a th:href="@{/trading/balances}">잔고 조회</a>
+                            </li>
+                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/kill-switch')} ? 'active' : ''">
+                                <a th:href="@{/trading/kill-switch}">⚡ Kill Switch</a>
+                            </li>
                         </ul>
                     </li>
                 </ul>

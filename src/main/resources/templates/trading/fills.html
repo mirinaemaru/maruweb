@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>체결 내역 조회</title>
+    <style>
+        .fills-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .filter-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            white-space: nowrap;
+            height: 42px;
+            line-height: 42px;
+        }
+
+        .form-select, .form-input {
+            min-width: 200px;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            height: 42px;
+            box-sizing: border-box;
+        }
+
+        .form-select:focus, .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            height: 42px;
+            box-sizing: border-box;
+            transform: translateY(-8px);
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-10px);
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+            transform: translateY(-10px);
+        }
+
+        .fills-section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .fills-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .fills-count {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .fills-count strong {
+            color: #667eea;
+            font-size: 18px;
+        }
+
+        .fills-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .fills-table thead {
+            background: #f8f9fa;
+        }
+
+        .fills-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+            font-size: 14px;
+        }
+
+        .fills-table td {
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+
+        .fills-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .side-buy {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+
+        .side-sell {
+            color: #3498db;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .api-error {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .price-cell {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+        }
+
+        .number-cell {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="fills-container">
+            <header>
+                <h1>📋 체결 내역 조회</h1>
+                <p class="subtitle">실제 체결된 주문의 상세 내역을 확인합니다</p>
+            </header>
+
+            <!-- Flash Messages -->
+            <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+            <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+            <!-- API Connection Error -->
+            <div th:if="${!apiConnected}" class="api-error">
+                <h2>⚠️ Trading System에 연결할 수 없습니다</h2>
+                <p>API 서버(포트 8099)가 실행 중인지 확인하세요.</p>
+                <p th:if="${errorDetail}" th:text="${errorDetail}"></p>
+            </div>
+
+            <!-- Filter Section -->
+            <div th:if="${apiConnected}" class="filter-section">
+                <form th:action="@{/trading/fills}" method="get" class="filter-form">
+                    <div class="form-group">
+                        <label for="accountId">계좌 선택</label>
+                        <select id="accountId" name="accountId" class="form-select" required>
+                            <option value="">계좌를 선택하세요</option>
+                            <option th:each="account : ${accounts}"
+                                    th:value="${account.accountId}"
+                                    th:text="${account.alias} + ' (' + ${account.cano} + ')'"
+                                    th:selected="${account.accountId == selectedAccountId}">
+                                Account
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="symbol">종목코드 (선택)</label>
+                        <input type="text"
+                               id="symbol"
+                               name="symbol"
+                               th:value="${selectedSymbol}"
+                               placeholder="예: 005930"
+                               class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="orderId">주문번호 (선택)</label>
+                        <input type="text"
+                               id="orderId"
+                               name="orderId"
+                               th:value="${selectedOrderId}"
+                               placeholder="주문번호"
+                               class="form-input">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">조회</button>
+                    <a th:href="@{/trading/fills}" class="btn btn-secondary">초기화</a>
+                </form>
+            </div>
+
+            <!-- Fills List -->
+            <div th:if="${apiConnected && selectedAccountId != null}" class="fills-section">
+                <div class="fills-header">
+                    <h2>체결 내역</h2>
+                    <div class="fills-count">
+                        총 <strong th:text="${fillCount ?: 0}">0</strong>건
+                    </div>
+                </div>
+
+                <div th:if="${fills == null || fills.isEmpty()}" class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <p>조회된 체결 내역이 없습니다.</p>
+                    <p style="font-size: 14px; color: #999;">다른 조건으로 검색해보세요.</p>
+                </div>
+
+                <table th:if="${fills != null && !fills.isEmpty()}" class="fills-table">
+                    <thead>
+                        <tr>
+                            <th>체결일시</th>
+                            <th>종목</th>
+                            <th>구분</th>
+                            <th class="price-cell">체결가</th>
+                            <th class="number-cell">체결수량</th>
+                            <th class="price-cell">수수료</th>
+                            <th class="price-cell">세금</th>
+                            <th>주문번호</th>
+                            <th>증권사주문번호</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="fill : ${fills}">
+                            <td th:text="${fill.fillTimestamp}">2025-01-01 09:00:00</td>
+                            <td th:text="${fill.symbol}">005930</td>
+                            <td>
+                                <span th:if="${fill.side == 'BUY'}" class="side-buy">매수</span>
+                                <span th:if="${fill.side == 'SELL'}" class="side-sell">매도</span>
+                            </td>
+                            <td class="price-cell" th:text="${#numbers.formatDecimal(fill.fillPrice, 0, 'COMMA', 2, 'POINT')}">70,000</td>
+                            <td class="number-cell" th:text="${#numbers.formatDecimal(fill.fillQty, 0, 'COMMA', 0, 'POINT')}">10</td>
+                            <td class="price-cell" th:text="${#numbers.formatDecimal(fill.fee, 0, 'COMMA', 0, 'POINT')}">350</td>
+                            <td class="price-cell" th:text="${#numbers.formatDecimal(fill.tax, 0, 'COMMA', 0, 'POINT')}">1,400</td>
+                            <td style="font-family: monospace; font-size: 12px;" th:text="${#strings.abbreviate(fill.orderId, 12)}">ord_...</td>
+                            <td style="font-family: monospace; font-size: 12px;" th:text="${fill.brokerOrderNo ?: '-'}">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Initial State -->
+            <div th:if="${apiConnected && selectedAccountId == null}" class="empty-state">
+                <div class="empty-state-icon">🔍</div>
+                <p>계좌를 선택하고 조회 버튼을 클릭하세요.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
