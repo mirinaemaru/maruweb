@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>알림 히스토리</title>
+    <style>
+        .notification-history-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .history-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .unread-badge {
+            background: #ff4444;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .filter-section select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .filter-section button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            background: #667eea;
+            color: white;
+        }
+
+        .filter-section button:hover {
+            background: #5568d3;
+        }
+
+        .notification-list {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .notification-item {
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            transition: background 0.2s;
+            position: relative;
+        }
+
+        .notification-item:hover {
+            background: #f8f9fa;
+        }
+
+        .notification-item.unread {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+        }
+
+        .notification-icon {
+            font-size: 32px;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .notification-title {
+            font-weight: 700;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .notification-time {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .notification-message {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .notification-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-action {
+            padding: 5px 12px;
+            font-size: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-read {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .type-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .type-INFO { background: #e3f2fd; color: #1976d2; }
+        .type-SUCCESS { background: #e8f5e9; color: #388e3c; }
+        .type-WARNING { background: #fff3e0; color: #f57c00; }
+        .type-ERROR { background: #ffebee; color: #c62828; }
+        .type-TRADE { background: #f3e5f5; color: #7b1fa2; }
+        .type-STRATEGY { background: #fce4ec; color: #c2185b; }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .bulk-actions {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="notification-history-container">
+            <div class="history-header">
+                <h1>🔔 알림 히스토리</h1>
+                <div class="unread-badge" th:if="${unreadCount > 0}" th:text="'읽지 않음: ' + ${unreadCount}">읽지 않음: 0</div>
+            </div>
+
+            <!-- Filters -->
+            <div class="filter-section">
+                <select id="typeFilter">
+                    <option value="">모든 타입</option>
+                    <option value="INFO" th:selected="${selectedType == 'INFO'}">정보</option>
+                    <option value="SUCCESS" th:selected="${selectedType == 'SUCCESS'}">성공</option>
+                    <option value="WARNING" th:selected="${selectedType == 'WARNING'}">경고</option>
+                    <option value="ERROR" th:selected="${selectedType == 'ERROR'}">오류</option>
+                    <option value="TRADE" th:selected="${selectedType == 'TRADE'}">거래</option>
+                    <option value="STRATEGY" th:selected="${selectedType == 'STRATEGY'}">전략</option>
+                </select>
+
+                <select id="readStatusFilter">
+                    <option value="">모든 상태</option>
+                    <option value="N" th:selected="${selectedReadStatus == 'N'}">읽지 않음</option>
+                    <option value="Y" th:selected="${selectedReadStatus == 'Y'}">읽음</option>
+                </select>
+
+                <button onclick="applyFilters()">필터 적용</button>
+                <button onclick="clearFilters()">초기화</button>
+            </div>
+
+            <!-- Notification List -->
+            <div class="notification-list">
+                <div class="bulk-actions">
+                    <button class="btn-action btn-read" onclick="markAllAsRead()">모두 읽음 처리</button>
+                </div>
+
+                <div th:if="${notifications == null || #lists.isEmpty(notifications)}" class="empty-state">
+                    <div style="font-size: 48px;">📭</div>
+                    <p>알림이 없습니다.</p>
+                </div>
+
+                <div th:each="notification : ${notifications}"
+                     class="notification-item"
+                     th:classappend="${notification.readStatus == 'N'} ? 'unread' : ''">
+
+                    <div class="notification-icon" th:text="${notification.type == 'INFO' ? '📌' :
+                        (notification.type == 'SUCCESS' ? '✅' :
+                        (notification.type == 'WARNING' ? '⚠️' :
+                        (notification.type == 'ERROR' ? '❌' :
+                        (notification.type == 'TRADE' ? '💰' :
+                        (notification.type == 'STRATEGY' ? '🎯' : '📌')))))}">📌</div>
+
+                    <div class="notification-content">
+                        <div class="notification-header">
+                            <div>
+                                <span class="type-badge" th:classappend="'type-' + ${notification.type}" th:text="${notification.type}">INFO</span>
+                                <span class="notification-title" th:text="${notification.title}">알림 제목</span>
+                            </div>
+                            <span class="notification-time" th:text="${#temporals.format(notification.createdAt, 'yyyy-MM-dd HH:mm:ss')}">2024-01-01 10:00:00</span>
+                        </div>
+
+                        <div class="notification-message" th:text="${notification.message}">알림 메시지</div>
+
+                        <div class="notification-actions">
+                            <button th:if="${notification.readStatus == 'N'}"
+                                    class="btn-action btn-read"
+                                    th:onclick="'markAsRead(' + ${notification.id} + ')'">읽음 처리</button>
+                            <button class="btn-action btn-delete"
+                                    th:onclick="'deleteNotification(' + ${notification.id} + ')'">삭제</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="extra-scripts">
+        <script>
+            function applyFilters() {
+                const type = document.getElementById('typeFilter').value;
+                const readStatus = document.getElementById('readStatusFilter').value;
+
+                let url = '/trading/notifications/history?';
+                if (type) url += 'type=' + type + '&';
+                if (readStatus) url += 'readStatus=' + readStatus;
+
+                window.location.href = url;
+            }
+
+            function clearFilters() {
+                window.location.href = '/trading/notifications/history';
+            }
+
+            function markAsRead(id) {
+                fetch(`/api/notifications/${id}/read`, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+
+            function markAllAsRead() {
+                fetch('/api/notifications/read-all', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+
+            function deleteNotification(id) {
+                if (!confirm('이 알림을 삭제하시겠습니까?')) return;
+
+                fetch(`/api/notifications/${id}/delete`, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        </script>
+    </th:block>
+</body>
+</html>

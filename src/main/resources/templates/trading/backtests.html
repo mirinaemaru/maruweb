@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>백테스팅 결과</title>
+    <style>
+        .backtest-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            border-radius: 16px;
+            color: white;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        header .subtitle {
+            font-size: 16px;
+            opacity: 0.95;
+        }
+
+        .filter-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .filter-grid label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .filter-grid input,
+        .filter-grid select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .backtest-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .backtest-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .backtest-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+
+        .backtest-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f5f5f5;
+        }
+
+        .backtest-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .backtest-date {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .metric {
+            text-align: center;
+        }
+
+        .metric-label {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .metric-value.positive {
+            color: #28a745;
+        }
+
+        .metric-value.negative {
+            color: #dc3545;
+        }
+
+        .view-detail-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            display: block;
+            transition: all 0.3s;
+        }
+
+        .view-detail-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="backtest-container">
+            <header>
+                <h1>📊 백테스팅 결과</h1>
+                <p class="subtitle">전략 백테스팅 결과 및 성과 분석</p>
+            </header>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <form th:action="@{/trading/backtests}" method="get">
+                    <div class="filter-grid">
+                        <div>
+                            <label>전략 ID</label>
+                            <input type="text" name="strategyId" th:value="${strategyId}" placeholder="전략 ID (선택사항)">
+                        </div>
+                        <div>
+                            <label>시작 날짜</label>
+                            <input type="date" name="startDate" th:value="${startDate}">
+                        </div>
+                        <div>
+                            <label>종료 날짜</label>
+                            <input type="date" name="endDate" th:value="${endDate}">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" class="btn btn-primary">🔍 조회</button>
+                        <button type="button" class="btn btn-secondary" onclick="window.location.href='/trading/backtests'">🔄 초기화</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Backtest Results Grid -->
+            <div th:if="${backtests == null || #lists.isEmpty(backtests)}" class="no-data">
+                백테스팅 결과가 없습니다.
+            </div>
+
+            <div class="backtest-grid" th:if="${backtests != null && !#lists.isEmpty(backtests)}">
+                <div th:each="backtest : ${backtests}" class="backtest-card">
+                    <div class="backtest-header">
+                        <div>
+                            <div class="backtest-name" th:text="${backtest.strategyName}">Strategy Name</div>
+                            <div class="backtest-date" th:text="${backtest.startDate} + ' ~ ' + ${backtest.endDate}">2024-01-01 ~ 2024-12-31</div>
+                        </div>
+                    </div>
+
+                    <div class="metric-grid">
+                        <div class="metric">
+                            <div class="metric-label">총 손익</div>
+                            <div class="metric-value"
+                                 th:classappend="${backtest.totalProfitLoss >= 0 ? 'positive' : 'negative'}"
+                                 th:text="${#numbers.formatInteger(backtest.totalProfitLoss, 0, 'COMMA')}">0</div>
+                        </div>
+
+                        <div class="metric">
+                            <div class="metric-label">승률</div>
+                            <div class="metric-value" th:text="${#numbers.formatDecimal(backtest.winRate, 1, 1)} + '%'">0.0%</div>
+                        </div>
+
+                        <div class="metric">
+                            <div class="metric-label">총 거래</div>
+                            <div class="metric-value" th:text="${backtest.totalTrades}">0</div>
+                        </div>
+
+                        <div class="metric">
+                            <div class="metric-label">샤프 비율</div>
+                            <div class="metric-value" th:text="${#numbers.formatDecimal(backtest.sharpeRatio, 2, 2)}">0.00</div>
+                        </div>
+                    </div>
+
+                    <a th:href="@{/trading/backtests/{id}(id=${backtest.id})}" class="view-detail-btn">
+                        📈 상세 보기
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

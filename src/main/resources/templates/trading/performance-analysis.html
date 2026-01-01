@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>성과 분석</title>
+    <style>
+        .performance-container {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .performance-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .performance-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+        }
+
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .btn-filter {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .btn-filter:hover {
+            opacity: 0.9;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .summary-card h3 {
+            font-size: 14px;
+            color: #666;
+            margin: 0 0 10px 0;
+            font-weight: 600;
+        }
+
+        .summary-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .summary-value.positive {
+            color: #10b981;
+        }
+
+        .summary-value.negative {
+            color: #ef4444;
+        }
+
+        .chart-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .chart-section h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin: 0 0 20px 0;
+        }
+
+        .data-table {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        .data-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .data-table td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #fecaca;
+        }
+
+        .btn-export {
+            background: #10b981;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .btn-export:hover {
+            background: #059669;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="performance-container">
+            <div class="performance-header">
+                <h1>📊 성과 분석</h1>
+                <p>일별 및 월별 트레이딩 성과를 분석합니다</p>
+            </div>
+
+            <div th:if="${error}" class="error-message">
+                <span th:text="${error}">오류 메시지</span>
+            </div>
+
+            <!-- 필터 섹션 -->
+            <form method="get" th:action="@{/trading/performance}">
+                <div class="filter-section">
+                    <div class="filter-group">
+                        <label>기간</label>
+                        <select name="period" th:value="${period}">
+                            <option value="daily" th:selected="${period == 'daily'}">일별</option>
+                            <option value="monthly" th:selected="${period == 'monthly'}">월별</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>시작일</label>
+                        <input type="date" name="startDate" th:value="${startDate}" required>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>종료일</label>
+                        <input type="date" name="endDate" th:value="${endDate}" required>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>전략 (선택)</label>
+                        <input type="text" name="strategyId" th:value="${strategyId}" placeholder="전략 ID">
+                    </div>
+
+                    <button type="submit" class="btn-filter">📊 조회</button>
+                    <button type="button" class="btn-export" onclick="exportToExcel()">📥 Excel 다운로드</button>
+                </div>
+            </form>
+
+            <!-- 요약 카드 -->
+            <div class="summary-cards" th:if="${summary != null}">
+                <div class="summary-card">
+                    <h3>총 수익/손실</h3>
+                    <div class="summary-value"
+                         th:classappend="${summary.totalProfitLoss >= 0} ? 'positive' : 'negative'"
+                         th:text="${#numbers.formatDecimal(summary.totalProfitLoss, 0, 'COMMA', 0, 'POINT')} + '원'">
+                        0원
+                    </div>
+                </div>
+
+                <div class="summary-card">
+                    <h3>총 거래 횟수</h3>
+                    <div class="summary-value" th:text="${summary.totalTrades}">0</div>
+                </div>
+
+                <div class="summary-card">
+                    <h3>승률</h3>
+                    <div class="summary-value" th:text="${#numbers.formatDecimal(summary.winRate, 1, 'COMMA', 2, 'POINT')} + '%'">0%</div>
+                </div>
+
+                <div class="summary-card">
+                    <h3>평균 수익/손실</h3>
+                    <div class="summary-value"
+                         th:classappend="${summary.avgProfitLoss >= 0} ? 'positive' : 'negative'"
+                         th:text="${#numbers.formatDecimal(summary.avgProfitLoss, 0, 'COMMA', 0, 'POINT')} + '원'">
+                        0원
+                    </div>
+                </div>
+            </div>
+
+            <!-- 차트 섹션 -->
+            <div class="chart-section" th:if="${performanceData != null}">
+                <h2>성과 추이</h2>
+                <canvas id="performanceChart" width="400" height="150"></canvas>
+            </div>
+
+            <!-- 데이터 테이블 -->
+            <div class="data-table" th:if="${performanceData != null && !#lists.isEmpty(performanceData)}">
+                <h2>상세 데이터</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>날짜</th>
+                            <th>거래 횟수</th>
+                            <th>수익/손실</th>
+                            <th>승률</th>
+                            <th>최대 이익</th>
+                            <th>최대 손실</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="item : ${performanceData}">
+                            <td th:text="${item.date}">2024-01-01</td>
+                            <td th:text="${item.trades}">0</td>
+                            <td th:text="${#numbers.formatDecimal(item.profitLoss, 0, 'COMMA', 0, 'POINT')} + '원'"
+                                th:style="${item.profitLoss >= 0} ? 'color: #10b981;' : 'color: #ef4444;'">
+                                0원
+                            </td>
+                            <td th:text="${#numbers.formatDecimal(item.winRate, 1, 'COMMA', 2, 'POINT')} + '%'">0%</td>
+                            <td th:text="${#numbers.formatDecimal(item.maxProfit, 0, 'COMMA', 0, 'POINT')} + '원'">0원</td>
+                            <td th:text="${#numbers.formatDecimal(item.maxLoss, 0, 'COMMA', 0, 'POINT')} + '원'">0원</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div th:if="${performanceData == null || #lists.isEmpty(performanceData)}"
+                 style="text-align: center; padding: 40px; color: #666;">
+                조회된 데이터가 없습니다. 필터를 조정해 주세요.
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="extra-scripts">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            const performanceData = /*[[${performanceData}]]*/ [];
+
+            if (performanceData && performanceData.length > 0) {
+                const ctx = document.getElementById('performanceChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: performanceData.map(item => item.date),
+                        datasets: [{
+                            label: '일일 수익/손실',
+                            data: performanceData.map(item => item.profitLoss),
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }, {
+                            label: '누적 수익/손실',
+                            data: performanceData.map((item, index) => {
+                                return performanceData.slice(0, index + 1)
+                                    .reduce((sum, d) => sum + d.profitLoss, 0);
+                            }),
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value.toLocaleString() + '원';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function exportToExcel() {
+                const params = new URLSearchParams(window.location.search);
+                const url = '/trading/performance/export?' + params.toString();
+                window.location.href = url;
+            }
+            /*]]>*/
+        </script>
+    </th:block>
+</body>
+</html>

@@ -39,6 +39,93 @@
                     margin-bottom: 30px;
                     border: 1px solid rgba(0,0,0,0.04);
                 }
+                .advanced-filter-toggle {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    cursor: pointer;
+                    margin-bottom: 20px;
+                    padding-bottom: 15px;
+                    border-bottom: 2px solid #f0f0f0;
+                }
+                .advanced-filter-toggle h3 {
+                    font-size: 16px;
+                    font-weight: 600;
+                    color: #333;
+                    margin: 0;
+                }
+                .toggle-icon {
+                    font-size: 20px;
+                    transition: transform 0.3s;
+                }
+                .toggle-icon.open {
+                    transform: rotate(180deg);
+                }
+                .advanced-filter-content {
+                    display: none;
+                    margin-bottom: 20px;
+                }
+                .advanced-filter-content.show {
+                    display: block;
+                }
+                .filter-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                    gap: 20px;
+                    margin-bottom: 20px;
+                }
+                .filter-group {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                }
+                .filter-group label {
+                    font-weight: 600;
+                    color: #333;
+                    font-size: 14px;
+                }
+                .filter-group input,
+                .filter-group select {
+                    padding: 10px 15px;
+                    border: 2px solid #e0e0e0;
+                    border-radius: 6px;
+                    font-size: 14px;
+                    transition: all 0.3s;
+                }
+                .filter-group input:focus,
+                .filter-group select:focus {
+                    outline: none;
+                    border-color: #667eea;
+                    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+                }
+                .filter-actions {
+                    display: flex;
+                    gap: 10px;
+                }
+                .filter-actions button {
+                    padding: 10px 24px;
+                    border: none;
+                    border-radius: 6px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                }
+                .btn-filter {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                }
+                .btn-filter:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+                }
+                .btn-reset {
+                    background: #e0e0e0;
+                    color: #333;
+                }
+                .btn-reset:hover {
+                    background: #d0d0d0;
+                }
                 .filter-form {
                     display: flex;
                     gap: 15px;
@@ -53,7 +140,9 @@
                     border: 2px solid #e0e0e0;
                     border-radius: 6px;
                     font-size: 14px;
+                    flex: 1;
                     min-width: 200px;
+                    max-width: calc(100% - 250px);
                     cursor: pointer;
                     transition: all 0.3s;
                 }
@@ -422,19 +511,66 @@
                         </div>
         
                         <div class="filter-section">
-                            <form class="filter-form" method="get" th:action="@{/trading/orders}">
-                                <label for="accountId">계좌 선택:</label>
-                                <select id="accountId" name="accountId" onchange="this.form.submit()">
-                                    <option value="">-- 계좌를 선택하세요 --</option>
-                                    <option th:each="account : ${accounts}"
-                                            th:value="${account.accountId}"
-                                            th:text="${account.alias} + ' (' + ${account.accountId} + ')'"
-                                            th:selected="${account.accountId == selectedAccountId}">
-                                        Account
-                                    </option>
-                                </select>
-                                <button type="submit">조회</button>
-                            </form>
+                            <div class="advanced-filter-toggle" onclick="toggleAdvancedFilter()">
+                                <h3>🔍 고급 필터</h3>
+                                <span class="toggle-icon" id="toggleIcon">▼</span>
+                            </div>
+                            <div class="advanced-filter-content" id="advancedFilterContent">
+                                <form method="get" th:action="@{/trading/orders}">
+                                    <div class="filter-grid">
+                                        <div class="filter-group">
+                                            <label for="accountId">계좌 선택</label>
+                                            <select id="accountId" name="accountId">
+                                                <option value="">전체 계좌</option>
+                                                <option th:each="account : ${accounts}"
+                                                        th:value="${account.accountId}"
+                                                        th:text="${account.alias} + ' (' + ${account.accountId} + ')'"
+                                                        th:selected="${account.accountId == selectedAccountId}">
+                                                    Account
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="filter-group">
+                                            <label for="startDate">시작일</label>
+                                            <input type="date" id="startDate" name="startDate"
+                                                   th:value="${param.startDate != null ? param.startDate[0] : #temporals.format(#temporals.createToday(), 'yyyy-MM-dd')}"/>
+                                        </div>
+                                        <div class="filter-group">
+                                            <label for="endDate">종료일</label>
+                                            <input type="date" id="endDate" name="endDate"
+                                                   th:value="${param.endDate != null ? param.endDate[0] : #temporals.format(#temporals.createToday(), 'yyyy-MM-dd')}"/>
+                                        </div>
+                                        <div class="filter-group">
+                                            <label for="status">주문 상태</label>
+                                            <select id="status" name="status">
+                                                <option value="">전체 상태</option>
+                                                <option value="PENDING" th:selected="${param.status != null && param.status[0] == 'PENDING'}">대기</option>
+                                                <option value="FILLED" th:selected="${param.status != null && param.status[0] == 'FILLED'}">체결</option>
+                                                <option value="CANCELLED" th:selected="${param.status != null && param.status[0] == 'CANCELLED'}">취소</option>
+                                                <option value="REJECTED" th:selected="${param.status != null && param.status[0] == 'REJECTED'}">거부</option>
+                                            </select>
+                                        </div>
+                                        <div class="filter-group">
+                                            <label for="symbol">종목 코드</label>
+                                            <input type="text" id="symbol" name="symbol" placeholder="예: 005930"
+                                                   th:value="${param.symbol != null ? param.symbol[0] : ''}"/>
+                                        </div>
+                                        <div class="filter-group">
+                                            <label for="side">매매 구분</label>
+                                            <select id="side" name="side">
+                                                <option value="">전체</option>
+                                                <option value="BUY" th:selected="${param.side != null && param.side[0] == 'BUY'}">매수</option>
+                                                <option value="SELL" th:selected="${param.side != null && param.side[0] == 'SELL'}">매도</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="filter-actions">
+                                        <button type="submit" class="btn-filter">필터 적용</button>
+                                        <button type="button" class="btn-reset" onclick="resetFilters()">초기화</button>
+                                        <button type="button" class="btn-export" onclick="exportToExcel()" style="background: #28a745; color: white;">📥 Excel Export</button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
         
                         <div th:if="${orders != null && !orders.isEmpty()}" class="orders-table-container">
@@ -536,6 +672,25 @@
                                     closeModifyModal();
                                 }
                             });
+
+                            // Toggle advanced filter
+                            function toggleAdvancedFilter() {
+                                const content = document.getElementById('advancedFilterContent');
+                                const icon = document.getElementById('toggleIcon');
+                                content.classList.toggle('show');
+                                icon.classList.toggle('open');
+                            }
+
+                            // Reset filters
+                            function resetFilters() {
+                                window.location.href = '/trading/orders';
+                            }
+
+                            // Export to Excel
+                            function exportToExcel() {
+                                const params = new URLSearchParams(window.location.search);
+                                window.location.href = '/trading/orders/export?' + params.toString();
+                            }
                         </script>
         
                         <div th:if="${selectedAccountId != null && (orders == null || orders.isEmpty())}" class="empty-state">

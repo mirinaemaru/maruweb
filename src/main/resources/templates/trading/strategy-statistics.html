@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>전략별 통계</title>
+    <style>
+        .statistics-container {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .statistics-header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .statistics-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+        }
+
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .btn-filter {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .btn-filter:hover {
+            opacity: 0.9;
+        }
+
+        .summary-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .summary-section h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin: 0 0 15px 0;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .summary-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .summary-item label {
+            font-size: 13px;
+            color: #666;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .summary-item .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .summary-item .value.positive {
+            color: #10b981;
+        }
+
+        .summary-item .value.negative {
+            color: #ef4444;
+        }
+
+        .strategy-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .strategy-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .strategy-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+
+        .strategy-card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+        }
+
+        .strategy-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0 0 5px 0;
+        }
+
+        .strategy-id {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .strategy-card-body {
+            padding: 20px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .stat-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .stat-value.positive {
+            color: #10b981;
+        }
+
+        .stat-value.negative {
+            color: #ef4444;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge.active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-badge.inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #fecaca;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .no-data-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="statistics-container">
+            <div class="statistics-header">
+                <h1>📈 전략별 통계</h1>
+                <p>각 전략의 성과를 비교 분석합니다</p>
+            </div>
+
+            <div th:if="${error}" class="error-message">
+                <span th:text="${error}">오류 메시지</span>
+            </div>
+
+            <!-- 필터 섹션 -->
+            <form method="get" th:action="@{/trading/performance/strategies}">
+                <div class="filter-section">
+                    <div class="filter-group">
+                        <label>시작일</label>
+                        <input type="date" name="startDate" th:value="${startDate}" required>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>종료일</label>
+                        <input type="date" name="endDate" th:value="${endDate}" required>
+                    </div>
+
+                    <button type="submit" class="btn-filter">📊 조회</button>
+                </div>
+            </form>
+
+            <!-- 전체 요약 -->
+            <div class="summary-section" th:if="${summary != null}">
+                <h2>전체 요약</h2>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <label>총 전략 수</label>
+                        <div class="value" th:text="${summary.totalStrategies}">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <label>활성 전략</label>
+                        <div class="value" th:text="${summary.activeStrategies}">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <label>총 거래 횟수</label>
+                        <div class="value" th:text="${summary.totalTrades}">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <label>전체 수익/손실</label>
+                        <div class="value"
+                             th:classappend="${summary.totalProfitLoss >= 0} ? 'positive' : 'negative'"
+                             th:text="${#numbers.formatDecimal(summary.totalProfitLoss, 0, 'COMMA', 0, 'POINT')} + '원'">
+                            0원
+                        </div>
+                    </div>
+                    <div class="summary-item">
+                        <label>평균 승률</label>
+                        <div class="value" th:text="${#numbers.formatDecimal(summary.avgWinRate, 1, 'COMMA', 2, 'POINT')} + '%'">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 전략 카드 -->
+            <div class="strategy-cards" th:if="${strategies != null && !#lists.isEmpty(strategies)}">
+                <div class="strategy-card" th:each="strategy : ${strategies}">
+                    <div class="strategy-card-header">
+                        <div class="strategy-name" th:text="${strategy.name}">전략명</div>
+                        <div class="strategy-id">
+                            <span th:text="'ID: ' + ${strategy.id}">ID: 1</span>
+                            <span class="status-badge"
+                                  th:classappend="${strategy.status == 'ACTIVE'} ? 'active' : 'inactive'"
+                                  th:text="${strategy.status == 'ACTIVE'} ? '활성' : '비활성'">
+                                활성
+                            </span>
+                        </div>
+                    </div>
+                    <div class="strategy-card-body">
+                        <div class="stat-row">
+                            <span class="stat-label">총 거래</span>
+                            <span class="stat-value" th:text="${strategy.totalTrades}">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">승리</span>
+                            <span class="stat-value positive" th:text="${strategy.winningTrades}">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">패배</span>
+                            <span class="stat-value negative" th:text="${strategy.losingTrades}">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">승률</span>
+                            <span class="stat-value" th:text="${#numbers.formatDecimal(strategy.winRate, 1, 'COMMA', 2, 'POINT')} + '%'">0%</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">총 수익/손실</span>
+                            <span class="stat-value"
+                                  th:classappend="${strategy.totalProfitLoss >= 0} ? 'positive' : 'negative'"
+                                  th:text="${#numbers.formatDecimal(strategy.totalProfitLoss, 0, 'COMMA', 0, 'POINT')} + '원'">
+                                0원
+                            </span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">평균 수익/손실</span>
+                            <span class="stat-value"
+                                  th:classappend="${strategy.avgProfitLoss >= 0} ? 'positive' : 'negative'"
+                                  th:text="${#numbers.formatDecimal(strategy.avgProfitLoss, 0, 'COMMA', 0, 'POINT')} + '원'">
+                                0원
+                            </span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">최대 이익</span>
+                            <span class="stat-value positive" th:text="${#numbers.formatDecimal(strategy.maxProfit, 0, 'COMMA', 0, 'POINT')} + '원'">0원</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">최대 손실</span>
+                            <span class="stat-value negative" th:text="${#numbers.formatDecimal(strategy.maxLoss, 0, 'COMMA', 0, 'POINT')} + '원'">0원</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 데이터 없음 -->
+            <div th:if="${strategies == null || #lists.isEmpty(strategies)}" class="no-data">
+                <div class="no-data-icon">📊</div>
+                <h3>조회된 전략이 없습니다</h3>
+                <p>기간을 조정하거나 전략을 추가해 주세요.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -219,7 +219,8 @@
 
             <!-- Filter Section -->
             <div th:if="${apiConnected}" class="filter-section">
-                <form th:action="@{/trading/fills}" method="get" class="filter-form">
+                <h3 style="margin-bottom: 15px;">🔍 필터</h3>
+                <form th:action="@{/trading/fills}" method="get" class="filter-form" style="flex-wrap: wrap;">
                     <div class="form-group">
                         <label for="accountId">계좌 선택</label>
                         <select id="accountId" name="accountId" class="form-select" required>
@@ -231,6 +232,24 @@
                                 Account
                             </option>
                         </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="startDate">시작일</label>
+                        <input type="date"
+                               id="startDate"
+                               name="startDate"
+                               th:value="${param.startDate != null ? param.startDate[0] : #temporals.format(#temporals.createToday(), 'yyyy-MM-dd')}"
+                               class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="endDate">종료일</label>
+                        <input type="date"
+                               id="endDate"
+                               name="endDate"
+                               th:value="${param.endDate != null ? param.endDate[0] : #temporals.format(#temporals.createToday(), 'yyyy-MM-dd')}"
+                               class="form-input">
                     </div>
 
                     <div class="form-group">
@@ -255,6 +274,7 @@
 
                     <button type="submit" class="btn btn-primary">조회</button>
                     <a th:href="@{/trading/fills}" class="btn btn-secondary">초기화</a>
+                    <button type="button" class="btn btn-success" onclick="exportToExcel()">📥 Excel Export</button>
                 </form>
             </div>
 
@@ -313,5 +333,13 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Export to Excel
+        function exportToExcel() {
+            const params = new URLSearchParams(window.location.search);
+            window.location.href = '/trading/fills/export?' + params.toString();
+        }
+    </script>
 </body>
 </html>

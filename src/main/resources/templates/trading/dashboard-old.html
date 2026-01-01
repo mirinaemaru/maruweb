@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Trading Dashboard</title>
+    <th:block layout:fragment="extra-css">
+        <style>
+                .trading-dashboard {
+                    padding: 30px;
+                    max-width: 1600px;
+                    margin: 0 auto;
+                }
+                .dashboard-header {
+                    margin-bottom: 40px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    padding: 40px;
+                    border-radius: 16px;
+                    color: white;
+                    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+                }
+                .dashboard-header h1 {
+                    font-size: 36px;
+                    font-weight: 700;
+                    margin-bottom: 10px;
+                    display: flex;
+                    align-items: center;
+                    gap: 15px;
+                }
+                .dashboard-header p {
+                    font-size: 16px;
+                    opacity: 0.95;
+                }
+                .dashboard-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+                    gap: 25px;
+                    margin-bottom: 30px;
+                }
+                .dashboard-card {
+                    background: white;
+                    border-radius: 16px;
+                    padding: 28px;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    border: 1px solid rgba(0,0,0,0.04);
+                }
+                .dashboard-card:hover {
+                    transform: translateY(-5px);
+                    box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+                }
+                .card-header {
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 20px;
+                    padding-bottom: 15px;
+                    border-bottom: 2px solid #f5f5f5;
+                }
+                .card-icon {
+                    font-size: 32px;
+                    margin-right: 12px;
+                    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+                }
+                .card-title {
+                    font-size: 20px;
+                    font-weight: 700;
+                    color: #2c3e50;
+                    letter-spacing: -0.3px;
+                }
+                .status-indicator {
+                    display: inline-block;
+                    padding: 8px 18px;
+                    border-radius: 25px;
+                    font-weight: 700;
+                    font-size: 13px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                }
+                .status-up {
+                    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+                    color: #0a472e;
+                }
+                .status-down {
+                    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+                    color: #721c24;
+                }
+                .status-off {
+                    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+                    color: #0a472e;
+                }
+                .status-on {
+                    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+                    color: #721c24;
+                }
+                .kill-switch-container {
+                    text-align: center;
+                    padding: 25px;
+                }
+                .kill-switch-status {
+                    font-size: 42px;
+                    font-weight: 800;
+                    margin: 15px 0;
+                }
+                .component-list {
+                    list-style: none;
+                    padding: 0;
+                }
+                .component-list li {
+                    padding: 12px 0;
+                    border-bottom: 1px solid #f5f5f5;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    transition: all 0.2s;
+                }
+                .component-list li:hover {
+                    background: #fafafa;
+                    padding-left: 10px;
+                    margin: 0 -10px;
+                }
+                .component-list li:last-child {
+                    border-bottom: none;
+                }
+                .stat-number {
+                    font-size: 48px;
+                    font-weight: 800;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                    margin: 15px 0;
+                }
+                .stat-label {
+                    color: #7f8c8d;
+                    font-size: 14px;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                }
+                .account-item, .strategy-item {
+                    padding: 14px 16px;
+                    margin: 8px 0;
+                    background: linear-gradient(135deg, #f5f7fa 0%, #f8f9fa 100%);
+                    border-radius: 8px;
+                    border: 1px solid #e8e8e8;
+                    transition: all 0.2s;
+                }
+                .account-item:hover, .strategy-item:hover {
+                    transform: translateX(4px);
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+                }
+                .badge {
+                    display: inline-block;
+                    padding: 5px 12px;
+                    border-radius: 6px;
+                    font-size: 11px;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.3px;
+                }
+                .badge-paper {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                }
+                .badge-active {
+                    background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+                    color: #0a472e;
+                }
+                .badge-inactive {
+                    background: #e8e8e8;
+                    color: #666;
+                }
+                .quick-links {
+                    margin-top: 30px;
+                    display: flex;
+                    gap: 15px;
+                    flex-wrap: wrap;
+                }
+                .quick-links a {
+                    padding: 14px 28px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    text-decoration: none;
+                    border-radius: 10px;
+                    font-weight: 600;
+                    font-size: 15px;
+                    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+                .quick-links a:hover {
+                    transform: translateY(-3px);
+                    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+                }
+            </style>
+    </th:block>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="trading-dashboard">
+                        <div class="dashboard-header">
+                            <h1>📊 Trading System Dashboard</h1>
+                            <p>자동매매 시스템 모니터링 및 관리</p>
+                        </div>
+        
+                        <div class="dashboard-grid">
+                            <!-- System Health -->
+                            <div class="dashboard-card">
+                                <div class="card-header">
+                                    <span class="card-icon">🏥</span>
+                                    <span class="card-title">System Health</span>
+                                </div>
+                                <div>
+                                    <span class="status-indicator" th:classappend="${systemStatus == 'UP'} ? 'status-up' : 'status-down'">
+                                        <span th:text="${systemStatus ?: 'UNKNOWN'}">UP</span>
+                                    </span>
+                                </div>
+                                <ul class="component-list">
+                                    <li th:if="${health.components}"><span>Database</span><strong th:text="${health.components.db}">UP</strong></li>
+                                    <li th:if="${health.components}"><span>KIS REST</span><strong th:text="${health.components.kisRest}">UP</strong></li>
+                                    <li th:if="${health.components}"><span>KIS WebSocket</span><strong th:text="${health.components.kisWs}">UP</strong></li>
+                                    <li th:if="${health.components}"><span>Token</span><strong th:text="${health.components.token}">VALID</strong></li>
+                                </ul>
+                            </div>
+        
+                            <!-- Kill Switch -->
+                            <div class="dashboard-card">
+                                <div class="card-header">
+                                    <span class="card-icon">⚡</span>
+                                    <span class="card-title">Kill Switch</span>
+                                </div>
+                                <div class="kill-switch-container">
+                                    <div class="kill-switch-status">
+                                        <span class="status-indicator" th:classappend="${killSwitchStatus == 'OFF'} ? 'status-off' : 'status-on'">
+                                            <span th:text="${killSwitchStatus ?: 'UNKNOWN'}">OFF</span>
+                                        </span>
+                                    </div>
+                                    <p class="stat-label" th:if="${killSwitchStatus == 'OFF'}">🟢 All systems operational</p>
+                                    <p class="stat-label" th:if="${killSwitchStatus != 'OFF'}">🔴 Trading halted</p>
+                                </div>
+                            </div>
+        
+                            <!-- Accounts -->
+                            <div class="dashboard-card">
+                                <div class="card-header">
+                                    <span class="card-icon">💼</span>
+                                    <span class="card-title">Accounts</span>
+                                </div>
+                                <div>
+                                    <div class="stat-number" th:text="${accountCount}">0</div>
+                                    <div class="stat-label">Total Accounts</div>
+                                </div>
+                                <div style="margin-top: 15px;">
+                                    <div th:each="account : ${accounts}" class="account-item">
+                                        <strong th:text="${account.alias}">Account</strong>
+                                        <span class="badge badge-paper" th:text="${account.environment}">PAPER</span>
+                                        <span class="badge badge-active" th:text="${account.status}">ACTIVE</span>
+                                    </div>
+                                    <div th:if="${accountCount == 0}"><p style="color: #999; text-align: center;">등록된 계좌가 없습니다.</p></div>
+                                </div>
+                            </div>
+        
+                            <!-- Strategies -->
+                            <div class="dashboard-card">
+                                <div class="card-header">
+                                    <span class="card-icon">🎯</span>
+                                    <span class="card-title">Strategies</span>
+                                </div>
+                                <div>
+                                    <div class="stat-number" th:text="${activeStrategyCount}">0</div>
+                                    <div class="stat-label">Active Strategies</div>
+                                    <div style="margin-top: 10px; color: #666; font-size: 14px;"><span th:text="${strategyCount}">0</span> Total</div>
+                                </div>
+                                <div style="margin-top: 15px;">
+                                    <div th:each="strategy : ${strategies}" class="strategy-item">
+                                        <strong th:text="${strategy.name}">Strategy</strong>
+                                        <span class="badge" th:classappend="${strategy.status == 'ACTIVE'} ? 'badge-active' : 'badge-inactive'" th:text="${strategy.status}">ACTIVE</span>
+                                    </div>
+                                    <div th:if="${strategyCount == 0}"><p style="color: #999; text-align: center;">등록된 전략이 없습니다.</p></div>
+                                </div>
+                            </div>
+                        </div>
+        
+                        <div class="quick-links">
+                            <a th:href="@{/trading/accounts}">📋 계좌 관리</a>
+                            <a th:href="@{/trading/strategies}">🎯 전략 관리</a>
+                            <a th:href="@{/trading/orders}">📈 주문 조회</a>
+                        </div>
+                    </div>
+    </div>
+</body>
+</html>

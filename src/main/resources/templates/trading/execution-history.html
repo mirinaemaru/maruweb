@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>전략 실행 히스토리</title>
+    <style>
+        .execution-history-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            border-radius: 16px;
+            color: white;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        header .subtitle {
+            font-size: 16px;
+            opacity: 0.95;
+        }
+
+        .filter-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .filter-grid label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .filter-grid input,
+        .filter-grid select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .execution-table {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+        }
+
+        th {
+            padding: 18px 15px;
+            text-align: left;
+            font-weight: 700;
+            color: #333;
+            font-size: 14px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+            color: #555;
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .profit-positive {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .profit-negative {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            font-size: 16px;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .summary-card h3 {
+            font-size: 14px;
+            color: #666;
+            margin: 0 0 10px 0;
+            font-weight: 600;
+        }
+
+        .summary-card .value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .summary-card .change {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="execution-history-container">
+            <header>
+                <h1>📊 전략 실행 히스토리</h1>
+                <p class="subtitle">전략별 실행 내역과 성과를 확인할 수 있습니다</p>
+            </header>
+
+            <!-- Summary Cards -->
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <h3>총 실행 횟수</h3>
+                    <div class="value" th:text="${totalExecutions != null ? totalExecutions : '0'}">0</div>
+                </div>
+                <div class="summary-card">
+                    <h3>성공 실행</h3>
+                    <div class="value" th:text="${successfulExecutions != null ? successfulExecutions : '0'}">0</div>
+                    <div class="change" th:if="${totalExecutions != null && totalExecutions > 0}">
+                        <span th:text="${#numbers.formatDecimal((successfulExecutions * 100.0 / totalExecutions), 1, 1)}">0.0</span>%
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <h3>실패 실행</h3>
+                    <div class="value" th:text="${failedExecutions != null ? failedExecutions : '0'}">0</div>
+                </div>
+                <div class="summary-card">
+                    <h3>총 손익</h3>
+                    <div class="value" th:classappend="${totalProfitLoss != null && totalProfitLoss >= 0 ? 'profit-positive' : 'profit-negative'}">
+                        <span th:if="${totalProfitLoss != null}" th:text="${#numbers.formatDecimal(totalProfitLoss, 0, 0)}">0</span>
+                        <span th:unless="${totalProfitLoss != null}">0</span>
+                        <span style="font-size: 18px;">원</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <form th:action="@{/trading/execution-history}" method="get">
+                    <div class="filter-grid">
+                        <div>
+                            <label>전략 선택</label>
+                            <select name="strategyId">
+                                <option value="">전체 전략</option>
+                                <option th:each="strategy : ${strategies}"
+                                        th:value="${strategy.id}"
+                                        th:text="${strategy.name}"
+                                        th:selected="${strategyId != null && strategyId == strategy.id.toString()}">
+                                    Strategy
+                                </option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>시작 날짜</label>
+                            <input type="date" name="startDate" th:value="${startDate}">
+                        </div>
+                        <div>
+                            <label>종료 날짜</label>
+                            <input type="date" name="endDate" th:value="${endDate}">
+                        </div>
+                        <div>
+                            <label>상태</label>
+                            <select name="status">
+                                <option value="">전체</option>
+                                <option value="SUCCESS" th:selected="${status == 'SUCCESS'}">성공</option>
+                                <option value="FAILED" th:selected="${status == 'FAILED'}">실패</option>
+                                <option value="PENDING" th:selected="${status == 'PENDING'}">대기중</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="filter-actions">
+                        <button type="submit" class="btn btn-primary">🔍 조회</button>
+                        <button type="button" class="btn btn-secondary" onclick="resetFilters()">🔄 초기화</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Execution History Table -->
+            <div class="execution-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>실행 시간</th>
+                            <th>전략명</th>
+                            <th>종목</th>
+                            <th>액션</th>
+                            <th>수량</th>
+                            <th>가격</th>
+                            <th>손익</th>
+                            <th>상태</th>
+                            <th>메시지</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${executions == null || #lists.isEmpty(executions)}">
+                            <td colspan="9" class="no-data">
+                                실행 내역이 없습니다.
+                            </td>
+                        </tr>
+                        <tr th:each="exec : ${executions}">
+                            <td th:text="${#temporals.format(exec.executedAt, 'yyyy-MM-dd HH:mm:ss')}">2024-01-01 10:00:00</td>
+                            <td th:text="${exec.strategyName}">Strategy Name</td>
+                            <td th:text="${exec.symbol}">005930</td>
+                            <td>
+                                <span th:if="${exec.side == 'BUY'}" style="color: #28a745; font-weight: 600;">매수</span>
+                                <span th:if="${exec.side == 'SELL'}" style="color: #dc3545; font-weight: 600;">매도</span>
+                            </td>
+                            <td th:text="${#numbers.formatInteger(exec.quantity, 0, 'COMMA')}">100</td>
+                            <td th:text="${#numbers.formatInteger(exec.price, 0, 'COMMA')}">75,000</td>
+                            <td>
+                                <span th:classappend="${exec.profitLoss >= 0 ? 'profit-positive' : 'profit-negative'}"
+                                      th:text="${#numbers.formatInteger(exec.profitLoss, 0, 'COMMA')}">
+                                    +50,000
+                                </span>
+                            </td>
+                            <td>
+                                <span class="status-badge"
+                                      th:classappend="${exec.status == 'SUCCESS' ? 'status-success' : (exec.status == 'FAILED' ? 'status-failed' : 'status-pending')}"
+                                      th:text="${exec.status == 'SUCCESS' ? '성공' : (exec.status == 'FAILED' ? '실패' : '대기중')}">
+                                    성공
+                                </span>
+                            </td>
+                            <td th:text="${exec.message}">실행 완료</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function resetFilters() {
+            window.location.href = '/trading/execution-history';
+        }
+    </script>
+</body>
+</html>

@@ -27,6 +27,7 @@ import java.util.Map;
 public class TradingController {
 
     private final TradingApiService tradingApiService;
+    private final com.maru.trading.service.ExcelExportService excelExportService;
 
     /**
      * Trading Dashboard - 메인 화면
@@ -51,6 +52,37 @@ public class TradingController {
             List<?> accounts = (List<?>) accountsData.get("items");
             model.addAttribute("accounts", accounts);
             model.addAttribute("accountCount", accounts != null ? accounts.size() : 0);
+
+            // 4. Strategies (전략 목록)
+            Map<String, Object> strategiesData = tradingApiService.getStrategies();
+            List<?> strategies = (List<?>) strategiesData.get("items");
+            model.addAttribute("strategies", strategies);
+            model.addAttribute("strategyCount", strategies != null ? strategies.size() : 0);
+
+            // Count active strategies
+            long activeCount = 0;
+            if (strategies != null) {
+                activeCount = strategies.stream()
+                    .filter(s -> {
+                        if (s instanceof Map) {
+                            Object status = ((Map<?, ?>) s).get("status");
+                            return "ACTIVE".equals(status);
+                        }
+                        return false;
+                    })
+                    .count();
+            }
+            model.addAttribute("activeStrategyCount", activeCount);
+
+            // 5. Dashboard Statistics
+            Map<String, Object> stats = tradingApiService.getDashboardStats();
+            model.addAttribute("todayOrders", stats.get("todayOrders"));
+            model.addAttribute("todayFills", stats.get("todayFills"));
+            model.addAttribute("todayProfitLoss", stats.get("todayProfitLoss"));
+            model.addAttribute("totalProfitLoss", stats.get("totalProfitLoss"));
+            model.addAttribute("winRate", stats.get("winRate"));
+            model.addAttribute("recentActivities", stats.get("recentActivities"));
+            model.addAttribute("dailyStats", stats.get("dailyStats"));
 
             return "trading/dashboard";
 
@@ -227,30 +259,44 @@ public class TradingController {
     }
 
     /**
-     * 주문 조회 페이지
+     * 주문 조회 페이지 (고급 필터링 지원)
      */
     @GetMapping("/orders")
-    public String orders(@RequestParam(required = false) String accountId, Model model) {
+    public String orders(@RequestParam(required = false) String accountId,
+                        @RequestParam(required = false) String startDate,
+                        @RequestParam(required = false) String endDate,
+                        @RequestParam(required = false) String status,
+                        @RequestParam(required = false) String symbol,
+                        @RequestParam(required = false) String side,
+                        Model model) {
         try {
-            log.info("Loading Trading Orders page - accountId: {}", accountId);
+            log.info("Loading Trading Orders page - accountId: {}, filters: startDate={}, endDate={}, status={}, symbol={}, side={}",
+                    accountId, startDate, endDate, status, symbol, side);
 
             // 계좌 목록 (필터용)
             Map<String, Object> accountsData = tradingApiService.getAccounts();
             List<?> accounts = (List<?>) accountsData.get("items");
             model.addAttribute("accounts", accounts);
 
-            // accountId가 없으면 첫 번째 계좌 자동 선택
-            if ((accountId == null || accountId.isEmpty()) && accounts != null && !accounts.isEmpty()) {
-                Map<String, Object> firstAccount = (Map<String, Object>) accounts.get(0);
-                accountId = (String) firstAccount.get("accountId");
-                log.info("Auto-selecting first account: {}", accountId);
-            }
-
             model.addAttribute("selectedAccountId", accountId);
 
-            // 주문 목록
+            // 주문 목록 (필터가 있으면 고급 필터링 사용)
             if (accountId != null && !accountId.isEmpty()) {
-                Map<String, Object> ordersData = tradingApiService.getOrders(accountId);
+                Map<String, Object> ordersData;
+
+                // 고급 필터가 하나라도 사용되었는지 확인
+                boolean useAdvancedFilter = (startDate != null && !startDate.isEmpty()) ||
+                                           (endDate != null && !endDate.isEmpty()) ||
+                                           (status != null && !status.isEmpty()) ||
+                                           (symbol != null && !symbol.isEmpty()) ||
+                                           (side != null && !side.isEmpty());
+
+                if (useAdvancedFilter) {
+                    ordersData = tradingApiService.getOrdersWithFilters(accountId, startDate, endDate, status, symbol, side);
+                } else {
+                    ordersData = tradingApiService.getOrders(accountId);
+                }
+
                 List<?> orders = (List<?>) ordersData.get("items");
                 model.addAttribute("orders", orders);
             }
@@ -263,6 +309,16 @@ public class TradingController {
             model.addAttribute("error", "Trading System API에 연결할 수 없습니다. API 서버가 실행 중인지 확인하세요.");
             model.addAttribute("errorDetail", e.getMessage());
             model.addAttribute("apiConnected", false);
+
+            // 계좌 목록은 에러 시에도 표시
+            try {
+                Map<String, Object> accountsData = tradingApiService.getAccounts();
+                List<?> accounts = (List<?>) accountsData.get("items");
+                model.addAttribute("accounts", accounts);
+            } catch (Exception ex) {
+                log.warn("Failed to load accounts for error page", ex);
+            }
+
             return "trading/orders";
         }
     }
@@ -378,36 +434,43 @@ public class TradingController {
     }
 
     /**
-     * 체결 내역 조회 페이지
+     * 체결 내역 조회 페이지 (고급 필터링 지원)
      */
     @GetMapping("/fills")
     public String fills(
             @RequestParam(required = false) String accountId,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
             @RequestParam(required = false) String orderId,
             @RequestParam(required = false) String symbol,
             Model model) {
         try {
-            log.info("Loading Trading Fills page - accountId: {}, orderId: {}, symbol: {}", accountId, orderId, symbol);
+            log.info("Loading Trading Fills page - accountId: {}, filters: startDate={}, endDate={}, orderId={}, symbol={}",
+                    accountId, startDate, endDate, orderId, symbol);
 
             // 계좌 목록 (필터용)
             Map<String, Object> accountsData = tradingApiService.getAccounts();
             List<?> accounts = (List<?>) accountsData.get("items");
             model.addAttribute("accounts", accounts);
 
-            // accountId가 없으면 첫 번째 계좌 자동 선택
-            if ((accountId == null || accountId.isEmpty()) && accounts != null && !accounts.isEmpty()) {
-                Map<String, Object> firstAccount = (Map<String, Object>) accounts.get(0);
-                accountId = (String) firstAccount.get("accountId");
-                log.info("Auto-selecting first account: {}", accountId);
-            }
-
             model.addAttribute("selectedAccountId", accountId);
             model.addAttribute("selectedOrderId", orderId);
             model.addAttribute("selectedSymbol", symbol);
 
-            // 체결 내역 조회
+            // 체결 내역 조회 (필터가 있으면 고급 필터링 사용)
             if (accountId != null && !accountId.isEmpty()) {
-                Map<String, Object> fillsData = tradingApiService.getFills(accountId, orderId, symbol);
+                Map<String, Object> fillsData;
+
+                // 고급 필터가 하나라도 사용되었는지 확인
+                boolean useAdvancedFilter = (startDate != null && !startDate.isEmpty()) ||
+                                           (endDate != null && !endDate.isEmpty());
+
+                if (useAdvancedFilter) {
+                    fillsData = tradingApiService.getFillsWithFilters(accountId, startDate, endDate, orderId, symbol);
+                } else {
+                    fillsData = tradingApiService.getFills(accountId, orderId, symbol);
+                }
+
                 List<?> fills = (List<?>) fillsData.get("items");
                 model.addAttribute("fills", fills);
                 model.addAttribute("fillCount", fills != null ? fills.size() : 0);
@@ -421,7 +484,87 @@ public class TradingController {
             model.addAttribute("error", "Trading System API에 연결할 수 없습니다. API 서버가 실행 중인지 확인하세요.");
             model.addAttribute("errorDetail", e.getMessage());
             model.addAttribute("apiConnected", false);
+
+            // 계좌 목록은 에러 시에도 표시
+            try {
+                Map<String, Object> accountsData = tradingApiService.getAccounts();
+                List<?> accounts = (List<?>) accountsData.get("items");
+                model.addAttribute("accounts", accounts);
+            } catch (Exception ex) {
+                log.warn("Failed to load accounts for error page", ex);
+            }
+
             return "trading/fills";
+        }
+    }
+
+    /**
+     * 주문 내역 엑셀 다운로드
+     */
+    @GetMapping("/orders/export")
+    public void exportOrders(
+            @RequestParam(required = false) String accountId,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String symbol,
+            @RequestParam(required = false) String side,
+            javax.servlet.http.HttpServletResponse response) {
+        try {
+            log.info("Exporting orders to Excel");
+
+            boolean useAdvancedFilter = (startDate != null && !startDate.isEmpty()) ||
+                    (endDate != null && !endDate.isEmpty()) ||
+                    (status != null && !status.isEmpty()) ||
+                    (symbol != null && !symbol.isEmpty()) ||
+                    (side != null && !side.isEmpty());
+
+            Map<String, Object> ordersData;
+            if (useAdvancedFilter) {
+                ordersData = tradingApiService.getOrdersWithFilters(accountId, startDate, endDate, status, symbol, side);
+            } else {
+                ordersData = tradingApiService.getOrders(accountId);
+            }
+
+            List<Map<String, Object>> orders = (List<Map<String, Object>>) ordersData.get("items");
+            excelExportService.exportOrdersToExcel(orders != null ? orders : new java.util.ArrayList<>(), response);
+
+        } catch (Exception e) {
+            log.error("Failed to export orders to Excel", e);
+        }
+    }
+
+    /**
+     * 체결 내역 엑셀 다운로드
+     */
+    @GetMapping("/fills/export")
+    public void exportFills(
+            @RequestParam(required = false) String accountId,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(required = false) String orderId,
+            @RequestParam(required = false) String symbol,
+            javax.servlet.http.HttpServletResponse response) {
+        try {
+            log.info("Exporting fills to Excel");
+
+            boolean useAdvancedFilter = (startDate != null && !startDate.isEmpty()) ||
+                    (endDate != null && !endDate.isEmpty()) ||
+                    (orderId != null && !orderId.isEmpty()) ||
+                    (symbol != null && !symbol.isEmpty());
+
+            Map<String, Object> fillsData;
+            if (useAdvancedFilter) {
+                fillsData = tradingApiService.getFillsWithFilters(accountId, startDate, endDate, orderId, symbol);
+            } else {
+                fillsData = tradingApiService.getFills(accountId, orderId, symbol);
+            }
+
+            List<Map<String, Object>> fills = (List<Map<String, Object>>) fillsData.get("items");
+            excelExportService.exportFillsToExcel(fills != null ? fills : new java.util.ArrayList<>(), response);
+
+        } catch (Exception e) {
+            log.error("Failed to export fills to Excel", e);
         }
     }
 

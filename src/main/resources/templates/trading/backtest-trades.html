@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>백테스트 거래 상세</title>
+    <style>
+        .trades-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .backtest-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .trades-table {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f5f7fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 700;
+            color: #333;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .profit { color: #28a745; font-weight: 600; }
+        .loss { color: #dc3545; font-weight: 600; }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="trades-container">
+            <div class="backtest-info">
+                <h1>📊 백테스트 거래 상세</h1>
+                <p th:if="${backtest}" th:text="'전략: ' + ${backtest.strategyName}"></p>
+                <p th:if="${backtest}" th:text="'기간: ' + ${backtest.startDate} + ' ~ ' + ${backtest.endDate}"></p>
+            </div>
+
+            <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+            <div class="trades-table">
+                <h3 style="padding: 20px 20px 10px 20px;">거래 내역</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>거래 ID</th>
+                            <th>날짜/시간</th>
+                            <th>종목</th>
+                            <th>방향</th>
+                            <th>수량</th>
+                            <th>진입가</th>
+                            <th>청산가</th>
+                            <th>손익</th>
+                            <th>수익률</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${trades == null || #lists.isEmpty(trades)}">
+                            <td colspan="9">
+                                <div class="empty-state">
+                                    <div style="font-size: 48px;">📭</div>
+                                    <p>거래 내역이 없습니다.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:each="trade : ${trades}">
+                            <td th:text="${trade.tradeId}">1</td>
+                            <td th:text="${trade.executedAt}">2024-01-01 09:00:00</td>
+                            <td th:text="${trade.symbol}">005930</td>
+                            <td>
+                                <span th:if="${trade.side == 'BUY'}" style="color: #28a745;">매수</span>
+                                <span th:if="${trade.side == 'SELL'}" style="color: #dc3545;">매도</span>
+                            </td>
+                            <td th:text="${trade.quantity}">100</td>
+                            <td th:text="${#numbers.formatInteger(trade.entryPrice, 0, 'COMMA')} + '원'">70,000원</td>
+                            <td th:text="${#numbers.formatInteger(trade.exitPrice, 0, 'COMMA')} + '원'">71,000원</td>
+                            <td th:classappend="${trade.profitLoss >= 0 ? 'profit' : 'loss'}"
+                                th:text="${#numbers.formatInteger(trade.profitLoss, 0, 'COMMA')} + '원'">+100,000원</td>
+                            <td th:classappend="${trade.returnPct >= 0 ? 'profit' : 'loss'}"
+                                th:text="${#numbers.formatDecimal(trade.returnPct, 1, 2)} + '%'">+1.43%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="margin-top: 20px; text-align: center;">
+                <a th:href="@{/trading/backtests}" class="btn btn-secondary">목록으로</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

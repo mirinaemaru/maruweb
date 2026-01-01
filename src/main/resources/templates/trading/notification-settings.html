@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>알림 설정</title>
+    <style>
+        .settings-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .settings-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .settings-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .settings-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .settings-section {
+            margin-bottom: 30px;
+        }
+
+        .settings-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .setting-icon {
+            font-size: 24px;
+        }
+
+        .setting-info {
+            flex: 1;
+        }
+
+        .setting-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .setting-desc {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 54px;
+            height: 28px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 28px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #667eea;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="settings-container">
+            <div class="settings-header">
+                <h1>⚙️ 알림 설정</h1>
+                <p>받고 싶은 알림 유형을 선택하세요</p>
+            </div>
+
+            <div th:if="${success}" class="success-message">
+                <span>✅</span>
+                <span th:text="${success}">설정이 저장되었습니다.</span>
+            </div>
+
+            <form method="post" th:action="@{/trading/notifications/settings}">
+                <div class="settings-card">
+                    <!-- 알림 타입 설정 -->
+                    <div class="settings-section">
+                        <div class="section-title">알림 타입</div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <span class="setting-icon">💰</span>
+                                <div class="setting-info">
+                                    <div class="setting-name">거래 알림</div>
+                                    <div class="setting-desc">주문 체결, 포지션 변경 등 거래 관련 알림</div>
+                                </div>
+                            </label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="enableTradeNotifications"
+                                       th:checked="${settings.enableTradeNotifications}">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <span class="setting-icon">🎯</span>
+                                <div class="setting-info">
+                                    <div class="setting-name">전략 알림</div>
+                                    <div class="setting-desc">전략 활성화, 비활성화, 상태 변경 알림</div>
+                                </div>
+                            </label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="enableStrategyNotifications"
+                                       th:checked="${settings.enableStrategyNotifications}">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <span class="setting-icon">❌</span>
+                                <div class="setting-info">
+                                    <div class="setting-name">오류 알림</div>
+                                    <div class="setting-desc">시스템 오류, 거래 실패 등 오류 알림</div>
+                                </div>
+                            </label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="enableErrorNotifications"
+                                       th:checked="${settings.enableErrorNotifications}">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <span class="setting-icon">⚠️</span>
+                                <div class="setting-info">
+                                    <div class="setting-name">경고 알림</div>
+                                    <div class="setting-desc">리스크 임계값 초과, 계좌 잔고 부족 등 경고</div>
+                                </div>
+                            </label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="enableWarningNotifications"
+                                       th:checked="${settings.enableWarningNotifications}">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <span class="setting-icon">✅</span>
+                                <div class="setting-info">
+                                    <div class="setting-name">성공 알림</div>
+                                    <div class="setting-desc">작업 완료, 목표 달성 등 성공 알림</div>
+                                </div>
+                            </label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="enableSuccessNotifications"
+                                       th:checked="${settings.enableSuccessNotifications}">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <span class="setting-icon">📌</span>
+                                <div class="setting-info">
+                                    <div class="setting-name">정보 알림</div>
+                                    <div class="setting-desc">일반 정보, 시스템 메시지 등</div>
+                                </div>
+                            </label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="enableInfoNotifications"
+                                       th:checked="${settings.enableInfoNotifications}">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 추가 설정 -->
+                    <div class="settings-section">
+                        <div class="section-title">추가 설정</div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <span class="setting-icon">🔊</span>
+                                <div class="setting-info">
+                                    <div class="setting-name">알림음 활성화</div>
+                                    <div class="setting-desc">알림 발생 시 소리 재생</div>
+                                </div>
+                            </label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="enableSound"
+                                       th:checked="${settings.enableSound}">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <span class="setting-icon">🌐</span>
+                                <div class="setting-info">
+                                    <div class="setting-name">브라우저 알림</div>
+                                    <div class="setting-desc">브라우저 푸시 알림 활성화 (권한 필요)</div>
+                                </div>
+                            </label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="enableBrowserNotification"
+                                       th:checked="${settings.enableBrowserNotification}">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-save">💾 설정 저장</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

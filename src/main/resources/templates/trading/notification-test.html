@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>실시간 알림 테스트</title>
+    <style>
+        .test-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            border-radius: 16px;
+            color: white;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .test-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .test-card h3 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-connected {
+            background: #28a745;
+            box-shadow: 0 0 8px #28a745;
+        }
+
+        .status-disconnected {
+            background: #dc3545;
+        }
+
+        .connection-status {
+            padding: 15px;
+            background: #f5f7fa;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="test-container">
+            <header>
+                <h1>🔔 실시간 알림 테스트</h1>
+                <p>WebSocket 연결 상태 확인 및 테스트 알림 전송</p>
+            </header>
+
+            <div class="test-card">
+                <h3>WebSocket 연결 상태</h3>
+                <div class="connection-status">
+                    <span class="status-indicator" id="statusIndicator"></span>
+                    <span id="connectionStatus">연결 확인 중...</span>
+                </div>
+            </div>
+
+            <div class="test-card">
+                <h3>테스트 알림 전송</h3>
+                <form id="testNotificationForm">
+                    <div class="form-group">
+                        <label>알림 유형</label>
+                        <select name="type" id="notificationType">
+                            <option value="INFO">정보 (INFO)</option>
+                            <option value="SUCCESS">성공 (SUCCESS)</option>
+                            <option value="WARNING">경고 (WARNING)</option>
+                            <option value="ERROR">오류 (ERROR)</option>
+                            <option value="TRADE">거래 (TRADE)</option>
+                            <option value="STRATEGY">전략 (STRATEGY)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>제목</label>
+                        <input type="text" name="title" id="notificationTitle" value="테스트 알림" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>메시지</label>
+                        <textarea name="message" id="notificationMessage" rows="3" required>WebSocket 연결이 정상적으로 작동합니다.</textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">📤 알림 전송</button>
+                </form>
+            </div>
+
+            <div class="test-card">
+                <h3>사전정의된 테스트 시나리오</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <button class="btn btn-primary" onclick="testTradeNotification()">거래 체결 알림</button>
+                    <button class="btn btn-primary" onclick="testStrategyNotification()">전략 상태 알림</button>
+                    <button class="btn btn-primary" onclick="testBalanceNotification()">잔고 변동 알림</button>
+                    <button class="btn btn-primary" onclick="testErrorNotification()">에러 알림</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:fragment="extra-scripts">
+        let stompClient = null;
+
+        function connectWebSocket() {
+            const socket = new SockJS('/ws-trading');
+            stompClient = Stomp.over(socket);
+
+            stompClient.connect({}, function (frame) {
+                console.log('Connected: ' + frame);
+                updateConnectionStatus(true);
+
+                // Subscribe to notifications topic
+                stompClient.subscribe('/topic/notifications', function (notification) {
+                    console.log('Received notification:', notification.body);
+                });
+            }, function(error) {
+                console.error('WebSocket connection error:', error);
+                updateConnectionStatus(false);
+            });
+        }
+
+        function updateConnectionStatus(connected) {
+            const indicator = document.getElementById('statusIndicator');
+            const status = document.getElementById('connectionStatus');
+
+            if (connected) {
+                indicator.className = 'status-indicator status-connected';
+                status.textContent = '연결됨 (Connected)';
+            } else {
+                indicator.className = 'status-indicator status-disconnected';
+                status.textContent = '연결 끊김 (Disconnected)';
+            }
+        }
+
+        document.getElementById('testNotificationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const params = new URLSearchParams(formData);
+
+            fetch('/api/notifications/test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: params
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Test notification sent:', data);
+                alert('알림이 전송되었습니다!');
+            })
+            .catch(error => {
+                console.error('Error sending test notification:', error);
+                alert('알림 전송 실패: ' + error);
+            });
+        });
+
+        function testTradeNotification() {
+            sendTestNotification('TRADE', '삼성전자 매수 체결', '수량: 10, 가격: 75,000원');
+        }
+
+        function testStrategyNotification() {
+            sendTestNotification('STRATEGY', '전략 상태 변경', 'RSI 역추세 전략: ACTIVE → STOPPED');
+        }
+
+        function testBalanceNotification() {
+            sendTestNotification('SUCCESS', '잔고 변동', '계좌 001: 10,500,000원 (+500,000원)');
+        }
+
+        function testErrorNotification() {
+            sendTestNotification('ERROR', '주문 실패', '계좌 잔고 부족으로 주문이 거부되었습니다.');
+        }
+
+        function sendTestNotification(type, title, message) {
+            const params = new URLSearchParams({type, title, message});
+
+            fetch('/api/notifications/test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: params
+            })
+            .then(response => response.json())
+            .then(data => console.log('Notification sent:', data))
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Connect on page load
+        window.addEventListener('DOMContentLoaded', connectWebSocket);
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</body>
+</html>

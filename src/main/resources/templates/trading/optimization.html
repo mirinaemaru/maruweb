@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>파라미터 최적화</title>
+    <style>
+        .optimization-container {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .optimization-header {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .optimization-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+        }
+
+        .config-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .config-card h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin: 0 0 20px 0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group select,
+        .form-group input {
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #fa709a;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            margin-left: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .results-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .progress-bar.active {
+            display: block;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .result-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #fa709a;
+        }
+
+        .result-card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+            margin: 0 0 10px 0;
+        }
+
+        .result-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .result-stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .result-stat label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .result-stat value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #fecaca;
+        }
+
+        .info-box {
+            background: #e0f2fe;
+            color: #075985;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #bae6fd;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="optimization-container">
+            <div class="optimization-header">
+                <h1>🎯 파라미터 최적화</h1>
+                <p>그리드 서치와 유전 알고리즘을 사용하여 전략 파라미터를 최적화합니다</p>
+            </div>
+
+            <div th:if="${error}" class="error-message">
+                <span th:text="${error}">오류 메시지</span>
+            </div>
+
+            <div class="info-box">
+                <strong>💡 사용법:</strong> 전략을 선택하고 최적화할 파라미터와 범위를 설정한 후 그리드 서치 또는 유전 알고리즘을 실행하세요.
+            </div>
+
+            <!-- 그리드 서치 설정 -->
+            <div class="config-card">
+                <h2>🔍 그리드 서치 설정</h2>
+                <form id="gridSearchForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>전략 선택</label>
+                            <select id="strategyId" name="strategyId" required>
+                                <option value="">전략을 선택하세요</option>
+                                <option th:each="strategy : ${strategies}"
+                                        th:value="${strategy.id}"
+                                        th:text="${strategy.name}">
+                                    전략명
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>파라미터 이름</label>
+                            <input type="text" id="parameterName" name="parameterName"
+                                   placeholder="예: stopLossPercent" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>시작 값</label>
+                            <input type="number" id="startValue" name="startValue"
+                                   step="0.01" placeholder="1.0" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>종료 값</label>
+                            <input type="number" id="endValue" name="endValue"
+                                   step="0.01" placeholder="5.0" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>증가 단위</label>
+                            <input type="number" id="stepValue" name="stepValue"
+                                   step="0.01" placeholder="0.5" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>백테스트 시작일</label>
+                            <input type="date" id="startDate" name="startDate">
+                        </div>
+
+                        <div class="form-group">
+                            <label>백테스트 종료일</label>
+                            <input type="date" id="endDate" name="endDate">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">🚀 그리드 서치 실행</button>
+                    <button type="button" class="btn-secondary" onclick="viewResults()">📊 결과 보기</button>
+                </form>
+            </div>
+
+            <!-- 유전 알고리즘 설정 -->
+            <div class="config-card">
+                <h2>🧬 유전 알고리즘 설정</h2>
+                <form id="geneticForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>전략 ID</label>
+                            <input type="text" id="gaStrategyId" name="strategyId"
+                                   placeholder="전략 ID" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>인구 크기</label>
+                            <input type="number" id="populationSize" name="populationSize"
+                                   value="100" min="10" max="500" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>세대 수</label>
+                            <input type="number" id="generations" name="generations"
+                                   value="50" min="10" max="200" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>돌연변이율</label>
+                            <input type="number" id="mutationRate" name="mutationRate"
+                                   value="0.01" min="0.001" max="0.1" step="0.001" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>백테스트 시작일</label>
+                            <input type="date" id="gaStartDate" name="startDate">
+                        </div>
+
+                        <div class="form-group">
+                            <label>백테스트 종료일</label>
+                            <input type="date" id="gaEndDate" name="endDate">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">🧬 유전 알고리즘 실행</button>
+                </form>
+            </div>
+
+            <!-- 진행 상태 -->
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-bar-fill" id="progressBarFill">0%</div>
+            </div>
+
+            <!-- 결과 섹션 -->
+            <div class="results-section" id="resultsSection">
+                <h2>📊 최적화 결과</h2>
+                <div id="resultsContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="extra-scripts">
+        <script>
+            document.getElementById('gridSearchForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const formData = new FormData(this);
+                const params = new URLSearchParams(formData);
+
+                // 진행 상태 표시
+                const progressBar = document.getElementById('progressBar');
+                const progressBarFill = document.getElementById('progressBarFill');
+                progressBar.classList.add('active');
+                progressBarFill.style.width = '0%';
+
+                // 가상의 진행 상태 업데이트
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    progress += 5;
+                    if (progress <= 90) {
+                        progressBarFill.style.width = progress + '%';
+                        progressBarFill.textContent = progress + '%';
+                    }
+                }, 500);
+
+                try {
+                    const response = await fetch('/trading/optimization/grid-search?' + params.toString(), {
+                        method: 'POST'
+                    });
+                    const result = await response.json();
+
+                    clearInterval(progressInterval);
+                    progressBarFill.style.width = '100%';
+                    progressBarFill.textContent = '완료!';
+
+                    setTimeout(() => {
+                        progressBar.classList.remove('active');
+                        displayResults(result);
+                    }, 1000);
+
+                } catch (error) {
+                    clearInterval(progressInterval);
+                    alert('그리드 서치 실행 중 오류가 발생했습니다: ' + error.message);
+                    progressBar.classList.remove('active');
+                }
+            });
+
+            document.getElementById('geneticForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const formData = new FormData(this);
+                const params = new URLSearchParams(formData);
+
+                const progressBar = document.getElementById('progressBar');
+                const progressBarFill = document.getElementById('progressBarFill');
+                progressBar.classList.add('active');
+                progressBarFill.style.width = '0%';
+
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    progress += 3;
+                    if (progress <= 90) {
+                        progressBarFill.style.width = progress + '%';
+                        progressBarFill.textContent = progress + '%';
+                    }
+                }, 1000);
+
+                try {
+                    const response = await fetch('/trading/optimization/genetic-algorithm?' + params.toString(), {
+                        method: 'POST'
+                    });
+                    const result = await response.json();
+
+                    clearInterval(progressInterval);
+                    progressBarFill.style.width = '100%';
+                    progressBarFill.textContent = '완료!';
+
+                    setTimeout(() => {
+                        progressBar.classList.remove('active');
+                        displayResults(result);
+                    }, 1000);
+
+                } catch (error) {
+                    clearInterval(progressInterval);
+                    alert('유전 알고리즘 실행 중 오류가 발생했습니다: ' + error.message);
+                    progressBar.classList.remove('active');
+                }
+            });
+
+            function displayResults(result) {
+                const resultsSection = document.getElementById('resultsSection');
+                const resultsContent = document.getElementById('resultsContent');
+
+                if (result.error) {
+                    resultsContent.innerHTML = `<div class="error-message">${result.error}</div>`;
+                } else if (result.results && result.results.length > 0) {
+                    let html = '';
+                    result.results.forEach((item, index) => {
+                        html += `
+                            <div class="result-card">
+                                <h3>결과 #${index + 1}</h3>
+                                <div class="result-stats">
+                                    <div class="result-stat">
+                                        <label>파라미터 값</label>
+                                        <value>${item.parameterValue}</value>
+                                    </div>
+                                    <div class="result-stat">
+                                        <label>수익률</label>
+                                        <value style="color: ${item.profitLoss >= 0 ? '#10b981' : '#ef4444'}">
+                                            ${item.profitLoss.toLocaleString()}원
+                                        </value>
+                                    </div>
+                                    <div class="result-stat">
+                                        <label>승률</label>
+                                        <value>${item.winRate.toFixed(2)}%</value>
+                                    </div>
+                                    <div class="result-stat">
+                                        <label>총 거래</label>
+                                        <value>${item.totalTrades}</value>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    resultsContent.innerHTML = html;
+                } else {
+                    resultsContent.innerHTML = '<p>결과가 없습니다.</p>';
+                }
+
+                resultsSection.classList.add('active');
+            }
+
+            function viewResults() {
+                window.location.href = '/trading/optimization/results';
+            }
+        </script>
+    </th:block>
+</body>
+</html>

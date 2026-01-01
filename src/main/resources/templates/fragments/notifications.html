@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <style th:fragment="notification-styles">
+        /* Notification Container */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 400px;
+        }
+
+        /* Notification Item */
+        .notification-item {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            margin-bottom: 15px;
+            padding: 18px;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            animation: slideIn 0.3s ease-out;
+            border-left: 4px solid #667eea;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .notification-item.hiding {
+            animation: slideOut 0.3s ease-out forwards;
+        }
+
+        @keyframes slideOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        /* Notification Icon */
+        .notification-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        /* Notification Content */
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .notification-message {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .notification-timestamp {
+            font-size: 11px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        /* Notification Close Button */
+        .notification-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #999;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .notification-close:hover {
+            color: #333;
+        }
+
+        /* Type-specific styles */
+        .notification-item.type-TRADE {
+            border-left-color: #667eea;
+        }
+
+        .notification-item.type-SUCCESS {
+            border-left-color: #28a745;
+        }
+
+        .notification-item.type-WARNING {
+            border-left-color: #ffc107;
+        }
+
+        .notification-item.type-ERROR {
+            border-left-color: #dc3545;
+        }
+
+        .notification-item.type-STRATEGY {
+            border-left-color: #17a2b8;
+        }
+
+        .notification-item.type-INFO {
+            border-left-color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <!-- Notification Widget -->
+    <div th:fragment="notification-widget">
+        <div id="notificationContainer" class="notification-container"></div>
+    </div>
+
+    <!-- Notification Scripts -->
+    <script th:fragment="notification-scripts">
+        let stompClient = null;
+        let notificationQueue = [];
+        let maxNotifications = 5;
+
+        // Connect to WebSocket
+        function connectNotificationWebSocket() {
+            const socket = new SockJS('/ws-trading');
+            stompClient = Stomp.over(socket);
+
+            // Suppress console logs
+            stompClient.debug = null;
+
+            stompClient.connect({}, function (frame) {
+                console.log('Notification WebSocket connected');
+
+                // Subscribe to notifications topic
+                stompClient.subscribe('/topic/notifications', function (message) {
+                    const notification = JSON.parse(message.body);
+                    showNotification(notification);
+                });
+            }, function(error) {
+                console.error('Notification WebSocket connection error:', error);
+                // Retry connection after 5 seconds
+                setTimeout(connectNotificationWebSocket, 5000);
+            });
+        }
+
+        // Show notification
+        function showNotification(notification) {
+            const container = document.getElementById('notificationContainer');
+            if (!container) return;
+
+            // Create notification element
+            const notifEl = document.createElement('div');
+            notifEl.className = `notification-item type-${notification.type}`;
+
+            // Choose icon based on type
+            let icon = '📢';
+            switch(notification.type) {
+                case 'TRADE': icon = '💰'; break;
+                case 'SUCCESS': icon = '✅'; break;
+                case 'WARNING': icon = '⚠️'; break;
+                case 'ERROR': icon = '❌'; break;
+                case 'STRATEGY': icon = '📊'; break;
+                case 'INFO': icon = 'ℹ️'; break;
+            }
+
+            notifEl.innerHTML = `
+                <div class="notification-icon">${icon}</div>
+                <div class="notification-content">
+                    <div class="notification-title">${notification.title}</div>
+                    <div class="notification-message">${notification.message}</div>
+                    <div class="notification-timestamp">${notification.timestamp}</div>
+                </div>
+                <button class="notification-close" onclick="closeNotification(this)">×</button>
+            `;
+
+            // Add to container
+            container.appendChild(notifEl);
+            notificationQueue.push(notifEl);
+
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                closeNotification(notifEl.querySelector('.notification-close'));
+            }, 5000);
+
+            // Remove oldest if too many
+            while (notificationQueue.length > maxNotifications) {
+                const oldest = notificationQueue.shift();
+                oldest.remove();
+            }
+        }
+
+        // Close notification
+        function closeNotification(btn) {
+            const notifEl = btn.closest ? btn.closest('.notification-item') : btn.parentElement.parentElement;
+            if (!notifEl) return;
+
+            notifEl.classList.add('hiding');
+            setTimeout(() => {
+                notifEl.remove();
+                const index = notificationQueue.indexOf(notifEl);
+                if (index > -1) {
+                    notificationQueue.splice(index, 1);
+                }
+            }, 300);
+        }
+
+        // Connect on page load
+        if (typeof SockJS !== 'undefined' && typeof Stomp !== 'undefined') {
+            window.addEventListener('DOMContentLoaded', connectNotificationWebSocket);
+        } else {
+            console.warn('SockJS or STOMP not loaded. Real-time notifications will not work.');
+        }
+    </script>
+</body>
+</html>
