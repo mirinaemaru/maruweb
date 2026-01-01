@@ -590,7 +590,11 @@
                                 </thead>
                                 <tbody>
                                     <tr th:each="order : ${orders}">
-                                        <td th:text="${order.orderTime != null ? #temporals.format(order.orderTime, 'yyyy-MM-dd HH:mm:ss') : '-'}">2024-01-01 10:00:00</td>
+                                        <td>
+                                            <a th:href="@{/trading/orders/{id}(id=${order.orderId})}"
+                                               th:text="${order.orderTime != null ? #temporals.format(order.orderTime, 'yyyy-MM-dd HH:mm:ss') : '-'}"
+                                               style="color: #667eea; text-decoration: none; font-weight: 600;">2024-01-01 10:00:00</a>
+                                        </td>
                                         <td th:text="${order.stockName ?: '-'}">종목명</td>
                                         <td th:text="${order.stockCode ?: '-'}">000000</td>
                                         <td>

@@ -278,7 +278,10 @@
                     <tbody>
                         <tr th:each="position : ${positions}">
                             <td>
-                                <strong th:text="${position.symbol}">AAPL</strong>
+                                <a th:href="@{/trading/positions/{id}(id=${position.positionId})}"
+                                   style="color: #667eea; text-decoration: none; font-weight: 700;">
+                                    <span th:text="${position.symbol}">AAPL</span>
+                                </a>
                             </td>
                             <td class="text-right" th:text="${#numbers.formatDecimal(position.qty, 0, 'COMMA', 2, 'POINT')}">100.00</td>
                             <td class="text-right" th:text="${#numbers.formatDecimal(position.avgPrice, 0, 'COMMA', 2, 'POINT')}">150.00</td>

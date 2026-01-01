@@ -259,6 +259,27 @@ public class TradingController {
     }
 
     /**
+     * 주문 상세 조회 페이지
+     */
+    @GetMapping("/orders/{orderId}")
+    public String orderDetail(@PathVariable String orderId, Model model) {
+        try {
+            log.info("Loading Order Detail page - orderId: {}", orderId);
+
+            Map<String, Object> order = tradingApiService.getOrder(orderId);
+            model.addAttribute("order", order);
+
+            return "trading/order-detail";
+
+        } catch (Exception e) {
+            log.error("Failed to load order detail", e);
+            model.addAttribute("error", "주문 상세 정보를 불러올 수 없습니다.");
+            model.addAttribute("errorDetail", e.getMessage());
+            return "trading/error";
+        }
+    }
+
+    /**
      * 주문 조회 페이지 (고급 필터링 지원)
      */
     @GetMapping("/orders")
@@ -320,6 +341,27 @@ public class TradingController {
             }
 
             return "trading/orders";
+        }
+    }
+
+    /**
+     * 포지션 상세 조회 페이지
+     */
+    @GetMapping("/positions/{positionId}")
+    public String positionDetail(@PathVariable String positionId, Model model) {
+        try {
+            log.info("Loading Position Detail page - positionId: {}", positionId);
+
+            Map<String, Object> position = tradingApiService.getPosition(positionId);
+            model.addAttribute("position", position);
+
+            return "trading/position-detail";
+
+        } catch (Exception e) {
+            log.error("Failed to load position detail", e);
+            model.addAttribute("error", "포지션 상세 정보를 불러올 수 없습니다.");
+            model.addAttribute("errorDetail", e.getMessage());
+            return "trading/error";
         }
     }
 
@@ -430,6 +472,27 @@ public class TradingController {
             log.error("Failed to toggle Kill Switch", e);
             redirectAttributes.addFlashAttribute("error", "Kill Switch 설정에 실패했습니다: " + e.getMessage());
             return "redirect:/trading/kill-switch";
+        }
+    }
+
+    /**
+     * 체결 상세 조회 페이지
+     */
+    @GetMapping("/fills/{fillId}")
+    public String fillDetail(@PathVariable String fillId, Model model) {
+        try {
+            log.info("Loading Fill Detail page - fillId: {}", fillId);
+
+            Map<String, Object> fill = tradingApiService.getFill(fillId);
+            model.addAttribute("fill", fill);
+
+            return "trading/fill-detail";
+
+        } catch (Exception e) {
+            log.error("Failed to load fill detail", e);
+            model.addAttribute("error", "체결 상세 정보를 불러올 수 없습니다.");
+            model.addAttribute("errorDetail", e.getMessage());
+            return "trading/error";
         }
     }
 

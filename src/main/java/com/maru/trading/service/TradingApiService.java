@@ -235,6 +235,26 @@ public class TradingApiService {
     }
 
     /**
+     * 주문 상세 조회 (ID 기반)
+     */
+    public Map<String, Object> getOrder(String orderId) {
+        String url = "/api/v1/query/orders/" + orderId;
+        try {
+            log.debug("Calling Trading API: {}", url);
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to get order from Trading System: {}", orderId, e);
+            throw new RuntimeException("주문 정보를 가져올 수 없습니다.", e);
+        }
+    }
+
+    /**
      * 주문 목록 조회
      */
     public Map<String, Object> getOrders(String accountId) {
@@ -306,6 +326,26 @@ public class TradingApiService {
         } catch (RestClientException e) {
             log.error("Failed to get filtered orders from Trading System", e);
             throw new RuntimeException("주문 목록을 가져올 수 없습니다.", e);
+        }
+    }
+
+    /**
+     * 포지션 상세 조회 (ID 기반)
+     */
+    public Map<String, Object> getPosition(String positionId) {
+        String url = "/api/v1/query/positions/" + positionId;
+        try {
+            log.debug("Calling Trading API: {}", url);
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to get position from Trading System: {}", positionId, e);
+            throw new RuntimeException("포지션 정보를 가져올 수 없습니다.", e);
         }
     }
 
@@ -460,6 +500,26 @@ public class TradingApiService {
         } catch (RestClientException e) {
             log.error("Failed to update strategy status in Trading System", e);
             throw new RuntimeException("전략 상태 변경에 실패했습니다.", e);
+        }
+    }
+
+    /**
+     * 체결 상세 조회 (ID 기반)
+     */
+    public Map<String, Object> getFill(String fillId) {
+        String url = "/api/v1/query/fills/" + fillId;
+        try {
+            log.debug("Calling Trading API: {}", url);
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to get fill from Trading System: {}", fillId, e);
+            throw new RuntimeException("체결 정보를 가져올 수 없습니다.", e);
         }
     }
 

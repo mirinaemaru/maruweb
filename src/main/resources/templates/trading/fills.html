@@ -309,7 +309,11 @@
                     </thead>
                     <tbody>
                         <tr th:each="fill : ${fills}">
-                            <td th:text="${fill.fillTimestamp}">2025-01-01 09:00:00</td>
+                            <td>
+                                <a th:href="@{/trading/fills/{id}(id=${fill.fillId})}"
+                                   th:text="${fill.fillTimestamp}"
+                                   style="color: #667eea; text-decoration: none; font-weight: 600;">2025-01-01 09:00:00</a>
+                            </td>
                             <td th:text="${fill.symbol}">005930</td>
                             <td>
                                 <span th:if="${fill.side == 'BUY'}" class="side-buy">매수</span>

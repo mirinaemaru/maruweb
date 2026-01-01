@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>주문 상세보기</title>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .order-detail-page {
+                padding: 30px;
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+            .page-header {
+                margin-bottom: 40px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 40px;
+                border-radius: 16px;
+                color: white;
+                box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+            }
+            .page-header h1 {
+                font-size: 36px;
+                font-weight: 700;
+                margin-bottom: 10px;
+            }
+            .page-header p {
+                font-size: 16px;
+                opacity: 0.95;
+            }
+            .detail-card {
+                background: white;
+                border-radius: 16px;
+                padding: 40px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+                border: 1px solid rgba(0,0,0,0.04);
+            }
+            .detail-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 30px;
+                padding-bottom: 20px;
+                border-bottom: 2px solid #f5f5f5;
+            }
+            .order-title {
+                font-size: 28px;
+                font-weight: 700;
+                color: #2c3e50;
+            }
+            .detail-section {
+                margin-bottom: 30px;
+            }
+            .section-title {
+                font-size: 18px;
+                font-weight: 700;
+                color: #2c3e50;
+                margin-bottom: 20px;
+                padding-bottom: 10px;
+                border-bottom: 2px solid #f5f5f5;
+            }
+            .info-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 20px;
+            }
+            .info-item {
+                padding: 20px;
+                background: #f8f9fa;
+                border-radius: 10px;
+                border-left: 4px solid #667eea;
+            }
+            .info-label {
+                font-size: 13px;
+                color: #666;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-bottom: 8px;
+            }
+            .info-value {
+                font-size: 16px;
+                color: #2c3e50;
+                font-weight: 700;
+                word-break: break-all;
+            }
+            .badge {
+                display: inline-block;
+                padding: 8px 16px;
+                border-radius: 8px;
+                font-size: 12px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.3px;
+            }
+            .badge-buy {
+                background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+                color: #0a472e;
+            }
+            .badge-sell {
+                background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+                color: #721c24;
+            }
+            .badge-filled {
+                background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+                color: #0a472e;
+            }
+            .badge-pending {
+                background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+                color: #856404;
+            }
+            .badge-cancelled {
+                background: #e8e8e8;
+                color: #666;
+            }
+            .badge-rejected {
+                background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+                color: #721c24;
+            }
+            .action-buttons {
+                display: flex;
+                gap: 15px;
+                margin-top: 30px;
+                padding-top: 30px;
+                border-top: 2px solid #f5f5f5;
+            }
+            .btn {
+                padding: 14px 28px;
+                border: none;
+                border-radius: 10px;
+                font-size: 15px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                text-decoration: none;
+                display: inline-block;
+            }
+            .btn-outline {
+                background: white;
+                color: #667eea;
+                border: 2px solid #667eea;
+                box-shadow: none;
+            }
+            .btn-outline:hover {
+                background: #667eea;
+                color: white;
+                transform: translateY(-2px);
+            }
+            .alert {
+                padding: 20px 28px;
+                border-radius: 12px;
+                margin-bottom: 30px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            }
+            .alert-error {
+                background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+                border: 1px solid #f5c6cb;
+                color: #721c24;
+            }
+            .money-positive {
+                color: #28a745;
+            }
+            .money-negative {
+                color: #dc3545;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="order-detail-page">
+            <div class="page-header">
+                <h1>Order Details</h1>
+                <p>View order information and details</p>
+            </div>
+
+            <div th:if="${error}" class="alert alert-error">
+                <div th:text="${error}">Error message</div>
+                <div th:if="${errorDetail}" style="margin-top: 10px; font-size: 13px;" th:text="${errorDetail}">Details</div>
+            </div>
+
+            <div th:if="${order}" class="detail-card">
+                <div class="detail-header">
+                    <div class="order-title">
+                        Order #<span th:text="${order.orderId}">ORD001</span>
+                    </div>
+                    <div>
+                        <span class="badge"
+                              th:classappend="${order.side == 'BUY'} ? 'badge-buy' : 'badge-sell'"
+                              th:text="${order.side}">BUY</span>
+                        <span class="badge"
+                              th:classappend="${order.status == 'FILLED'} ? 'badge-filled' : (${order.status == 'PENDING'} ? 'badge-pending' : (${order.status == 'CANCELLED'} ? 'badge-cancelled' : 'badge-rejected'))"
+                              th:text="${order.status}">FILLED</span>
+                    </div>
+                </div>
+
+                <!-- Order Information Section -->
+                <div class="detail-section">
+                    <div class="section-title">Order Information</div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Order ID</div>
+                            <div class="info-value" th:text="${order.orderId}">ORD001</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Symbol</div>
+                            <div class="info-value" th:text="${order.symbol}">005930</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Side</div>
+                            <div class="info-value">
+                                <span class="badge"
+                                      th:classappend="${order.side == 'BUY'} ? 'badge-buy' : 'badge-sell'"
+                                      th:text="${order.side}">BUY</span>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Order Type</div>
+                            <div class="info-value" th:text="${order.orderType}">LIMIT</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Quantity</div>
+                            <div class="info-value" th:text="${order.quantity}">100</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Price</div>
+                            <div class="info-value" th:text="${#numbers.formatDecimal(order.price, 0, 'COMMA', 0, 'POINT')} + ' KRW'">70,000 KRW</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Execution Information Section -->
+                <div class="detail-section">
+                    <div class="section-title">Execution Information</div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Status</div>
+                            <div class="info-value">
+                                <span class="badge"
+                                      th:classappend="${order.status == 'FILLED'} ? 'badge-filled' : (${order.status == 'PENDING'} ? 'badge-pending' : (${order.status == 'CANCELLED'} ? 'badge-cancelled' : 'badge-rejected'))"
+                                      th:text="${order.status}">FILLED</span>
+                            </div>
+                        </div>
+                        <div class="info-item" th:if="${order.filledQuantity != null}">
+                            <div class="info-label">Filled Quantity</div>
+                            <div class="info-value" th:text="${order.filledQuantity}">100</div>
+                        </div>
+                        <div class="info-item" th:if="${order.avgPrice != null}">
+                            <div class="info-label">Average Fill Price</div>
+                            <div class="info-value" th:text="${#numbers.formatDecimal(order.avgPrice, 0, 'COMMA', 0, 'POINT')} + ' KRW'">70,000 KRW</div>
+                        </div>
+                        <div class="info-item" th:if="${order.remainingQuantity != null}">
+                            <div class="info-label">Remaining Quantity</div>
+                            <div class="info-value" th:text="${order.remainingQuantity}">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Information Section -->
+                <div class="detail-section">
+                    <div class="section-title">Account Information</div>
+                    <div class="info-grid">
+                        <div class="info-item" th:if="${order.accountId}">
+                            <div class="info-label">Account ID</div>
+                            <div class="info-value" th:text="${order.accountId}">ACC001</div>
+                        </div>
+                        <div class="info-item" th:if="${order.strategyId}">
+                            <div class="info-label">Strategy ID</div>
+                            <div class="info-value" th:text="${order.strategyId}">STR001</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timestamp Section -->
+                <div class="detail-section">
+                    <div class="section-title">Timestamps</div>
+                    <div class="info-grid">
+                        <div class="info-item" th:if="${order.createdAt}">
+                            <div class="info-label">Created At</div>
+                            <div class="info-value" th:text="${order.createdAt}">2024-01-01 00:00:00</div>
+                        </div>
+                        <div class="info-item" th:if="${order.updatedAt}">
+                            <div class="info-label">Updated At</div>
+                            <div class="info-value" th:text="${order.updatedAt}">2024-01-01 00:00:00</div>
+                        </div>
+                        <div class="info-item" th:if="${order.filledAt}">
+                            <div class="info-label">Filled At</div>
+                            <div class="info-value" th:text="${order.filledAt}">2024-01-01 00:00:00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <a th:href="@{/trading/orders}" class="btn btn-outline">Back to Orders</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
