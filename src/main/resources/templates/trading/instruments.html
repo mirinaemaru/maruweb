@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>종목 관리</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-graph-up me-2"></i>종목 관리</h2>
+            <span class="badge bg-secondary fs-6" th:text="'총 ' + ${total} + '개'"></span>
+        </div>
+
+        <!-- 알림 메시지 -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i><span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- 필터 -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="get" action="/trading/instruments" class="row g-3 align-items-end">
+                    <div class="col-md-2">
+                        <label class="form-label">시장</label>
+                        <select name="market" class="form-select">
+                            <option value="">전체</option>
+                            <option value="KOSPI" th:selected="${selectedMarket == 'KOSPI'}">KOSPI</option>
+                            <option value="KOSDAQ" th:selected="${selectedMarket == 'KOSDAQ'}">KOSDAQ</option>
+                            <option value="KONEX" th:selected="${selectedMarket == 'KONEX'}">KONEX</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">상태</label>
+                        <select name="status" class="form-select">
+                            <option value="">전체</option>
+                            <option value="LISTED" th:selected="${selectedStatus == 'LISTED'}">상장</option>
+                            <option value="SUSPENDED" th:selected="${selectedStatus == 'SUSPENDED'}">거래정지</option>
+                            <option value="DELISTED" th:selected="${selectedStatus == 'DELISTED'}">상장폐지</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">거래 가능</label>
+                        <select name="tradable" class="form-select">
+                            <option value="">전체</option>
+                            <option value="true" th:selected="${selectedTradable == true}">거래 가능</option>
+                            <option value="false" th:selected="${selectedTradable == false}">거래 불가</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">종목 검색</label>
+                        <input type="text" name="search" class="form-control" placeholder="종목명 또는 코드"
+                               th:value="${searchKeyword}">
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="bi bi-search me-1"></i>검색
+                        </button>
+                        <a href="/trading/instruments" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i>초기화
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 종목 목록 테이블 -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>종목코드</th>
+                                <th>종목명 (한글)</th>
+                                <th>종목명 (영문)</th>
+                                <th>시장</th>
+                                <th>업종</th>
+                                <th>상태</th>
+                                <th class="text-center">거래 가능</th>
+                                <th class="text-center">거래 정지</th>
+                                <th>상장일</th>
+                                <th>관리</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(instruments)}">
+                                <td colspan="10" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                    조회된 종목이 없습니다.
+                                </td>
+                            </tr>
+                            <tr th:each="inst : ${instruments}">
+                                <td>
+                                    <a th:href="@{/trading/instruments/{symbol}(symbol=${inst.symbol})}"
+                                       th:text="${inst.symbol}" class="fw-bold text-decoration-none"></a>
+                                </td>
+                                <td th:text="${inst.nameKr}"></td>
+                                <td th:text="${inst.nameEn}" class="text-muted small"></td>
+                                <td>
+                                    <span class="badge"
+                                          th:classappend="${inst.market == 'KOSPI'} ? 'bg-primary' : (${inst.market == 'KOSDAQ'} ? 'bg-success' : 'bg-secondary')"
+                                          th:text="${inst.market}"></span>
+                                </td>
+                                <td th:text="${inst.industry}" class="small"></td>
+                                <td>
+                                    <span class="badge"
+                                          th:classappend="${inst.status == 'LISTED'} ? 'bg-success' : (${inst.status == 'SUSPENDED'} ? 'bg-warning text-dark' : 'bg-danger')"
+                                          th:text="${inst.status == 'LISTED'} ? '상장' : (${inst.status == 'SUSPENDED'} ? '거래정지' : '상장폐지')"></span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="form-check form-switch d-inline-block">
+                                        <input class="form-check-input tradable-toggle" type="checkbox"
+                                               th:checked="${inst.tradable}"
+                                               th:data-symbol="${inst.symbol}">
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <div class="form-check form-switch d-inline-block">
+                                        <input class="form-check-input halted-toggle" type="checkbox"
+                                               th:checked="${inst.halted}"
+                                               th:data-symbol="${inst.symbol}">
+                                    </div>
+                                </td>
+                                <td th:text="${inst.listingDate}" class="small"></td>
+                                <td>
+                                    <a th:href="@{/trading/instruments/{symbol}(symbol=${inst.symbol})}"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 거래 가능 토글
+    document.querySelectorAll('.tradable-toggle').forEach(function(toggle) {
+        toggle.addEventListener('change', function() {
+            const symbol = this.dataset.symbol;
+            const tradable = this.checked;
+
+            fetch(`/trading/instruments/${symbol}/toggle-tradable?tradable=${tradable}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('변경 실패: ' + data.error);
+                    this.checked = !tradable;
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                this.checked = !tradable;
+            });
+        });
+    });
+
+    // 거래 정지 토글
+    document.querySelectorAll('.halted-toggle').forEach(function(toggle) {
+        toggle.addEventListener('change', function() {
+            const symbol = this.dataset.symbol;
+            const halted = this.checked;
+
+            fetch(`/trading/instruments/${symbol}/toggle-halted?halted=${halted}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('변경 실패: ' + data.error);
+                    this.checked = !halted;
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                this.checked = !halted;
+            });
+        });
+    });
+});
+</script>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>최적화 데모</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-sliders me-2"></i>최적화 데모</h2>
+        </div>
+
+        <div class="row">
+            <!-- MA 크로스오버 최적화 -->
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>MA 크로스오버 최적화</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">이동평균 교차 전략의 최적 파라미터를 찾습니다.</p>
+                        <ul class="small">
+                            <li>Short Period: 5, 10, 15</li>
+                            <li>Long Period: 20, 30, 50</li>
+                            <li>목표: Sharpe Ratio 최대화</li>
+                        </ul>
+                        <button type="button" class="btn btn-primary w-100" onclick="runOptimization('ma-crossover', this)">
+                            <i class="bi bi-play-fill me-1"></i>최적화 실행
+                        </button>
+                    </div>
+                    <div class="card-footer bg-light" id="result-ma-crossover" style="display: none;">
+                        <div class="result-content"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RSI 최적화 -->
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-activity me-2"></i>RSI 최적화</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">RSI 전략의 최적 파라미터를 찾습니다.</p>
+                        <ul class="small">
+                            <li>Period: 10, 14, 20</li>
+                            <li>Overbought: 65, 70, 75</li>
+                            <li>Oversold: 25, 30, 35</li>
+                            <li>목표: Profit Factor 최대화</li>
+                        </ul>
+                        <button type="button" class="btn btn-success w-100" onclick="runOptimization('rsi', this)">
+                            <i class="bi bi-play-fill me-1"></i>최적화 실행
+                        </button>
+                    </div>
+                    <div class="card-footer bg-light" id="result-rsi" style="display: none;">
+                        <div class="result-content"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 랜덤 서치 최적화 -->
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="bi bi-shuffle me-2"></i>랜덤 서치 최적화</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">더 넓은 파라미터 공간에서 랜덤 샘플링으로 최적화합니다.</p>
+                        <ul class="small">
+                            <li>Short Period: 3~15</li>
+                            <li>Long Period: 15~50</li>
+                            <li>최대 20회 랜덤 테스트</li>
+                            <li>목표: Sharpe Ratio 최대화</li>
+                        </ul>
+                        <button type="button" class="btn btn-warning w-100" onclick="runOptimization('random-search', this)">
+                            <i class="bi bi-play-fill me-1"></i>최적화 실행
+                        </button>
+                    </div>
+                    <div class="card-footer bg-light" id="result-random-search" style="display: none;">
+                        <div class="result-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 설명 -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5><i class="bi bi-info-circle me-2"></i>파라미터 최적화란?</h5>
+                <p class="mb-2">
+                    파라미터 최적화는 트레이딩 전략의 성과를 극대화하기 위해 최적의 파라미터 조합을 찾는 과정입니다.
+                </p>
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6>Grid Search</h6>
+                        <p class="small text-muted">
+                            모든 파라미터 조합을 체계적으로 테스트합니다. 정확하지만 시간이 오래 걸릴 수 있습니다.
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>Random Search</h6>
+                        <p class="small text-muted">
+                            랜덤하게 파라미터를 샘플링합니다. 넓은 공간을 빠르게 탐색할 수 있습니다.
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>유의사항</h6>
+                        <p class="small text-muted">
+                            과최적화(Overfitting)를 주의하세요. Walk-Forward 분석으로 검증하는 것을 권장합니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+<script>
+function runOptimization(type, btn) {
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>실행 중...';
+
+    const resultDiv = document.getElementById('result-' + type);
+    resultDiv.style.display = 'none';
+
+    fetch('/trading/demo/optimization/' + type, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+
+        if (data.error) {
+            resultDiv.querySelector('.result-content').innerHTML =
+                '<div class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>' + data.error + '</div>';
+        } else {
+            let html = '<div class="small">';
+            html += '<div class="fw-bold text-success mb-2"><i class="bi bi-check-circle me-1"></i>최적화 완료</div>';
+
+            if (data.bestParameters) {
+                html += '<div><strong>최적 파라미터:</strong></div>';
+                html += '<ul class="mb-2">';
+                for (const [key, value] of Object.entries(data.bestParameters)) {
+                    html += '<li>' + key + ': ' + value + '</li>';
+                }
+                html += '</ul>';
+            }
+
+            if (data.bestObjectiveValue != null) {
+                html += '<div><strong>최적 목표값:</strong> ' + data.bestObjectiveValue.toFixed(4) + '</div>';
+            }
+
+            if (data.totalRuns != null) {
+                html += '<div><strong>총 실행 횟수:</strong> ' + data.totalRuns + '</div>';
+            }
+
+            if (data.durationMs != null) {
+                html += '<div><strong>소요 시간:</strong> ' + data.durationMs + 'ms</div>';
+            }
+
+            if (data.bestBacktest) {
+                html += '<div class="mt-2 pt-2 border-top">';
+                html += '<strong>최적 백테스트 결과:</strong><br>';
+                if (data.bestBacktest.totalReturn != null) {
+                    html += '수익률: ' + (data.bestBacktest.totalReturn * 100).toFixed(2) + '%<br>';
+                }
+                if (data.bestBacktest.sharpeRatio != null) {
+                    html += 'Sharpe: ' + data.bestBacktest.sharpeRatio.toFixed(2) + '<br>';
+                }
+                if (data.bestBacktest.totalTrades != null) {
+                    html += '거래 수: ' + data.bestBacktest.totalTrades;
+                }
+                html += '</div>';
+            }
+
+            html += '</div>';
+            resultDiv.querySelector('.result-content').innerHTML = html;
+        }
+
+        resultDiv.style.display = 'block';
+    })
+    .catch(err => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        resultDiv.querySelector('.result-content').innerHTML =
+            '<div class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>오류: ' + err.message + '</div>';
+        resultDiv.style.display = 'block';
+    });
+}
+</script>
+</th:block>
+</body>
+</html>

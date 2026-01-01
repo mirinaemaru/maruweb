@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>데모 백테스트</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-lightning me-2"></i>데모 백테스트</h2>
+            <div>
+                <button type="button" class="btn btn-outline-success me-2" onclick="generateData()">
+                    <i class="bi bi-database-add me-1"></i>데모 데이터 생성
+                </button>
+                <button type="button" class="btn btn-outline-danger" onclick="clearData()">
+                    <i class="bi bi-trash me-1"></i>데모 데이터 삭제
+                </button>
+            </div>
+        </div>
+
+        <!-- 상태 메시지 -->
+        <div id="statusMessage" class="alert" style="display: none;"></div>
+
+        <div class="row">
+            <!-- MA 크로스오버 백테스트 -->
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>MA 크로스오버</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">5일/20일 이동평균선 교차 전략</p>
+                        <ul class="small">
+                            <li>골든 크로스: 매수 신호</li>
+                            <li>데드 크로스: 매도 신호</li>
+                            <li>종목: 삼성전자 (005930)</li>
+                            <li>기간: 최근 1년</li>
+                        </ul>
+                        <button type="button" class="btn btn-primary w-100" onclick="runBacktest('ma-crossover', this)">
+                            <i class="bi bi-play-fill me-1"></i>백테스트 실행
+                        </button>
+                    </div>
+                    <div class="card-footer bg-light" id="result-ma-crossover" style="display: none;">
+                        <div class="result-content"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RSI 백테스트 -->
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-activity me-2"></i>RSI 전략</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">RSI 과매수/과매도 기반 전략</p>
+                        <ul class="small">
+                            <li>RSI 14일 기준</li>
+                            <li>RSI 30 이하: 매수</li>
+                            <li>RSI 70 이상: 매도</li>
+                            <li>종목: SK하이닉스 (000660)</li>
+                        </ul>
+                        <button type="button" class="btn btn-success w-100" onclick="runBacktest('rsi', this)">
+                            <i class="bi bi-play-fill me-1"></i>백테스트 실행
+                        </button>
+                    </div>
+                    <div class="card-footer bg-light" id="result-rsi" style="display: none;">
+                        <div class="result-content"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 전략 비교 -->
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>전략 비교</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">여러 전략의 성과를 비교합니다</p>
+                        <ul class="small">
+                            <li>MA 크로스오버 vs RSI</li>
+                            <li>동일 기간, 동일 종목</li>
+                            <li>수익률, Sharpe, MDD 비교</li>
+                        </ul>
+                        <button type="button" class="btn btn-info w-100" onclick="runComparison(this)">
+                            <i class="bi bi-play-fill me-1"></i>비교 실행
+                        </button>
+                    </div>
+                    <div class="card-footer bg-light" id="result-compare" style="display: none;">
+                        <div class="result-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 설명 -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5><i class="bi bi-info-circle me-2"></i>데모 백테스트 안내</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>사용 방법</h6>
+                        <ol class="small text-muted">
+                            <li><strong>데모 데이터 생성</strong> 버튼을 클릭하여 테스트용 가격 데이터를 생성합니다.</li>
+                            <li>원하는 전략의 <strong>백테스트 실행</strong> 버튼을 클릭합니다.</li>
+                            <li>결과를 확인하고 다른 전략과 비교해 보세요.</li>
+                            <li>테스트가 끝나면 <strong>데모 데이터 삭제</strong>로 정리합니다.</li>
+                        </ol>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>주의사항</h6>
+                        <ul class="small text-muted">
+                            <li>데모 데이터는 실제 시장 데이터와 다를 수 있습니다.</li>
+                            <li>백테스트 결과가 실제 성과를 보장하지 않습니다.</li>
+                            <li>실제 투자 전 충분한 검증이 필요합니다.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+<script>
+function showMessage(message, isError) {
+    const div = document.getElementById('statusMessage');
+    div.className = 'alert ' + (isError ? 'alert-danger' : 'alert-success');
+    div.innerHTML = (isError ? '<i class="bi bi-exclamation-triangle me-2"></i>' : '<i class="bi bi-check-circle me-2"></i>') + message;
+    div.style.display = 'block';
+    setTimeout(() => div.style.display = 'none', 5000);
+}
+
+function generateData() {
+    fetch('/trading/demo/backtest/generate-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            showMessage(data.error, true);
+        } else {
+            showMessage('데모 데이터가 성공적으로 생성되었습니다.', false);
+        }
+    })
+    .catch(err => showMessage('오류: ' + err.message, true));
+}
+
+function clearData() {
+    if (!confirm('데모 데이터를 삭제하시겠습니까?')) return;
+
+    fetch('/trading/demo/backtest/clear', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            showMessage(data.error, true);
+        } else {
+            showMessage('데모 데이터가 삭제되었습니다.', false);
+            // 결과 영역 숨기기
+            document.querySelectorAll('[id^="result-"]').forEach(el => el.style.display = 'none');
+        }
+    })
+    .catch(err => showMessage('오류: ' + err.message, true));
+}
+
+function runBacktest(type, btn) {
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>실행 중...';
+
+    const resultDiv = document.getElementById('result-' + type);
+    resultDiv.style.display = 'none';
+
+    fetch('/trading/demo/backtest/' + type, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        displayBacktestResult(resultDiv, data);
+    })
+    .catch(err => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        resultDiv.querySelector('.result-content').innerHTML =
+            '<div class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>오류: ' + err.message + '</div>';
+        resultDiv.style.display = 'block';
+    });
+}
+
+function runComparison(btn) {
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>비교 중...';
+
+    const resultDiv = document.getElementById('result-compare');
+    resultDiv.style.display = 'none';
+
+    fetch('/trading/demo/backtest/compare', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+
+        if (data.error) {
+            resultDiv.querySelector('.result-content').innerHTML =
+                '<div class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>' + data.error + '</div>';
+        } else {
+            let html = '<div class="small">';
+            html += '<div class="fw-bold text-success mb-2"><i class="bi bi-check-circle me-1"></i>비교 완료</div>';
+            html += '<table class="table table-sm table-bordered mb-0">';
+            html += '<thead><tr><th>전략</th><th>수익률</th><th>Sharpe</th></tr></thead>';
+            html += '<tbody>';
+            for (const [strategy, result] of Object.entries(data)) {
+                if (result && result.totalReturn != null) {
+                    html += '<tr>';
+                    html += '<td>' + strategy + '</td>';
+                    html += '<td class="' + (result.totalReturn >= 0 ? 'text-success' : 'text-danger') + '">' +
+                            (result.totalReturn * 100).toFixed(2) + '%</td>';
+                    html += '<td>' + (result.sharpeRatio || '-') + '</td>';
+                    html += '</tr>';
+                }
+            }
+            html += '</tbody></table>';
+            html += '</div>';
+            resultDiv.querySelector('.result-content').innerHTML = html;
+        }
+
+        resultDiv.style.display = 'block';
+    })
+    .catch(err => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        resultDiv.querySelector('.result-content').innerHTML =
+            '<div class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>오류: ' + err.message + '</div>';
+        resultDiv.style.display = 'block';
+    });
+}
+
+function displayBacktestResult(resultDiv, data) {
+    if (data.error) {
+        resultDiv.querySelector('.result-content').innerHTML =
+            '<div class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>' + data.error + '</div>';
+    } else {
+        let html = '<div class="small">';
+        html += '<div class="fw-bold text-success mb-2"><i class="bi bi-check-circle me-1"></i>백테스트 완료</div>';
+
+        if (data.totalReturn != null) {
+            const returnClass = data.totalReturn >= 0 ? 'text-success' : 'text-danger';
+            html += '<div>수익률: <span class="' + returnClass + ' fw-bold">' +
+                    (data.totalReturn * 100).toFixed(2) + '%</span></div>';
+        }
+
+        if (data.sharpeRatio != null) {
+            html += '<div>Sharpe Ratio: ' + data.sharpeRatio.toFixed(2) + '</div>';
+        }
+
+        if (data.maxDrawdown != null) {
+            html += '<div>MDD: <span class="text-danger">' +
+                    (data.maxDrawdown * 100).toFixed(2) + '%</span></div>';
+        }
+
+        if (data.totalTrades != null) {
+            html += '<div>총 거래 수: ' + data.totalTrades + '</div>';
+        }
+
+        if (data.winRate != null) {
+            html += '<div>승률: ' + (data.winRate * 100).toFixed(1) + '%</div>';
+        }
+
+        html += '</div>';
+        resultDiv.querySelector('.result-content').innerHTML = html;
+    }
+    resultDiv.style.display = 'block';
+}
+</script>
+</th:block>
+</body>
+</html>

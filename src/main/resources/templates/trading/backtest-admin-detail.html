@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>백테스트 상세</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container-fluid">
+        <!-- 브레드크럼 -->
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/trading/backtests/admin">백테스트 관리</a></li>
+                <li class="breadcrumb-item active" th:text="${backtest.backtestId}"></li>
+            </ol>
+        </nav>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="bi bi-bar-chart-line me-2"></i>
+                백테스트 결과
+            </h2>
+            <div>
+                <button type="button" class="btn btn-outline-danger" onclick="confirmDelete()">
+                    <i class="bi bi-trash me-1"></i>삭제
+                </button>
+                <a href="/trading/backtests/admin" class="btn btn-outline-secondary ms-2">
+                    <i class="bi bi-arrow-left me-1"></i>목록으로
+                </a>
+            </div>
+        </div>
+
+        <div th:if="${error}" class="alert alert-warning" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${error}"></span>
+        </div>
+
+        <div class="row" th:if="${backtest != null and backtest.backtestId != null}">
+            <!-- 기본 정보 -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>기본 정보</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-borderless mb-0">
+                            <tr>
+                                <th class="text-muted" style="width: 40%">백테스트 ID</th>
+                                <td th:text="${backtest.backtestId}" class="font-monospace small"></td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">전략 ID</th>
+                                <td th:text="${backtest.strategyId}" class="fw-bold"></td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">종목</th>
+                                <td>
+                                    <span th:each="symbol, iter : ${backtest.symbols}">
+                                        <span class="badge bg-secondary" th:text="${symbol}"></span>
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">기간</th>
+                                <td>
+                                    <span th:text="${backtest.startDate}"></span> ~
+                                    <span th:text="${backtest.endDate}"></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">타임프레임</th>
+                                <td th:text="${backtest.timeframe}"></td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">초기 자본</th>
+                                <td th:text="${#numbers.formatInteger(backtest.initialCapital, 3, 'COMMA')} + '원'"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 성과 지표 -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-graph-up-arrow me-2"></i>성과 지표</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6 mb-3">
+                                <div class="fs-3 fw-bold"
+                                     th:classappend="${backtest.totalReturn != null and backtest.totalReturn >= 0} ? 'text-success' : 'text-danger'"
+                                     th:text="${backtest.totalReturn != null} ? ${#numbers.formatDecimal(backtest.totalReturn, 1, 2)} + '%' : '-'">
+                                </div>
+                                <div class="text-muted small">총 수익률</div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <div class="fs-3 fw-bold text-primary"
+                                     th:text="${backtest.sharpeRatio != null} ? ${#numbers.formatDecimal(backtest.sharpeRatio, 1, 2)} : '-'">
+                                </div>
+                                <div class="text-muted small">Sharpe Ratio</div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <div class="fs-3 fw-bold text-danger"
+                                     th:text="${backtest.maxDrawdown != null} ? ${#numbers.formatDecimal(backtest.maxDrawdown, 1, 2)} + '%' : '-'">
+                                </div>
+                                <div class="text-muted small">최대 낙폭 (MDD)</div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <div class="fs-3 fw-bold"
+                                     th:text="${backtest.winRate != null} ? ${#numbers.formatDecimal(backtest.winRate, 1, 1)} + '%' : '-'">
+                                </div>
+                                <div class="text-muted small">승률</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 거래 통계 -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-receipt me-2"></i>거래 통계</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-borderless mb-0">
+                            <tr>
+                                <th class="text-muted">총 거래 수</th>
+                                <td th:text="${backtest.totalTrades}"></td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">승리 거래</th>
+                                <td th:text="${backtest.winningTrades}" class="text-success"></td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">패배 거래</th>
+                                <td th:text="${backtest.losingTrades}" class="text-danger"></td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">평균 수익</th>
+                                <td th:text="${backtest.avgProfit != null} ? ${#numbers.formatDecimal(backtest.avgProfit, 1, 2)} + '%' : '-'"></td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Profit Factor</th>
+                                <td th:text="${backtest.profitFactor != null} ? ${#numbers.formatDecimal(backtest.profitFactor, 1, 2)} : '-'"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 설정 정보 -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-gear me-2"></i>설정 정보</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-borderless mb-0">
+                            <tr>
+                                <th class="text-muted">수수료</th>
+                                <td th:text="${backtest.commission != null} ? ${#numbers.formatDecimal(backtest.commission * 100, 1, 4)} + '%' : '-'"></td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">슬리피지</th>
+                                <td th:text="${backtest.slippage != null} ? ${#numbers.formatDecimal(backtest.slippage * 100, 1, 4)} + '%' : '-'"></td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">실행 시간</th>
+                                <td th:text="${backtest.durationMs != null} ? ${backtest.durationMs} + 'ms' : '-'"></td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">생성일시</th>
+                                <td th:text="${backtest.createdAt}"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 삭제 확인 폼 -->
+    <form id="deleteForm" th:action="@{/trading/backtests/admin/{id}/delete(id=${backtest.backtestId})}"
+          method="post" style="display: none;">
+    </form>
+</div>
+
+<th:block layout:fragment="scripts">
+<script th:inline="javascript">
+function confirmDelete() {
+    const backtestId = [[${backtest.backtestId}]];
+    if (confirm('이 백테스트를 삭제하시겠습니까?')) {
+        document.getElementById('deleteForm').submit();
+    }
+}
+</script>
+</th:block>
+</body>
+</html>

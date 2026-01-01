@@ -1367,4 +1367,350 @@ public class TradingApiService {
             return errorResult;
         }
     }
+
+    // ==================== 종목 관리 (Instrument Management) ====================
+
+    /**
+     * 종목 목록 조회
+     */
+    public Map<String, Object> getInstruments(String market, String status, Boolean tradable, String search) {
+        StringBuilder url = new StringBuilder("/api/v1/admin/instruments?");
+        if (market != null && !market.isEmpty()) {
+            url.append("market=").append(market).append("&");
+        }
+        if (status != null && !status.isEmpty()) {
+            url.append("status=").append(status).append("&");
+        }
+        if (tradable != null) {
+            url.append("tradable=").append(tradable).append("&");
+        }
+        if (search != null && !search.isEmpty()) {
+            url.append("search=").append(search).append("&");
+        }
+        String finalUrl = url.toString().replaceAll("[&?]$", "");
+
+        try {
+            log.debug("Calling Trading API for instruments: {}", finalUrl);
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                finalUrl, HttpMethod.GET, null,
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to get instruments", e);
+            Map<String, Object> errorResult = new HashMap<>();
+            errorResult.put("items", new java.util.ArrayList<>());
+            errorResult.put("total", 0);
+            errorResult.put("error", "종목 목록을 가져올 수 없습니다.");
+            return errorResult;
+        }
+    }
+
+    /**
+     * 종목 상세 조회
+     */
+    public Map<String, Object> getInstrument(String symbol) {
+        String url = "/api/v1/admin/instruments/" + symbol;
+        try {
+            log.debug("Calling Trading API for instrument: {}", url);
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                url, HttpMethod.GET, null,
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to get instrument: {}", symbol, e);
+            Map<String, Object> errorResult = new HashMap<>();
+            errorResult.put("error", "종목 정보를 가져올 수 없습니다.");
+            return errorResult;
+        }
+    }
+
+    /**
+     * 종목 상태 업데이트
+     */
+    public Map<String, Object> updateInstrumentStatus(String symbol, String status, Boolean tradable, Boolean halted) {
+        String url = "/api/v1/admin/instruments/" + symbol + "/status";
+        try {
+            log.info("Updating instrument status: symbol={}, status={}, tradable={}, halted={}", symbol, status, tradable, halted);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            Map<String, Object> statusData = new HashMap<>();
+            if (status != null) statusData.put("status", status);
+            if (tradable != null) statusData.put("tradable", tradable);
+            if (halted != null) statusData.put("halted", halted);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(statusData, headers);
+
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                url, HttpMethod.PUT, request,
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to update instrument status", e);
+            throw new RuntimeException("종목 상태 업데이트에 실패했습니다.", e);
+        }
+    }
+
+    // ==================== 백테스트 관리 (Admin Backtest) ====================
+
+    /**
+     * 백테스트 실행
+     */
+    public Map<String, Object> runBacktest(Map<String, Object> request) {
+        String url = "/api/v1/admin/backtests";
+        try {
+            log.info("Running backtest: {}", request);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
+
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                url, HttpMethod.POST, entity,
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to run backtest", e);
+            Map<String, Object> errorResult = new HashMap<>();
+            errorResult.put("success", false);
+            errorResult.put("error", "백테스트 실행에 실패했습니다: " + e.getMessage());
+            return errorResult;
+        }
+    }
+
+    /**
+     * 백테스트 목록 조회 (Admin)
+     */
+    public Map<String, Object> listBacktests() {
+        String url = "/api/v1/admin/backtests";
+        try {
+            log.debug("Calling Trading API for backtest list: {}", url);
+            ResponseEntity<Object> response = tradingApiRestTemplate.exchange(
+                url, HttpMethod.GET, null,
+                new ParameterizedTypeReference<Object>() {}
+            );
+            // Handle both List and Map responses
+            Object body = response.getBody();
+            Map<String, Object> result = new HashMap<>();
+            if (body instanceof java.util.List) {
+                result.put("backtests", body);
+            } else if (body instanceof Map) {
+                result = (Map<String, Object>) body;
+            }
+            return result;
+        } catch (RestClientException e) {
+            log.error("Failed to list backtests", e);
+            Map<String, Object> errorResult = new HashMap<>();
+            errorResult.put("backtests", new java.util.ArrayList<>());
+            errorResult.put("error", "백테스트 목록을 가져올 수 없습니다.");
+            return errorResult;
+        }
+    }
+
+    /**
+     * 백테스트 삭제
+     */
+    public Map<String, Object> deleteBacktest(String backtestId) {
+        String url = "/api/v1/admin/backtests/" + backtestId;
+        try {
+            log.info("Deleting backtest: {}", backtestId);
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                url, HttpMethod.DELETE, null,
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to delete backtest", e);
+            Map<String, Object> errorResult = new HashMap<>();
+            errorResult.put("success", false);
+            errorResult.put("error", "백테스트 삭제에 실패했습니다.");
+            return errorResult;
+        }
+    }
+
+    /**
+     * 백테스트 상세 조회 (Admin)
+     */
+    public Map<String, Object> getBacktest(String backtestId) {
+        String url = "/api/v1/admin/backtests/" + backtestId;
+        try {
+            log.debug("Calling Trading API for backtest: {}", url);
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                url, HttpMethod.GET, null,
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to get backtest", e);
+            Map<String, Object> errorResult = new HashMap<>();
+            errorResult.put("error", "백테스트 정보를 가져올 수 없습니다.");
+            return errorResult;
+        }
+    }
+
+    // ==================== 최적화 데모 (Optimization Demo) ====================
+
+    /**
+     * MA 크로스오버 최적화 데모
+     */
+    public Map<String, Object> runMACrossoverOptimization() {
+        String url = "/api/v1/demo/optimization/ma-crossover";
+        try {
+            log.info("Running MA Crossover optimization demo");
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                url, HttpMethod.POST, null,
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to run MA Crossover optimization", e);
+            Map<String, Object> errorResult = new HashMap<>();
+            errorResult.put("error", "MA 크로스오버 최적화 실행에 실패했습니다.");
+            return errorResult;
+        }
+    }
+
+    /**
+     * RSI 최적화 데모
+     */
+    public Map<String, Object> runRSIOptimization() {
+        String url = "/api/v1/demo/optimization/rsi";
+        try {
+            log.info("Running RSI optimization demo");
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                url, HttpMethod.POST, null,
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to run RSI optimization", e);
+            Map<String, Object> errorResult = new HashMap<>();
+            errorResult.put("error", "RSI 최적화 실행에 실패했습니다.");
+            return errorResult;
+        }
+    }
+
+    /**
+     * 랜덤 서치 최적화 데모
+     */
+    public Map<String, Object> runRandomSearchOptimization() {
+        String url = "/api/v1/demo/advanced/random-search";
+        try {
+            log.info("Running Random Search optimization demo");
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                url, HttpMethod.POST, null,
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to run Random Search optimization", e);
+            Map<String, Object> errorResult = new HashMap<>();
+            errorResult.put("error", "랜덤 서치 최적화 실행에 실패했습니다.");
+            return errorResult;
+        }
+    }
+
+    // ==================== 데모 백테스트 (Demo Backtest) ====================
+
+    /**
+     * 데모 데이터 생성
+     */
+    public Map<String, Object> generateDemoData() {
+        String url = "/api/v1/demo/backtest/generate-data";
+        try {
+            log.info("Generating demo data");
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                url, HttpMethod.POST, null,
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to generate demo data", e);
+            Map<String, Object> errorResult = new HashMap<>();
+            errorResult.put("error", "데모 데이터 생성에 실패했습니다.");
+            return errorResult;
+        }
+    }
+
+    /**
+     * MA 크로스오버 백테스트 데모
+     */
+    public Map<String, Object> runMACrossoverBacktest() {
+        String url = "/api/v1/demo/backtest/ma-crossover";
+        try {
+            log.info("Running MA Crossover backtest demo");
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                url, HttpMethod.POST, null,
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to run MA Crossover backtest", e);
+            Map<String, Object> errorResult = new HashMap<>();
+            errorResult.put("error", "MA 크로스오버 백테스트 실행에 실패했습니다.");
+            return errorResult;
+        }
+    }
+
+    /**
+     * RSI 백테스트 데모
+     */
+    public Map<String, Object> runRSIBacktest() {
+        String url = "/api/v1/demo/backtest/rsi";
+        try {
+            log.info("Running RSI backtest demo");
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                url, HttpMethod.POST, null,
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to run RSI backtest", e);
+            Map<String, Object> errorResult = new HashMap<>();
+            errorResult.put("error", "RSI 백테스트 실행에 실패했습니다.");
+            return errorResult;
+        }
+    }
+
+    /**
+     * 백테스트 비교 데모
+     */
+    public Map<String, Object> runBacktestComparison() {
+        String url = "/api/v1/demo/backtest/compare";
+        try {
+            log.info("Running backtest comparison demo");
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                url, HttpMethod.POST, null,
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to run backtest comparison", e);
+            Map<String, Object> errorResult = new HashMap<>();
+            errorResult.put("error", "백테스트 비교 실행에 실패했습니다.");
+            return errorResult;
+        }
+    }
+
+    /**
+     * 데모 데이터 삭제
+     */
+    public Map<String, Object> clearDemoData() {
+        String url = "/api/v1/demo/backtest/clear";
+        try {
+            log.info("Clearing demo data");
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                url, HttpMethod.DELETE, null,
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to clear demo data", e);
+            Map<String, Object> errorResult = new HashMap<>();
+            errorResult.put("error", "데모 데이터 삭제에 실패했습니다.");
+            return errorResult;
+        }
+    }
 }

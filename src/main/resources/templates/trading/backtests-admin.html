@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>백테스트 관리</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-gear-wide-connected me-2"></i>백테스트 관리</h2>
+            <a href="/trading/backtests/admin/run" class="btn btn-primary">
+                <i class="bi bi-play-circle me-1"></i>새 백테스트 실행
+            </a>
+        </div>
+
+        <!-- 알림 메시지 -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i><span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-warning" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${error}"></span>
+        </div>
+
+        <!-- 백테스트 목록 -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>전략</th>
+                                <th>종목</th>
+                                <th>기간</th>
+                                <th class="text-end">수익률</th>
+                                <th class="text-end">Sharpe</th>
+                                <th class="text-end">MDD</th>
+                                <th>거래 수</th>
+                                <th>실행일시</th>
+                                <th>관리</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(backtests)}">
+                                <td colspan="10" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                    백테스트 결과가 없습니다.
+                                    <a href="/trading/backtests/admin/run" class="d-block mt-2">새 백테스트 실행하기</a>
+                                </td>
+                            </tr>
+                            <tr th:each="bt : ${backtests}">
+                                <td>
+                                    <a th:href="@{/trading/backtests/admin/{id}(id=${bt.backtestId})}"
+                                       th:text="${#strings.abbreviate(bt.backtestId, 12)}"
+                                       class="text-decoration-none" title="상세 보기"></a>
+                                </td>
+                                <td th:text="${bt.strategyId}" class="fw-bold"></td>
+                                <td>
+                                    <span th:each="symbol, iter : ${bt.symbols}">
+                                        <span th:text="${symbol}"></span>
+                                        <span th:if="${!iter.last}">, </span>
+                                    </span>
+                                </td>
+                                <td class="small">
+                                    <span th:text="${bt.startDate}"></span> ~
+                                    <span th:text="${bt.endDate}"></span>
+                                </td>
+                                <td class="text-end"
+                                    th:classappend="${bt.totalReturn != null and bt.totalReturn >= 0} ? 'text-success' : 'text-danger'">
+                                    <span th:text="${bt.totalReturn != null} ? ${#numbers.formatDecimal(bt.totalReturn, 1, 2)} + '%' : '-'"></span>
+                                </td>
+                                <td class="text-end" th:text="${bt.sharpeRatio != null} ? ${#numbers.formatDecimal(bt.sharpeRatio, 1, 2)} : '-'"></td>
+                                <td class="text-end text-danger" th:text="${bt.maxDrawdown != null} ? ${#numbers.formatDecimal(bt.maxDrawdown, 1, 2)} + '%' : '-'"></td>
+                                <td th:text="${bt.totalTrades}"></td>
+                                <td class="small" th:text="${bt.createdAt}"></td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a th:href="@{/trading/backtests/admin/{id}(id=${bt.backtestId})}"
+                                           class="btn btn-outline-primary" title="상세">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger"
+                                                th:data-id="${bt.backtestId}"
+                                                onclick="confirmDelete(this)" title="삭제">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 삭제 확인 폼 (hidden) -->
+    <form id="deleteForm" method="post" style="display: none;">
+    </form>
+</div>
+
+<th:block layout:fragment="scripts">
+<script>
+function confirmDelete(btn) {
+    const backtestId = btn.dataset.id;
+    if (confirm('이 백테스트를 삭제하시겠습니까?\nID: ' + backtestId)) {
+        const form = document.getElementById('deleteForm');
+        form.action = '/trading/backtests/admin/' + backtestId + '/delete';
+        form.submit();
+    }
+}
+</script>
+</th:block>
+</body>
+</html>
