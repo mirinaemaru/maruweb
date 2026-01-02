@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -31,6 +32,7 @@ public class DDay {
     private String description;
 
     @NotNull(message = "Target date is required")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "target_date", nullable = false)
     private LocalDate targetDate;
 
