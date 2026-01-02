@@ -535,6 +535,9 @@ header h1 {
     align-items: center;
     gap: 8px;
     transition: all 0.3s;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .todo-item:hover {
@@ -551,8 +554,10 @@ header h1 {
     display: flex;
     align-items: flex-start;
     gap: 15px;
-    flex: 1;
+    flex: 0 0 auto;
     min-width: 0;
+    overflow: hidden;
+    width: fit-content;
 }
 
 .toggle-form {
@@ -568,8 +573,10 @@ header h1 {
 }
 
 .todo-text {
-    flex: 1;
+    flex: 0 0 auto;
     min-width: 0;
+    width: fit-content;
+    overflow: hidden;
 }
 
 .todo-text h3 {
@@ -577,7 +584,7 @@ header h1 {
     color: #333;
     margin-bottom: 5px;
     overflow: hidden;
-    max-width: 100%;
+    width: fit-content;
 }
 
 /* Title with description inline (Completed/All tabs) */
@@ -585,7 +592,10 @@ header h1 {
     display: flex;
     align-items: baseline;
     overflow: hidden;
-    width: 100%;
+    flex: 0 0 auto;
+    min-width: 0;
+    width: fit-content;
+    box-sizing: border-box;
 }
 
 .todo-title-text {
@@ -598,8 +608,9 @@ header h1 {
     color: #888;
     font-weight: 400;
     font-size: 0.9em;
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     min-width: 0;
+    max-width: 80%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -667,6 +678,24 @@ header h1 {
 }
 
 /* Responsive */
+@media (max-width: 1200px) {
+    .todo-desc-inline {
+        max-width: 55%;
+    }
+}
+
+@media (max-width: 1024px) {
+    .todo-desc-inline {
+        max-width: 50%;
+    }
+}
+
+@media (max-width: 900px) {
+    .todo-desc-inline {
+        max-width: 45%;
+    }
+}
+
 @media (max-width: 768px) {
     .sidebar {
         width: 220px;
@@ -719,6 +748,16 @@ header h1 {
     .form-group {
         flex-direction: column;
     }
+
+    .todo-desc-inline {
+        max-width: 40%;
+    }
+}
+
+@media (max-width: 600px) {
+    .todo-desc-inline {
+        max-width: 35%;
+    }
 }
 
 @media (max-width: 480px) {
@@ -745,6 +784,10 @@ header h1 {
     .main-content {
         margin-left: 50px;
         padding: 10px;
+    }
+
+    .todo-desc-inline {
+        max-width: 25%;
     }
 }
 

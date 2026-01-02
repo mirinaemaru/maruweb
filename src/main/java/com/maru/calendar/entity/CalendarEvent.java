@@ -44,6 +44,13 @@ public class CalendarEvent {
     @Column(name = "location")
     private String location;
 
+    // D-Day Integration
+    @Column(name = "dday_icon", length = 10)
+    private String ddayIcon; // 이모지 아이콘 (🎯, 🎂, 💍 등)
+
+    @Column(name = "dday_id")
+    private Long ddayId; // 연동된 DDay의 ID
+
     // Google Calendar Integration (nullable for now, will be used later)
     @Column(name = "google_event_id", unique = true)
     private String googleEventId;

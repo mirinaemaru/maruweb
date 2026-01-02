@@ -72,7 +72,20 @@
       "mcp__playwright__browser_evaluate",
       "mcp__playwright__browser_run_code",
       "mcp__playwright__browser_close",
-      "mcp__playwright__browser_click"
+      "mcp__playwright__browser_click",
+      "Bash(brew services:*)",
+      "Bash(source .env)",
+      "Bash(src/main/java/com/maru/trading/service/TradingApiService.java )",
+      "Bash(src/main/resources/templates/trading/fills.html )",
+      "Bash(src/main/resources/templates/trading/orders.html )",
+      "Bash(src/main/resources/templates/trading/positions.html )",
+      "Bash(src/main/resources/templates/trading/fill-detail.html )",
+      "Bash(src/main/resources/templates/trading/order-detail.html )",
+      "Bash(src/main/resources/templates/trading/position-detail.html)",
+      "Bash(bfg:*)",
+      "Bash(git reflog:*)",
+      "Bash(git gc:*)",
+      "mcp__playwright__browser_type"
     ]
   },
   "enableAllProjectMcpServers": true,
