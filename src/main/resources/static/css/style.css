@@ -225,6 +225,27 @@ body {
     color: white;
 }
 
+.submenu-header {
+    margin: 15px 0 8px 0;
+    padding: 8px 20px 8px 28px;
+    pointer-events: none;
+}
+
+.submenu-header:first-child {
+    margin-top: 8px;
+}
+
+.submenu-header span {
+    display: block;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.82em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 6px;
+}
+
 .sidebar-footer {
     padding: 20px;
     border-top: 1px solid rgba(255, 255, 255, 0.2);

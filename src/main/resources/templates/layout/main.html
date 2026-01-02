@@ -52,12 +52,23 @@
                     <li class="has-submenu" th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading')} ? 'active' : ''">
                         <a th:href="@{/trading/dashboard}"><span class="menu-icon">📊</span><span class="menu-text">Trading</span></a>
                         <ul class="submenu">
+                            <!-- 대시보드 & 계좌 -->
+                            <li class="submenu-header"><span>📊 대시보드 & 계좌</span></li>
                             <li th:classappend="${#httpServletRequest.requestURI == '/trading/dashboard'} ? 'active' : ''">
                                 <a th:href="@{/trading/dashboard}">Dashboard</a>
                             </li>
                             <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/accounts')} ? 'active' : ''">
                                 <a th:href="@{/trading/accounts}">계좌관리</a>
                             </li>
+                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/balances')} ? 'active' : ''">
+                                <a th:href="@{/trading/balances}">잔고 조회</a>
+                            </li>
+                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/instruments')} ? 'active' : ''">
+                                <a th:href="@{/trading/instruments}">종목 관리</a>
+                            </li>
+
+                            <!-- 거래 & 실행 -->
+                            <li class="submenu-header"><span>💼 거래 & 실행</span></li>
                             <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/strategies')} ? 'active' : ''">
                                 <a th:href="@{/trading/strategies}">전략 관리</a>
                             </li>
@@ -70,71 +81,77 @@
                             <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/fills')} ? 'active' : ''">
                                 <a th:href="@{/trading/fills}">체결 내역</a>
                             </li>
-                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/balances')} ? 'active' : ''">
-                                <a th:href="@{/trading/balances}">잔고 조회</a>
-                            </li>
+
+                            <!-- 리스크 & 성과 -->
+                            <li class="submenu-header"><span>🛡️ 리스크 & 성과</span></li>
                             <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/kill-switch')} ? 'active' : ''">
-                                <a th:href="@{/trading/kill-switch}">⚡ Kill Switch</a>
+                                <a th:href="@{/trading/kill-switch}">Kill Switch</a>
                             </li>
                             <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/risk-rules')} ? 'active' : ''">
-                                <a th:href="@{/trading/risk-rules}">⚙️ 리스크 룰</a>
-                            </li>
-                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/demo-scenarios')} ? 'active' : ''">
-                                <a th:href="@{/trading/demo-scenarios}">🎯 데모 시나리오</a>
-                            </li>
-                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/demo-signal')} ? 'active' : ''">
-                                <a th:href="@{/trading/demo-signal}">🚀 데모 신호</a>
-                            </li>
-                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/execution-history')} ? 'active' : ''">
-                                <a th:href="@{/trading/execution-history}">📊 실행 히스토리</a>
-                            </li>
-                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/backtests')} ? 'active' : ''">
-                                <a th:href="@{/trading/backtests}">📈 백테스팅 결과</a>
-                            </li>
-                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/backtests/advanced/walk-forward')} ? 'active' : ''">
-                                <a th:href="@{/trading/backtests/advanced/walk-forward}">🔄 Walk-Forward</a>
-                            </li>
-                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/backtests/advanced/portfolio')} ? 'active' : ''">
-                                <a th:href="@{/trading/backtests/advanced/portfolio}">💼 Portfolio Test</a>
-                            </li>
-                            <li th:classappend="${#httpServletRequest.requestURI == '/trading/notifications/test'} ? 'active' : ''">
-                                <a th:href="@{/trading/notifications/test}">🔔 실시간 알림</a>
-                            </li>
-                            <li th:classappend="${#httpServletRequest.requestURI == '/trading/notifications/history'} ? 'active' : ''">
-                                <a th:href="@{/trading/notifications/history}">📜 알림 히스토리</a>
-                            </li>
-                            <li th:classappend="${#httpServletRequest.requestURI == '/trading/notifications/settings'} ? 'active' : ''">
-                                <a th:href="@{/trading/notifications/settings}">⚙️ 알림 설정</a>
+                                <a th:href="@{/trading/risk-rules}">리스크 룰</a>
                             </li>
                             <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/performance')} ? 'active' : ''">
-                                <a th:href="@{/trading/performance}">📊 성과 분석</a>
+                                <a th:href="@{/trading/performance}">성과 분석</a>
                             </li>
                             <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/performance/strategies')} ? 'active' : ''">
-                                <a th:href="@{/trading/performance/strategies}">📈 전략별 통계</a>
-                            </li>
-                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/optimization')} ? 'active' : ''">
-                                <a th:href="@{/trading/optimization}">🎯 파라미터 최적화</a>
+                                <a th:href="@{/trading/performance/strategies}">전략별 통계</a>
                             </li>
                             <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/risk/var')} ? 'active' : ''">
-                                <a th:href="@{/trading/risk/var}">📉 VaR 분석</a>
+                                <a th:href="@{/trading/risk/var}">VaR 분석</a>
                             </li>
                             <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/risk/correlation')} ? 'active' : ''">
-                                <a th:href="@{/trading/risk/correlation}">🔗 상관관계 분석</a>
+                                <a th:href="@{/trading/risk/correlation}">상관관계 분석</a>
                             </li>
-                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/health-check')} ? 'active' : ''">
-                                <a th:href="@{/trading/health-check}">🏥 Health Check</a>
+
+                            <!-- 백테스팅 & 최적화 -->
+                            <li class="submenu-header"><span>🔬 백테스팅 & 최적화</span></li>
+                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/backtests')} ? 'active' : ''">
+                                <a th:href="@{/trading/backtests}">백테스팅 결과</a>
                             </li>
-                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/instruments')} ? 'active' : ''">
-                                <a th:href="@{/trading/instruments}">📈 종목 관리</a>
+                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/backtests/advanced/walk-forward')} ? 'active' : ''">
+                                <a th:href="@{/trading/backtests/advanced/walk-forward}">Walk-Forward</a>
+                            </li>
+                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/backtests/advanced/portfolio')} ? 'active' : ''">
+                                <a th:href="@{/trading/backtests/advanced/portfolio}">Portfolio Test</a>
                             </li>
                             <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/backtests/admin')} ? 'active' : ''">
-                                <a th:href="@{/trading/backtests/admin}">⚙️ 백테스트 관리</a>
+                                <a th:href="@{/trading/backtests/admin}">백테스트 관리</a>
+                            </li>
+                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/optimization')} ? 'active' : ''">
+                                <a th:href="@{/trading/optimization}">파라미터 최적화</a>
+                            </li>
+
+                            <!-- 알림 & 모니터링 -->
+                            <li class="submenu-header"><span>🔔 알림 & 모니터링</span></li>
+                            <li th:classappend="${#httpServletRequest.requestURI == '/trading/notifications/test'} ? 'active' : ''">
+                                <a th:href="@{/trading/notifications/test}">실시간 알림</a>
+                            </li>
+                            <li th:classappend="${#httpServletRequest.requestURI == '/trading/notifications/history'} ? 'active' : ''">
+                                <a th:href="@{/trading/notifications/history}">알림 히스토리</a>
+                            </li>
+                            <li th:classappend="${#httpServletRequest.requestURI == '/trading/notifications/settings'} ? 'active' : ''">
+                                <a th:href="@{/trading/notifications/settings}">알림 설정</a>
+                            </li>
+                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/health-check')} ? 'active' : ''">
+                                <a th:href="@{/trading/health-check}">Health Check</a>
+                            </li>
+                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/execution-history')} ? 'active' : ''">
+                                <a th:href="@{/trading/execution-history}">실행 히스토리</a>
+                            </li>
+
+                            <!-- 데모 & 테스트 -->
+                            <li class="submenu-header"><span>🎯 데모 & 테스트</span></li>
+                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/demo-scenarios')} ? 'active' : ''">
+                                <a th:href="@{/trading/demo-scenarios}">데모 시나리오</a>
+                            </li>
+                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/demo-signal')} ? 'active' : ''">
+                                <a th:href="@{/trading/demo-signal}">데모 신호</a>
                             </li>
                             <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/demo/optimization')} ? 'active' : ''">
-                                <a th:href="@{/trading/demo/optimization}">🎯 최적화 데모</a>
+                                <a th:href="@{/trading/demo/optimization}">최적화 데모</a>
                             </li>
                             <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/demo/backtest')} ? 'active' : ''">
-                                <a th:href="@{/trading/demo/backtest}">🧪 데모 백테스트</a>
+                                <a th:href="@{/trading/demo/backtest}">데모 백테스트</a>
                             </li>
                         </ul>
                     </li>
