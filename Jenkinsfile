@@ -11,6 +11,11 @@ pipeline {
         GOOGLE_CLIENT_SECRET = credentials('google-client-secret')
         CALENDAR_ENCRYPTION_KEY = credentials('calendar-encryption-key')
 
+        // Database credentials
+        DB_USERNAME = credentials('db-username')
+        DB_PASSWORD = credentials('db-password')
+        DB_URL = credentials('db-url')
+
         // Build settings
         MAVEN_OPTS = '-Xmx1024m'
         APP_NAME = 'maruweb'
@@ -78,6 +83,9 @@ pipeline {
                     # Start application in background
                     nohup java -jar \
                         -Dspring.profiles.active=prod \
+                        -DDB_USERNAME=${DB_USERNAME} \
+                        -DDB_PASSWORD=${DB_PASSWORD} \
+                        -DDB_URL=${DB_URL} \
                         -DGOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID} \
                         -DGOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET} \
                         -DCALENDAR_ENCRYPTION_KEY=${CALENDAR_ENCRYPTION_KEY} \
