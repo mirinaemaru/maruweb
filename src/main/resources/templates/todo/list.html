@@ -103,7 +103,7 @@
                             <span class="todo-title-text" th:text="${todo.title}">Todo Title</span>
                             <span th:if="${todo.description != null and todo.description != ''}"
                                   class="todo-desc-inline"
-                                  th:text="' - ' + ${#strings.abbreviate(todo.description, 100)}"></span>
+                                  th:text="' - ' + ${#strings.abbreviate(todo.description, 20)}"></span>
                         </h3>
                         <!-- Active 탭에서는 description 수정 가능 -->
                         <div th:if="${filter == 'active'}">
