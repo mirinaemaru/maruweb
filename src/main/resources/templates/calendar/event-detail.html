@@ -98,5 +98,21 @@
                     </div>
                 </div>
     </div>
+    <th:block layout:fragment="extra-scripts">
+<script>
+    // Auto-update End Date & Time when Start Date & Time changes
+    document.addEventListener('DOMContentLoaded', function() {
+        const startDateTimeInput = document.getElementById('startDateTime');
+        const endDateTimeInput = document.getElementById('endDateTime');
+
+        if (startDateTimeInput && endDateTimeInput) {
+            startDateTimeInput.addEventListener('change', function() {
+                // Copy the start date/time value to end date/time
+                endDateTimeInput.value = this.value;
+            });
+        }
+    });
+</script>
+    </th:block>
 </body>
 </html>
