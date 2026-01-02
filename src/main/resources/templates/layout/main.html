@@ -147,6 +147,9 @@
 
         <!-- Main Content Area -->
         <main class="main-content">
+            <!-- Recent Menu List -->
+            <div id="recentMenuList" class="recent-menu-list"></div>
+
             <div layout:fragment="content">
                 <!-- Page content will be inserted here -->
             </div>
@@ -179,6 +182,126 @@
                 });
             });
         });
+
+        // Recent Menu functionality
+        (function() {
+            const COOKIE_NAME = 'recentMenus';
+            const MAX_ITEMS = 10;
+
+            // 메뉴 매핑 정보
+            const menuMap = {
+                '/': { name: 'Dashboard', icon: '🏠' },
+                '/todos': { name: 'Todo', icon: '📝' },
+                '/calendar': { name: 'Calendar', icon: '📅' },
+                '/dday': { name: 'D-Day', icon: '⏰' },
+                '/notes': { name: 'Notes', icon: '📒' },
+                '/habits': { name: 'Habits', icon: '✅' },
+                '/shortcuts': { name: 'Shortcuts', icon: '🔗' },
+                '/trading/dashboard': { name: 'Trading', icon: '📊' },
+                '/trading/accounts': { name: '계좌관리', icon: '💰' },
+                '/trading/strategies': { name: '전략 관리', icon: '📋' },
+                '/trading/orders': { name: '주문조회', icon: '📄' },
+                '/trading/positions': { name: '포지션 관리', icon: '📌' },
+                '/trading/fills': { name: '체결 내역', icon: '✔️' },
+                '/trading/balances': { name: '잔고 조회', icon: '💵' },
+                '/trading/kill-switch': { name: 'Kill Switch', icon: '⚡' },
+                '/trading/risk-rules': { name: '리스크 룰', icon: '⚙️' },
+                '/trading/performance': { name: '성과 분석', icon: '📊' },
+                '/trading/backtests': { name: '백테스팅', icon: '📈' }
+            };
+
+            // 쿠키 읽기
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+                return null;
+            }
+
+            // 쿠키 쓰기
+            function setCookie(name, value, days = 365) {
+                const expires = new Date(Date.now() + days * 864e5).toUTCString();
+                document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
+            }
+
+            // 현재 페이지 경로 가져오기
+            function getCurrentPath() {
+                const path = window.location.pathname;
+                // 세부 페이지는 부모 경로로 매핑 (예: /todos/1/edit -> /todos)
+                for (const menuPath in menuMap) {
+                    if (path === menuPath || (menuPath !== '/' && path.startsWith(menuPath))) {
+                        return menuPath;
+                    }
+                }
+                return path;
+            }
+
+            // 최근 메뉴 리스트 가져오기
+            function getRecentMenus() {
+                const cookie = getCookie(COOKIE_NAME);
+                if (!cookie) return [];
+                try {
+                    return JSON.parse(decodeURIComponent(cookie));
+                } catch (e) {
+                    return [];
+                }
+            }
+
+            // 최근 메뉴에 추가
+            function addToRecentMenus(path) {
+                const menuInfo = menuMap[path];
+                if (!menuInfo) return;
+
+                let recentMenus = getRecentMenus();
+
+                // 이미 존재하면 제거
+                recentMenus = recentMenus.filter(item => item.path !== path);
+
+                // 맨 앞에 추가
+                recentMenus.unshift({
+                    path: path,
+                    name: menuInfo.name,
+                    icon: menuInfo.icon,
+                    timestamp: Date.now()
+                });
+
+                // 10개로 제한
+                if (recentMenus.length > MAX_ITEMS) {
+                    recentMenus = recentMenus.slice(0, MAX_ITEMS);
+                }
+
+                setCookie(COOKIE_NAME, JSON.stringify(recentMenus));
+                return recentMenus;
+            }
+
+            // 최근 메뉴 표시
+            function displayRecentMenus() {
+                const recentMenus = getRecentMenus();
+                const container = document.getElementById('recentMenuList');
+
+                if (!container || recentMenus.length === 0) return;
+
+                const html = recentMenus.map(menu => `
+                    <a href="${menu.path}" class="recent-menu-item" title="${menu.name}">
+                        <span class="recent-menu-icon">${menu.icon}</span>
+                        <span class="recent-menu-name">${menu.name}</span>
+                    </a>
+                `).join('');
+
+                container.innerHTML = html;
+            }
+
+            // 페이지 로드 시 실행
+            document.addEventListener('DOMContentLoaded', function() {
+                const currentPath = getCurrentPath();
+
+                // 현재 페이지를 최근 메뉴에 추가
+                addToRecentMenus(currentPath);
+
+                // 최근 메뉴 표시
+                displayRecentMenus();
+            });
+        })();
     </script>
     <!-- WebSocket Libraries for Notifications -->
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
