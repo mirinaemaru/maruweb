@@ -69,6 +69,21 @@
                                 <input type="hidden" name="allDay" value="N">
                             </div>
 
+                            <div class="form-group">
+                                <label for="ddayIcon">D-Day Integration (Optional)</label>
+                                <select id="ddayIcon" th:field="*{ddayIcon}" class="todo-input">
+                                    <option value="">-- No D-Day --</option>
+                                    <option value="🎯">🎯 Target</option>
+                                    <option value="🎂">🎂 Birthday</option>
+                                    <option value="💍">💍 Anniversary</option>
+                                    <option value="✈️">✈️ Travel</option>
+                                    <option value="🎓">🎓 Graduation</option>
+                                    <option value="💼">💼 Work</option>
+                                    <option value="🏃">🏃 Exercise</option>
+                                    <option value="📅">📅 Event</option>
+                                </select>
+                            </div>
+
                             <div class="form-actions">
                                 <button type="submit" class="btn btn-primary">Update Event</button>
                                 <a th:href="@{/calendar}" class="btn btn-secondary">Cancel</a>
