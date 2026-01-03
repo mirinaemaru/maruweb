@@ -222,16 +222,25 @@ public class BacktestController {
         try {
             log.info("Loading admin backtest list");
 
-            Map<String, Object> result = tradingApiService.listBacktests();
+            try {
+                Map<String, Object> result = tradingApiService.listBacktests();
 
-            model.addAttribute("backtests", result.get("backtests"));
-            model.addAttribute("error", result.get("error"));
+                model.addAttribute("backtests", result.get("backtests"));
+                model.addAttribute("error", result.get("error"));
+            } catch (Exception apiException) {
+                log.warn("Failed to load backtests from Trading System API (timeout or unavailable): {}",
+                        apiException.getMessage());
+                // API 타임아웃 시 빈 결과와 경고 메시지 표시
+                model.addAttribute("backtests", new java.util.ArrayList<>());
+                model.addAttribute("warning", "Trading System API 응답 시간이 초과되었습니다. 나중에 다시 시도해주세요.");
+            }
 
             return "trading/backtests-admin";
 
         } catch (Exception e) {
             log.error("Failed to load admin backtest list", e);
             model.addAttribute("error", "백테스트 목록을 불러오는데 실패했습니다: " + e.getMessage());
+            model.addAttribute("backtests", new java.util.ArrayList<>());
             return "trading/backtests-admin";
         }
     }
