@@ -76,11 +76,32 @@
                 padding: 30px;
             }
 
+            .filter-form {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                align-items: center;
+            }
+
+            .filter-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .filter-buttons {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-left: auto;
+            }
+
             .form-label {
                 color: var(--text-primary);
                 font-weight: 600;
                 font-size: 14px;
-                margin-bottom: 8px;
+                margin-bottom: 0;
+                white-space: nowrap;
             }
 
             .form-select, .form-control {
@@ -243,7 +264,7 @@
         <div class="page-header">
             <h2>
                 <i class="bi bi-graph-up me-2"></i>종목 관리
-                <span class="badge bg-secondary ms-3" th:text="'총 ' + ${total} + '개'"></span>
+                <span class="badge bg-secondary ms-3" th:text="'총 ' + ${#numbers.formatInteger(total, 0, 'COMMA')} + '개'"></span>
             </h2>
         </div>
 
@@ -264,8 +285,8 @@
         <!-- 필터 -->
         <div class="card mb-4">
             <div class="card-body">
-                <form method="get" action="/trading/instruments" class="row g-3 align-items-end">
-                    <div class="col-md-2">
+                <form method="get" action="/trading/instruments" class="filter-form">
+                    <div class="filter-item">
                         <label class="form-label">시장</label>
                         <select name="market" class="form-select">
                             <option value="">전체</option>
@@ -274,7 +295,7 @@
                             <option value="KONEX" th:selected="${selectedMarket == 'KONEX'}">KONEX</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
+                    <div class="filter-item">
                         <label class="form-label">상태</label>
                         <select name="status" class="form-select">
                             <option value="">전체</option>
@@ -283,7 +304,7 @@
                             <option value="DELISTED" th:selected="${selectedStatus == 'DELISTED'}">상장폐지</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
+                    <div class="filter-item">
                         <label class="form-label">거래 가능</label>
                         <select name="tradable" class="form-select">
                             <option value="">전체</option>
@@ -291,13 +312,13 @@
                             <option value="false" th:selected="${selectedTradable == false}">거래 불가</option>
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="filter-item">
                         <label class="form-label">종목 검색</label>
                         <input type="text" name="search" class="form-control" placeholder="종목명 또는 코드"
                                th:value="${searchKeyword}">
                     </div>
-                    <div class="col-md-3">
-                        <button type="submit" class="btn btn-primary me-2">
+                    <div class="filter-buttons">
+                        <button type="submit" class="btn btn-primary">
                             <i class="bi bi-search me-1"></i>검색
                         </button>
                         <a href="/trading/instruments" class="btn btn-outline-secondary">
