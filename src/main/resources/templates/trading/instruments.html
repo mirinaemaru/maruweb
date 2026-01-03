@@ -6,67 +6,243 @@
     <title>종목 관리</title>
     <th:block layout:fragment="extra-css">
         <style>
+            .instruments-container {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+
+            .page-header {
+                margin-bottom: 40px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 40px;
+                border-radius: 16px;
+                color: white;
+                box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+            }
+            [data-theme="dark"] .page-header {
+                background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .page-header h2 {
+                font-size: 36px;
+                font-weight: 700;
+                margin: 0;
+                color: white;
+            }
+
+            .badge.bg-secondary {
+                background: rgba(255, 255, 255, 0.2) !important;
+                color: white !important;
+                padding: 8px 16px;
+                border-radius: 20px;
+                font-size: 14px;
+            }
+
+            .alert {
+                padding: 20px 28px;
+                border-radius: 12px;
+                margin-bottom: 30px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                animation: slideDown 0.3s ease-out;
+            }
+
+            @keyframes slideDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
             .card {
                 background: var(--bg-secondary);
-                border: 1px solid var(--border-color);
-                transition: background-color 0.3s ease, border-color 0.3s ease;
+                border: none;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                transition: background-color 0.3s ease;
+                margin-bottom: 20px;
             }
 
             .card-body {
                 color: var(--text-primary);
+                padding: 30px;
             }
 
             .form-label {
                 color: var(--text-primary);
+                font-weight: 600;
+                font-size: 14px;
+                margin-bottom: 8px;
             }
 
             .form-select, .form-control {
-                background: var(--bg-secondary);
-                border: 1px solid var(--border-color);
+                background: var(--bg-tertiary);
+                border: 2px solid var(--border-color);
                 color: var(--text-primary);
+                padding: 10px 12px;
+                border-radius: 8px;
                 transition: all 0.3s ease;
             }
 
             .form-select:focus, .form-control:focus {
-                background: var(--bg-secondary);
-                border-color: var(--accent-primary);
+                background: var(--bg-tertiary);
+                border-color: #667eea;
                 color: var(--text-primary);
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+
+            .btn {
+                padding: 10px 24px;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 600;
+                transition: all 0.3s;
+            }
+
+            .btn-primary {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            }
+
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            }
+
+            [data-theme="dark"] .btn-primary {
+                background: #6c757d;
+                box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+            }
+
+            [data-theme="dark"] .btn-primary:hover {
+                background: #5a6268;
+            }
+
+            .btn-outline-secondary {
+                border: 2px solid var(--border-color);
+                color: var(--text-primary);
+                background: transparent;
+            }
+
+            .btn-outline-secondary:hover {
+                background: var(--bg-tertiary);
+                border-color: var(--text-primary);
+                color: var(--text-primary);
+            }
+
+            .btn-sm.btn-outline-primary {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            [data-theme="dark"] .btn-sm.btn-outline-primary {
+                border-color: #6c757d;
+                color: #6c757d;
+            }
+
+            [data-theme="dark"] .btn-sm.btn-outline-primary:hover {
+                background: #6c757d;
+                color: white;
+                border-color: #6c757d;
+            }
+
+            .table-responsive {
+                border-radius: 8px;
+                overflow: hidden;
             }
 
             .table {
                 color: var(--text-primary);
+                margin-bottom: 0;
             }
 
             .table thead {
-                background: var(--bg-tertiary);
-                border-color: var(--border-color);
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+
+            [data-theme="dark"] .table thead {
+                background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+            }
+
+            .table thead th {
+                padding: 15px 12px;
+                font-weight: 600;
+                font-size: 13px;
+                text-transform: uppercase;
+                border: none;
             }
 
             .table tbody tr {
                 background: var(--bg-secondary);
-                border-color: var(--border-color);
+                border-bottom: 1px solid var(--border-color);
+                transition: background-color 0.2s;
             }
 
             .table tbody tr:hover {
                 background: var(--bg-tertiary);
             }
 
+            .table tbody td {
+                padding: 15px 12px;
+                border: none;
+                vertical-align: middle;
+            }
+
             .text-muted {
                 color: var(--text-muted) !important;
             }
 
-            h2 {
-                color: var(--text-primary);
+            .badge {
+                padding: 4px 10px;
+                border-radius: 4px;
+                font-size: 10px;
+                font-weight: 600;
+            }
+
+            .badge.bg-primary {
+                background: #667eea !important;
+            }
+
+            .badge.bg-success {
+                background: #28a745 !important;
+            }
+
+            .badge.bg-warning {
+                background: #ffc107 !important;
+            }
+
+            .badge.bg-danger {
+                background: #dc3545 !important;
+            }
+
+            [data-theme="dark"] .badge.bg-primary,
+            [data-theme="dark"] .badge.bg-success,
+            [data-theme="dark"] .badge.bg-warning,
+            [data-theme="dark"] .badge.bg-danger {
+                background: #6c757d !important;
+                color: white !important;
             }
         </style>
     </th:block>
 </head>
 <body>
 <div layout:fragment="content">
-    <div class="container-fluid">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="bi bi-graph-up me-2"></i>종목 관리</h2>
-            <span class="badge bg-secondary fs-6" th:text="'총 ' + ${total} + '개'"></span>
+    <div class="instruments-container">
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="bi bi-graph-up me-2"></i>종목 관리</h2>
+                <span class="badge bg-secondary" th:text="'총 ' + ${total} + '개'"></span>
+            </div>
         </div>
 
         <!-- 알림 메시지 -->
