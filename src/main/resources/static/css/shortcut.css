@@ -16,33 +16,35 @@
 
 /* Category Tabs Container */
 .category-tabs-container {
-    background: #fff;
+    background: var(--bg-secondary);
+    transition: background-color 0.3s ease;
 }
 
 /* Category Tabs */
 .category-tabs {
     display: flex;
     gap: 6px;
-    border-bottom: 2px solid #e0e0e0;
+    border-bottom: 2px solid var(--border-color);
     margin-bottom: 0;
+    transition: border-color 0.3s ease;
 }
 
 .category-tab {
     padding: 12px 24px;
     cursor: pointer;
     font-weight: 500;
-    color: #666;
-    border: 2px solid #e0e0e0;
+    color: var(--text-secondary);
+    border: 2px solid var(--border-color);
     border-bottom: none;
     border-radius: 8px 8px 0 0;
-    background: #f5f5f5;
+    background: var(--bg-tertiary);
     margin-bottom: -2px;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
 }
 
 .category-tab:hover {
-    background: #e8e8e8;
-    color: #333;
+    background: var(--filter-tab-hover);
+    color: var(--text-primary);
 }
 
 .category-tab.active {
@@ -54,11 +56,12 @@
 
 /* Tab Content */
 .tab-content {
-    border: 2px solid #e0e0e0;
+    border: 2px solid var(--border-color);
     border-top: none;
     border-radius: 0 0 12px 12px;
-    background: #fff;
+    background: var(--bg-secondary);
     min-height: 200px;
+    transition: all 0.3s ease;
 }
 
 .shortcuts-panel {
@@ -78,7 +81,7 @@
 }
 
 .empty-shortcuts {
-    color: #999;
+    color: var(--text-muted);
     font-size: 0.95em;
     text-align: center;
     padding: 40px 20px;
@@ -90,15 +93,15 @@
     justify-content: space-between;
     align-items: center;
     padding: 12px 15px;
-    border: 1px solid #e0e0e0;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
-    background: #fafafa;
-    transition: all 0.2s;
+    background: var(--bg-tertiary);
+    transition: all 0.3s ease;
 }
 
 .shortcut-item:hover {
-    background: #f0f4ff;
-    border-color: #667eea;
+    background: var(--filter-tab-hover);
+    border-color: var(--accent-primary);
 }
 
 .shortcut-info {
@@ -110,14 +113,14 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    color: #333;
+    color: var(--text-primary);
     text-decoration: none;
     font-weight: 500;
     transition: color 0.2s;
 }
 
 .shortcut-link:hover {
-    color: #667eea;
+    color: var(--accent-primary);
 }
 
 .link-icon {
@@ -131,7 +134,7 @@
 .shortcut-description {
     display: block;
     font-size: 0.85em;
-    color: #666;
+    color: var(--text-secondary);
     margin-top: 4px;
     padding-left: 26px;
 }

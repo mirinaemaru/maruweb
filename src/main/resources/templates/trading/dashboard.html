@@ -41,7 +41,7 @@
             }
 
             .stat-card {
-                background: white;
+                background: var(--bg-secondary);
                 border-radius: 12px;
                 padding: 25px;
                 box-shadow: 0 2px 8px rgba(0,0,0,0.08);
@@ -68,7 +68,7 @@
 
             .stat-label {
                 font-size: 13px;
-                color: #666;
+                color: var(--text-secondary);
                 font-weight: 600;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
@@ -78,13 +78,13 @@
             .stat-value {
                 font-size: 32px;
                 font-weight: 800;
-                color: #333;
+                color: var(--text-primary);
                 margin-bottom: 5px;
             }
 
             .stat-change {
                 font-size: 12px;
-                color: #999;
+                color: var(--text-muted);
             }
 
             /* Main Grid */
@@ -102,11 +102,12 @@
             }
 
             .dashboard-card {
-                background: white;
+                background: var(--bg-secondary);
                 border-radius: 16px;
                 padding: 28px;
                 box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-                border: 1px solid rgba(0,0,0,0.04);
+                border: 1px solid var(--border-color);
+                transition: background-color 0.3s ease, border-color 0.3s ease;
             }
 
             .card-header {
@@ -115,13 +116,14 @@
                 justify-content: space-between;
                 margin-bottom: 25px;
                 padding-bottom: 15px;
-                border-bottom: 2px solid #f5f5f5;
+                border-bottom: 2px solid var(--border-color);
+                transition: border-color 0.3s ease;
             }
 
             .card-title {
                 font-size: 20px;
                 font-weight: 700;
-                color: #2c3e50;
+                color: var(--text-primary);
                 display: flex;
                 align-items: center;
                 gap: 10px;
@@ -149,31 +151,31 @@
                 padding: 15px;
                 border-left: 3px solid #667eea;
                 margin-bottom: 12px;
-                background: #f8f9fa;
+                background: var(--bg-tertiary);
                 border-radius: 0 8px 8px 0;
                 transition: all 0.2s;
             }
 
             .activity-item:hover {
-                background: #e9ecef;
+                background: var(--filter-tab-hover);
                 transform: translateX(5px);
             }
 
             .activity-time {
                 font-size: 11px;
-                color: #999;
+                color: var(--text-muted);
                 margin-bottom: 5px;
             }
 
             .activity-title {
                 font-weight: 600;
-                color: #333;
+                color: var(--text-primary);
                 margin-bottom: 3px;
             }
 
             .activity-desc {
                 font-size: 13px;
-                color: #666;
+                color: var(--text-secondary);
             }
 
             /* System Status */
@@ -185,11 +187,12 @@
 
             .status-item {
                 padding: 15px;
-                background: #f8f9fa;
+                background: var(--bg-tertiary);
                 border-radius: 8px;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                transition: background-color 0.3s ease;
             }
 
             .status-badge {

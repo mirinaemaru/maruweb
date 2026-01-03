@@ -9,15 +9,15 @@
 
 /* Dashboard Card */
 .dashboard-card {
-    background: #fff;
-    border: 2px solid #e0e0e0;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
     border-radius: 12px;
     overflow: hidden;
     transition: all 0.3s;
 }
 
 .dashboard-card:hover {
-    border-color: #667eea;
+    border-color: var(--accent-primary);
     box-shadow: 0 5px 20px rgba(102, 126, 234, 0.15);
 }
 
@@ -59,7 +59,7 @@
 }
 
 .empty-state-small {
-    color: #999;
+    color: var(--text-muted);
     text-align: center;
     padding: 40px 20px;
     font-size: 0.95em;
@@ -77,7 +77,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 10px 0;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .dashboard-list-item:last-child {
@@ -92,12 +92,12 @@
 }
 
 .item-link:hover .item-title {
-    color: #667eea;
+    color: var(--accent-primary);
 }
 
 .item-title {
     display: block;
-    color: #333;
+    color: var(--text-primary);
     font-size: 0.95em;
     white-space: nowrap;
     overflow: hidden;
@@ -107,13 +107,13 @@
 
 .item-date,
 .item-time {
-    color: #999;
+    color: var(--text-muted);
     font-size: 0.85em;
     white-space: nowrap;
 }
 
 .item-dday {
-    color: #667eea;
+    color: var(--accent-primary);
     font-size: 0.9em;
     font-weight: 600;
     white-space: nowrap;
@@ -131,12 +131,12 @@
 }
 
 .shortcut-category-preview h4 {
-    color: #667eea;
+    color: var(--accent-primary);
     font-size: 0.9em;
     font-weight: 600;
     margin: 0 0 8px 0;
     padding-bottom: 5px;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .shortcut-links {
@@ -151,8 +151,8 @@
 .shortcut-links li a {
     display: inline-block;
     padding: 5px 12px;
-    background: #f5f5f5;
-    color: #333;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
     text-decoration: none;
     border-radius: 15px;
     font-size: 0.85em;
@@ -160,19 +160,19 @@
 }
 
 .shortcut-links li a:hover {
-    background: #667eea;
+    background: var(--accent-primary);
     color: white;
 }
 
 /* Card Footer */
 .card-footer {
     padding: 12px 20px;
-    background: #f8f9fa;
-    border-top: 1px solid #e0e0e0;
+    background: var(--bg-tertiary);
+    border-top: 1px solid var(--border-color);
 }
 
 .card-link {
-    color: #667eea;
+    color: var(--accent-primary);
     text-decoration: none;
     font-size: 0.9em;
     font-weight: 500;
@@ -180,7 +180,7 @@
 }
 
 .card-link:hover {
-    color: #764ba2;
+    color: var(--accent-secondary);
 }
 
 /* Responsive */

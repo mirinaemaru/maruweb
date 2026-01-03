@@ -26,6 +26,15 @@
                 <h2>Maru Web</h2>
                 <p class="sidebar-subtitle">Management System</p>
             </div>
+
+            <!-- Theme Toggle -->
+            <div class="theme-toggle-wrapper">
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                    <span class="theme-toggle-icon" id="themeIcon">☀️</span>
+                    <span id="themeText">Light Mode</span>
+                </button>
+            </div>
+
             <nav class="sidebar-nav">
                 <ul>
                     <li th:classappend="${#httpServletRequest.requestURI == '/'} ? 'active' : ''">
@@ -158,7 +167,7 @@
                 </ul>
             </nav>
             <div class="sidebar-footer">
-                <p>&copy; 2024 Maru Web</p>
+                <p>&copy; 2026 Maru Web</p>
             </div>
         </aside>
 
@@ -176,6 +185,64 @@
     <!-- Notification Widget -->
     <th:block th:replace="~{fragments/notifications :: notification-widget}"></th:block>
     <script>
+        // Theme Toggle Functionality
+        (function() {
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = document.getElementById('themeIcon');
+            const themeText = document.getElementById('themeText');
+            const html = document.documentElement;
+
+            // Get theme from localStorage or system preference
+            function getInitialTheme() {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme) {
+                    return savedTheme;
+                }
+                // Check system preference
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    return 'dark';
+                }
+                return 'light';
+            }
+
+            // Apply theme
+            function applyTheme(theme) {
+                if (theme === 'dark') {
+                    html.setAttribute('data-theme', 'dark');
+                    themeIcon.textContent = '🌙';
+                    themeText.textContent = 'Dark Mode';
+                } else {
+                    html.removeAttribute('data-theme');
+                    themeIcon.textContent = '☀️';
+                    themeText.textContent = 'Light Mode';
+                }
+                localStorage.setItem('theme', theme);
+            }
+
+            // Toggle theme
+            function toggleTheme() {
+                const currentTheme = html.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                applyTheme(newTheme);
+            }
+
+            // Initialize theme on page load
+            applyTheme(getInitialTheme());
+
+            // Add click event listener
+            themeToggle.addEventListener('click', toggleTheme);
+
+            // Listen for system theme changes
+            if (window.matchMedia) {
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+                    // Only auto-switch if user hasn't manually set a preference
+                    if (!localStorage.getItem('theme')) {
+                        applyTheme(e.matches ? 'dark' : 'light');
+                    }
+                });
+            }
+        })();
+
         // Submenu toggle functionality
         document.addEventListener('DOMContentLoaded', function() {
             const submenuItems = document.querySelectorAll('.sidebar-nav li.has-submenu > a');

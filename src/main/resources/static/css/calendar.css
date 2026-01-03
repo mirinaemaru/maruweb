@@ -12,7 +12,8 @@
     padding: 15px 20px;
     border-radius: 8px;
     border: 2px solid;
-    background: white;
+    background: var(--bg-secondary);
+    transition: all 0.3s ease;
 }
 
 .connection-status.connected {
@@ -20,9 +21,17 @@
     background: #f1f8f4;
 }
 
+[data-theme="dark"] .connection-status.connected {
+    background: #064e3b;
+}
+
 .connection-status.disconnected {
     border-color: #ff9800;
     background: #fff8e1;
+}
+
+[data-theme="dark"] .connection-status.disconnected {
+    background: #78350f;
 }
 
 .status-info {
@@ -132,14 +141,15 @@
     align-items: center;
     margin-bottom: 20px;
     padding: 15px;
-    background: #f8f9fa;
+    background: var(--bg-tertiary);
     border-radius: 8px;
+    transition: background-color 0.3s ease;
 }
 
 .current-month {
     font-size: 1.5em;
     font-weight: 600;
-    color: #333;
+    color: var(--text-primary);
 }
 
 .btn-nav, .btn-today {
@@ -165,9 +175,10 @@
 
 /* Calendar Grid */
 .calendar-grid {
-    border: 1px solid #e0e0e0;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     overflow: hidden;
+    transition: border-color 0.3s ease;
 }
 
 .calendar-header-row {
@@ -192,7 +203,8 @@
 .calendar-week {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--border-color);
+    transition: border-color 0.3s ease;
 }
 
 .calendar-week:last-child {
@@ -202,8 +214,8 @@
 .calendar-day {
     min-height: 180px;
     padding: 8px;
-    border-right: 1px solid #e0e0e0;
-    background: white;
+    border-right: 1px solid var(--border-color);
+    background: var(--bg-secondary);
     cursor: pointer;
     transition: all 0.3s;
     position: relative;
@@ -215,16 +227,20 @@
 }
 
 .calendar-day:hover {
-    background: #f8f9fa;
+    background: var(--bg-tertiary);
 }
 
 .calendar-day.other-month {
-    background: #fafafa;
+    background: var(--bg-tertiary);
     opacity: 0.5;
 }
 
 .calendar-day.today {
     background: #fff3e0;
+}
+
+[data-theme="dark"] .calendar-day.today {
+    background: #4a3800;
 }
 
 .calendar-day.today .day-number {
@@ -241,7 +257,7 @@
 .day-number {
     font-weight: 600;
     font-size: 14px;
-    color: #333;
+    color: var(--text-primary);
     margin-bottom: 4px;
 }
 

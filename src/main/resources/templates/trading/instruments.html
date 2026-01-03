@@ -4,6 +4,62 @@
       layout:decorate="~{layout/main}">
 <head>
     <title>종목 관리</title>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .card {
+                background: var(--bg-secondary);
+                border: 1px solid var(--border-color);
+                transition: background-color 0.3s ease, border-color 0.3s ease;
+            }
+
+            .card-body {
+                color: var(--text-primary);
+            }
+
+            .form-label {
+                color: var(--text-primary);
+            }
+
+            .form-select, .form-control {
+                background: var(--bg-secondary);
+                border: 1px solid var(--border-color);
+                color: var(--text-primary);
+                transition: all 0.3s ease;
+            }
+
+            .form-select:focus, .form-control:focus {
+                background: var(--bg-secondary);
+                border-color: var(--accent-primary);
+                color: var(--text-primary);
+            }
+
+            .table {
+                color: var(--text-primary);
+            }
+
+            .table thead {
+                background: var(--bg-tertiary);
+                border-color: var(--border-color);
+            }
+
+            .table tbody tr {
+                background: var(--bg-secondary);
+                border-color: var(--border-color);
+            }
+
+            .table tbody tr:hover {
+                background: var(--bg-tertiary);
+            }
+
+            .text-muted {
+                color: var(--text-muted) !important;
+            }
+
+            h2 {
+                color: var(--text-primary);
+            }
+        </style>
+    </th:block>
 </head>
 <body>
 <div layout:fragment="content">
