@@ -2,10 +2,12 @@
 
 /* Add Habit Section */
 .add-habit-section {
-    background: #f8f9fa;
+    background: var(--bg-tertiary);
     padding: 20px;
     border-radius: 12px;
     margin-bottom: 25px;
+    border: 1px solid var(--border-color);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .add-habit-form {
@@ -19,14 +21,33 @@
     flex: 1;
     min-width: 200px;
     padding: 12px 20px;
-    border: 2px solid #e0e0e0;
+    border: 2px solid var(--border-color);
     border-radius: 8px;
     font-size: 16px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
 }
 
 .habit-input:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: var(--accent-primary);
+}
+
+.icon-select {
+    padding: 12px 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 16px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.icon-select:focus {
+    outline: none;
+    border-color: var(--accent-primary);
 }
 
 /* Month Navigation */
@@ -40,24 +61,26 @@
 
 .month-nav h2 {
     font-size: 1.5em;
-    color: #333;
+    color: var(--text-primary);
     min-width: 150px;
     text-align: center;
 }
 
 .nav-btn {
     padding: 8px 16px;
-    background: #f5f5f5;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     text-decoration: none;
-    color: #666;
+    color: var(--text-secondary);
     font-weight: 500;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
 }
 
 .nav-btn:hover {
-    background: #667eea;
+    background: var(--accent-primary);
     color: white;
+    border-color: var(--accent-primary);
 }
 
 /* Habit Tracker Table */
@@ -68,17 +91,19 @@
 .habit-table {
     width: 100%;
     border-collapse: collapse;
-    background: white;
+    background: var(--bg-secondary);
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    transition: background-color 0.3s ease;
 }
 
 .habit-table th,
 .habit-table td {
     padding: 12px 8px;
     text-align: center;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
 }
 
 .habit-table thead th {
@@ -150,11 +175,11 @@
 .check-btn {
     width: 28px;
     height: 28px;
-    border: 2px solid #e0e0e0;
+    border: 2px solid var(--border-color);
     border-radius: 6px;
-    background: white;
+    background: var(--bg-secondary);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -163,13 +188,13 @@
 }
 
 .check-btn:hover {
-    border-color: #667eea;
+    border-color: var(--accent-primary);
     background: rgba(102, 126, 234, 0.1);
 }
 
 .check-btn.checked {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-color: #667eea;
+    border-color: var(--accent-primary);
 }
 
 /* Action Cell */
