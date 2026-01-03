@@ -4,110 +4,440 @@
       layout:decorate="~{layout/main}">
 <head>
     <title>최적화 데모</title>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .optimization-container {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 20px;
+                padding-bottom: 40px;
+            }
+
+            .page-header {
+                margin-bottom: 30px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 30px 40px;
+                border-radius: 16px;
+                color: white;
+                box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            [data-theme="dark"] .page-header {
+                background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .page-header h2 {
+                font-size: 28px;
+                font-weight: 700;
+                margin: 0;
+                color: white;
+            }
+
+            .page-header p {
+                margin: 10px 0 0 0;
+                opacity: 0.9;
+                font-size: 15px;
+            }
+
+            .header-buttons .btn {
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-weight: 600;
+                background: rgba(255, 255, 255, 0.2);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                color: white;
+                transition: all 0.3s;
+            }
+
+            .header-buttons .btn:hover {
+                background: rgba(255, 255, 255, 0.3);
+                color: white;
+            }
+
+            .strategy-cards {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+                margin-bottom: 20px;
+            }
+
+            @media (max-width: 992px) {
+                .strategy-cards {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+
+            @media (max-width: 768px) {
+                .strategy-cards {
+                    grid-template-columns: 1fr;
+                }
+                .page-header {
+                    flex-direction: column;
+                    gap: 15px;
+                    text-align: center;
+                }
+            }
+
+            .card {
+                background: var(--bg-secondary);
+                border: none;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                transition: all 0.3s ease;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            }
+
+            .card-header {
+                border-radius: 12px 12px 0 0 !important;
+                padding: 18px 20px;
+                border: none;
+            }
+
+            .card-header.bg-primary {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            }
+
+            .card-header.bg-success {
+                background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+            }
+
+            .card-header.bg-warning {
+                background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%) !important;
+            }
+
+            [data-theme="dark"] .card-header.bg-primary {
+                background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%) !important;
+                border-bottom: 1px solid rgba(102, 126, 234, 0.3);
+            }
+
+            [data-theme="dark"] .card-header.bg-success {
+                background: linear-gradient(135deg, #1e3a27 0%, #1a3b35 100%) !important;
+                border-bottom: 1px solid rgba(40, 167, 69, 0.3);
+            }
+
+            [data-theme="dark"] .card-header.bg-warning {
+                background: linear-gradient(135deg, #3d3520 0%, #3d2d15 100%) !important;
+                border-bottom: 1px solid rgba(255, 193, 7, 0.3);
+            }
+
+            .card-header h5 {
+                margin: 0;
+                font-size: 16px;
+                font-weight: 600;
+            }
+
+            .card-body {
+                color: var(--text-primary);
+                padding: 20px;
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .card-body p {
+                color: var(--text-muted);
+                margin-bottom: 15px;
+            }
+
+            .card-body ul {
+                color: var(--text-primary);
+                padding-left: 20px;
+                margin-bottom: 20px;
+                flex: 1;
+            }
+
+            .card-body ul li {
+                margin-bottom: 5px;
+                font-size: 14px;
+            }
+
+            .card-footer {
+                background: var(--bg-tertiary) !important;
+                border-top: 1px solid var(--border-color);
+                padding: 15px 20px;
+                border-radius: 0 0 12px 12px !important;
+            }
+
+            .btn {
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 600;
+                transition: all 0.3s;
+            }
+
+            .btn-primary {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border: none;
+                color: white;
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            }
+
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+                background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
+            }
+
+            .btn-success {
+                background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                border: none;
+                color: white;
+                box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+            }
+
+            .btn-success:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+                background: linear-gradient(135deg, #229a3e 0%, #1bb98a 100%);
+            }
+
+            .btn-warning {
+                background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+                border: none;
+                color: #212529;
+                box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+            }
+
+            .btn-warning:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(255, 193, 7, 0.4);
+                background: linear-gradient(135deg, #e0a800 0%, #e06e10 100%);
+            }
+
+            [data-theme="dark"] .btn-primary {
+                background: #6c757d;
+                box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+            }
+
+            [data-theme="dark"] .btn-primary:hover {
+                background: #5a6268;
+            }
+
+            [data-theme="dark"] .btn-success {
+                background: #218838;
+                box-shadow: 0 4px 15px rgba(33, 136, 56, 0.3);
+            }
+
+            [data-theme="dark"] .btn-success:hover {
+                background: #1e7e34;
+            }
+
+            [data-theme="dark"] .btn-warning {
+                background: #d39e00;
+                color: #fff;
+                box-shadow: 0 4px 15px rgba(211, 158, 0, 0.3);
+            }
+
+            [data-theme="dark"] .btn-warning:hover {
+                background: #c69500;
+            }
+
+            /* Info Card */
+            .info-card {
+                background: var(--bg-secondary);
+                border: none;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+
+            .info-card:hover {
+                transform: none;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+
+            .info-card .card-body {
+                padding: 25px;
+            }
+
+            .info-card h5 {
+                color: #667eea;
+                font-weight: 600;
+                margin-bottom: 15px;
+            }
+
+            [data-theme="dark"] .info-card h5 {
+                color: #8b9df0;
+            }
+
+            .info-card > .card-body > p {
+                color: var(--text-primary);
+                margin-bottom: 20px;
+            }
+
+            .info-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+            }
+
+            @media (max-width: 768px) {
+                .info-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            .info-item {
+                background: var(--bg-tertiary);
+                padding: 20px;
+                border-radius: 10px;
+            }
+
+            .info-item h6 {
+                color: var(--text-primary);
+                font-weight: 600;
+                margin-bottom: 10px;
+            }
+
+            .info-item p {
+                color: var(--text-muted);
+                font-size: 14px;
+                margin: 0;
+                line-height: 1.6;
+            }
+
+            /* Result styles */
+            .result-content {
+                font-size: 14px;
+            }
+
+            .result-content .text-success {
+                color: #28a745 !important;
+            }
+
+            .result-content .text-danger {
+                color: #dc3545 !important;
+            }
+
+            .result-content ul {
+                padding-left: 20px;
+                margin-bottom: 10px;
+            }
+
+            .result-content .border-top {
+                border-color: var(--border-color) !important;
+            }
+        </style>
+    </th:block>
 </head>
 <body>
 <div layout:fragment="content">
-    <div class="container-fluid">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="bi bi-sliders me-2"></i>최적화 데모</h2>
+    <div class="optimization-container">
+        <!-- 페이지 헤더 -->
+        <div class="page-header">
+            <div>
+                <h2><i class="bi bi-sliders me-2"></i>최적화 데모</h2>
+                <p>다양한 최적화 방법으로 최적의 파라미터를 찾아보세요</p>
+            </div>
+            <div class="header-buttons">
+                <a href="/trading/demo" class="btn">
+                    <i class="bi bi-arrow-left me-1"></i>데모 목록
+                </a>
+            </div>
         </div>
 
-        <div class="row">
+        <!-- 전략 카드 그리드 -->
+        <div class="strategy-cards">
             <!-- MA 크로스오버 최적화 -->
-            <div class="col-lg-4 mb-4">
-                <div class="card h-100">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>MA 크로스오버 최적화</h5>
-                    </div>
-                    <div class="card-body">
-                        <p class="text-muted">이동평균 교차 전략의 최적 파라미터를 찾습니다.</p>
-                        <ul class="small">
-                            <li>Short Period: 5, 10, 15</li>
-                            <li>Long Period: 20, 30, 50</li>
-                            <li>목표: Sharpe Ratio 최대화</li>
-                        </ul>
-                        <button type="button" class="btn btn-primary w-100" onclick="runOptimization('ma-crossover', this)">
-                            <i class="bi bi-play-fill me-1"></i>최적화 실행
-                        </button>
-                    </div>
-                    <div class="card-footer bg-light" id="result-ma-crossover" style="display: none;">
-                        <div class="result-content"></div>
-                    </div>
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="bi bi-graph-up me-2"></i>MA 크로스오버 최적화</h5>
+                </div>
+                <div class="card-body">
+                    <p>이동평균 교차 전략의 최적 파라미터를 찾습니다.</p>
+                    <ul>
+                        <li>Short Period: 5, 10, 15</li>
+                        <li>Long Period: 20, 30, 50</li>
+                        <li>목표: Sharpe Ratio 최대화</li>
+                    </ul>
+                    <button type="button" class="btn btn-primary w-100" onclick="runOptimization('ma-crossover', this)">
+                        <i class="bi bi-play-fill me-1"></i>최적화 실행
+                    </button>
+                </div>
+                <div class="card-footer" id="result-ma-crossover" style="display: none;">
+                    <div class="result-content"></div>
                 </div>
             </div>
 
             <!-- RSI 최적화 -->
-            <div class="col-lg-4 mb-4">
-                <div class="card h-100">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0"><i class="bi bi-activity me-2"></i>RSI 최적화</h5>
-                    </div>
-                    <div class="card-body">
-                        <p class="text-muted">RSI 전략의 최적 파라미터를 찾습니다.</p>
-                        <ul class="small">
-                            <li>Period: 10, 14, 20</li>
-                            <li>Overbought: 65, 70, 75</li>
-                            <li>Oversold: 25, 30, 35</li>
-                            <li>목표: Profit Factor 최대화</li>
-                        </ul>
-                        <button type="button" class="btn btn-success w-100" onclick="runOptimization('rsi', this)">
-                            <i class="bi bi-play-fill me-1"></i>최적화 실행
-                        </button>
-                    </div>
-                    <div class="card-footer bg-light" id="result-rsi" style="display: none;">
-                        <div class="result-content"></div>
-                    </div>
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="bi bi-activity me-2"></i>RSI 최적화</h5>
+                </div>
+                <div class="card-body">
+                    <p>RSI 전략의 최적 파라미터를 찾습니다.</p>
+                    <ul>
+                        <li>Period: 10, 14, 20</li>
+                        <li>Overbought: 65, 70, 75</li>
+                        <li>Oversold: 25, 30, 35</li>
+                        <li>목표: Profit Factor 최대화</li>
+                    </ul>
+                    <button type="button" class="btn btn-success w-100" onclick="runOptimization('rsi', this)">
+                        <i class="bi bi-play-fill me-1"></i>최적화 실행
+                    </button>
+                </div>
+                <div class="card-footer" id="result-rsi" style="display: none;">
+                    <div class="result-content"></div>
                 </div>
             </div>
 
             <!-- 랜덤 서치 최적화 -->
-            <div class="col-lg-4 mb-4">
-                <div class="card h-100">
-                    <div class="card-header bg-warning text-dark">
-                        <h5 class="mb-0"><i class="bi bi-shuffle me-2"></i>랜덤 서치 최적화</h5>
-                    </div>
-                    <div class="card-body">
-                        <p class="text-muted">더 넓은 파라미터 공간에서 랜덤 샘플링으로 최적화합니다.</p>
-                        <ul class="small">
-                            <li>Short Period: 3~15</li>
-                            <li>Long Period: 15~50</li>
-                            <li>최대 20회 랜덤 테스트</li>
-                            <li>목표: Sharpe Ratio 최대화</li>
-                        </ul>
-                        <button type="button" class="btn btn-warning w-100" onclick="runOptimization('random-search', this)">
-                            <i class="bi bi-play-fill me-1"></i>최적화 실행
-                        </button>
-                    </div>
-                    <div class="card-footer bg-light" id="result-random-search" style="display: none;">
-                        <div class="result-content"></div>
-                    </div>
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5><i class="bi bi-shuffle me-2"></i>랜덤 서치 최적화</h5>
+                </div>
+                <div class="card-body">
+                    <p>더 넓은 파라미터 공간에서 랜덤 샘플링으로 최적화합니다.</p>
+                    <ul>
+                        <li>Short Period: 3~15</li>
+                        <li>Long Period: 15~50</li>
+                        <li>최대 20회 랜덤 테스트</li>
+                        <li>목표: Sharpe Ratio 최대화</li>
+                    </ul>
+                    <button type="button" class="btn btn-warning w-100" onclick="runOptimization('random-search', this)">
+                        <i class="bi bi-play-fill me-1"></i>최적화 실행
+                    </button>
+                </div>
+                <div class="card-footer" id="result-random-search" style="display: none;">
+                    <div class="result-content"></div>
                 </div>
             </div>
         </div>
 
         <!-- 설명 -->
-        <div class="card mt-4">
+        <div class="card info-card">
             <div class="card-body">
                 <h5><i class="bi bi-info-circle me-2"></i>파라미터 최적화란?</h5>
-                <p class="mb-2">
+                <p>
                     파라미터 최적화는 트레이딩 전략의 성과를 극대화하기 위해 최적의 파라미터 조합을 찾는 과정입니다.
                 </p>
-                <div class="row">
-                    <div class="col-md-4">
-                        <h6>Grid Search</h6>
-                        <p class="small text-muted">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <h6><i class="bi bi-grid-3x3 me-2"></i>Grid Search</h6>
+                        <p>
                             모든 파라미터 조합을 체계적으로 테스트합니다. 정확하지만 시간이 오래 걸릴 수 있습니다.
                         </p>
                     </div>
-                    <div class="col-md-4">
-                        <h6>Random Search</h6>
-                        <p class="small text-muted">
+                    <div class="info-item">
+                        <h6><i class="bi bi-shuffle me-2"></i>Random Search</h6>
+                        <p>
                             랜덤하게 파라미터를 샘플링합니다. 넓은 공간을 빠르게 탐색할 수 있습니다.
                         </p>
                     </div>
-                    <div class="col-md-4">
-                        <h6>유의사항</h6>
-                        <p class="small text-muted">
+                    <div class="info-item">
+                        <h6><i class="bi bi-exclamation-triangle me-2"></i>유의사항</h6>
+                        <p>
                             과최적화(Overfitting)를 주의하세요. Walk-Forward 분석으로 검증하는 것을 권장합니다.
                         </p>
                     </div>
