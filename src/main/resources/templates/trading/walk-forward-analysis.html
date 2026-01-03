@@ -47,17 +47,20 @@
 
         .form-group {
             margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
 
         .form-group label {
-            display: block;
             font-weight: 600;
-            margin-bottom: 8px;
             color: var(--text-primary);
+            min-width: 150px;
+            white-space: nowrap;
         }
 
         .form-group input, .form-group select {
-            width: 100%;
+            flex: 1;
             padding: 10px;
             border: 2px solid var(--border-color);
             border-radius: 6px;
@@ -67,6 +70,13 @@
         .form-group input:focus, .form-group select:focus {
             outline: none;
             border-color: #667eea;
+        }
+
+        .form-group small {
+            color: var(--text-secondary);
+            font-size: 12px;
+            white-space: nowrap;
+            margin-left: 10px;
         }
 
         .btn-submit {
