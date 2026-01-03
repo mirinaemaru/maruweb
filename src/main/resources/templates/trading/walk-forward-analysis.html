@@ -84,6 +84,21 @@
             text-align: left;
         }
 
+        .form-group-inline {
+            flex-wrap: nowrap;
+        }
+
+        .form-group-inline input[type="number"] {
+            width: 300px;
+            flex: 0 0 auto;
+        }
+
+        .form-group-inline small {
+            width: auto;
+            margin-left: 15px;
+            white-space: nowrap;
+        }
+
         .btn-submit {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -143,13 +158,13 @@
                         <input type="date" id="endDate" name="endDate" required>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group form-group-inline">
                         <label for="windowDays">Window 크기 (일)</label>
                         <input type="number" id="windowDays" name="windowDays" value="30" min="7" max="365">
                         <small>학습/최적화에 사용할 기간 (기본: 30일)</small>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group form-group-inline">
                         <label for="stepDays">Step 크기 (일)</label>
                         <input type="number" id="stepDays" name="stepDays" value="7" min="1" max="90">
                         <small>각 단계마다 이동할 일수 (기본: 7일)</small>
