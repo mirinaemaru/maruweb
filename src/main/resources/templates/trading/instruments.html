@@ -10,6 +10,7 @@
                 max-width: 1400px;
                 margin: 0 auto;
                 padding: 20px;
+                padding-bottom: 40px;
             }
 
             .page-header {
@@ -68,12 +69,20 @@
                 border-radius: 12px;
                 box-shadow: 0 2px 8px rgba(0,0,0,0.1);
                 transition: background-color 0.3s ease;
-                margin-bottom: 20px;
+                margin-bottom: 30px;
+            }
+
+            .card:last-child {
+                margin-bottom: 0;
             }
 
             .card-body {
                 color: var(--text-primary);
-                padding: 30px;
+                padding: 20px;
+            }
+
+            .card-body.table-card {
+                padding: 0;
             }
 
             .filter-form {
@@ -179,18 +188,28 @@
             }
 
             .table-responsive {
-                border-radius: 8px;
+                border-radius: 12px;
                 overflow: hidden;
+            }
+
+            .table-scroll-container {
+                max-height: calc(100vh - 380px);
+                overflow-y: auto;
             }
 
             .table {
                 color: var(--text-primary);
                 margin-bottom: 0;
+                width: 100%;
+                table-layout: fixed;
             }
 
             .table thead {
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 color: white;
+                position: sticky;
+                top: 0;
+                z-index: 10;
             }
 
             [data-theme="dark"] .table thead {
@@ -203,6 +222,34 @@
                 font-size: 13px;
                 text-transform: uppercase;
                 border: none;
+                white-space: nowrap;
+            }
+
+            .table thead th:first-child {
+                border-radius: 12px 0 0 0;
+            }
+
+            .table thead th:last-child {
+                border-radius: 0 12px 0 0;
+            }
+
+            .table th.col-symbol { width: 90px; }
+            .table th.col-name-kr { width: auto; }
+            .table th.col-name-en { width: 150px; }
+            .table th.col-market { width: 70px; }
+            .table th.col-industry { width: 100px; }
+            .table th.col-status { width: 70px; }
+            .table th.col-tradable { width: 70px; }
+            .table th.col-halted { width: 70px; }
+            .table th.col-listing { width: 90px; }
+            .table th.col-action { width: 60px; }
+
+            .table td {
+                overflow: visible;
+            }
+
+            .table td.text-center {
+                text-align: center !important;
             }
 
             .table tbody tr {
@@ -223,6 +270,33 @@
 
             .text-muted {
                 color: var(--text-muted) !important;
+            }
+
+            .symbol-link {
+                color: var(--text-primary);
+                font-weight: 600;
+                text-decoration: none;
+                transition: color 0.2s;
+            }
+
+            .symbol-link:hover {
+                color: #667eea;
+                text-decoration: underline;
+            }
+
+            [data-theme="dark"] .symbol-link:hover {
+                color: #8b9df0;
+            }
+
+            .detail-link {
+                color: var(--text-primary);
+                text-decoration: none;
+                font-size: 12px;
+            }
+
+            .detail-link:hover {
+                color: #667eea;
+                text-decoration: underline;
             }
 
             .badge {
@@ -331,21 +405,21 @@
 
         <!-- 종목 목록 테이블 -->
         <div class="card">
-            <div class="card-body">
-                <div class="table-responsive">
+            <div class="card-body table-card">
+                <div class="table-responsive table-scroll-container">
                     <table class="table table-hover">
                         <thead class="table-light">
                             <tr>
-                                <th>종목코드</th>
-                                <th>종목명 (한글)</th>
-                                <th>종목명 (영문)</th>
-                                <th>시장</th>
-                                <th>업종</th>
-                                <th>상태</th>
-                                <th class="text-center">거래 가능</th>
-                                <th class="text-center">거래 정지</th>
-                                <th>상장일</th>
-                                <th>관리</th>
+                                <th class="col-symbol text-center">종목코드</th>
+                                <th class="col-name-kr">종목명 (한글)</th>
+                                <th class="col-name-en">종목명 (영문)</th>
+                                <th class="col-market text-center">시장</th>
+                                <th class="col-industry text-center">업종</th>
+                                <th class="col-status text-center">상태</th>
+                                <th class="col-tradable text-center">거래 가능</th>
+                                <th class="col-halted text-center">거래 정지</th>
+                                <th class="col-listing text-center">상장일</th>
+                                <th class="col-action text-center">관리</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -356,43 +430,21 @@
                                 </td>
                             </tr>
                             <tr th:each="inst : ${instruments}">
-                                <td>
+                                <td class="text-center">
                                     <a th:href="@{/trading/instruments/{symbol}(symbol=${inst.symbol})}"
-                                       th:text="${inst.symbol}" class="fw-bold text-decoration-none"></a>
+                                       th:text="${inst.symbol}" class="symbol-link"></a>
                                 </td>
                                 <td th:text="${inst.nameKr}"></td>
                                 <td th:text="${inst.nameEn}" class="text-muted small"></td>
-                                <td>
-                                    <span class="badge"
-                                          th:classappend="${inst.market == 'KOSPI'} ? 'bg-primary' : (${inst.market == 'KOSDAQ'} ? 'bg-success' : 'bg-secondary')"
-                                          th:text="${inst.market}"></span>
-                                </td>
-                                <td th:text="${inst.industry}" class="small"></td>
-                                <td>
-                                    <span class="badge"
-                                          th:classappend="${inst.status == 'LISTED'} ? 'bg-success' : (${inst.status == 'SUSPENDED'} ? 'bg-warning text-dark' : 'bg-danger')"
-                                          th:text="${inst.status == 'LISTED'} ? '상장' : (${inst.status == 'SUSPENDED'} ? '거래정지' : '상장폐지')"></span>
-                                </td>
+                                <td class="text-center" th:text="${inst.market}"></td>
+                                <td class="text-center small" th:text="${inst.industry}"></td>
+                                <td class="text-center" th:text="${inst.status == 'LISTED'} ? '상장' : (${inst.status == 'SUSPENDED'} ? '거래정지' : '상장폐지')"></td>
+                                <td class="text-center" th:text="${inst.tradable} ? 'Y' : 'N'"></td>
+                                <td class="text-center" th:text="${inst.halted} ? 'Y' : 'N'"></td>
+                                <td class="text-center small" th:text="${inst.listingDate}"></td>
                                 <td class="text-center">
-                                    <div class="form-check form-switch d-inline-block">
-                                        <input class="form-check-input tradable-toggle" type="checkbox"
-                                               th:checked="${inst.tradable}"
-                                               th:data-symbol="${inst.symbol}">
-                                    </div>
-                                </td>
-                                <td class="text-center">
-                                    <div class="form-check form-switch d-inline-block">
-                                        <input class="form-check-input halted-toggle" type="checkbox"
-                                               th:checked="${inst.halted}"
-                                               th:data-symbol="${inst.symbol}">
-                                    </div>
-                                </td>
-                                <td th:text="${inst.listingDate}" class="small"></td>
-                                <td>
                                     <a th:href="@{/trading/instruments/{symbol}(symbol=${inst.symbol})}"
-                                       class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
+                                       class="detail-link">상세</a>
                                 </td>
                             </tr>
                         </tbody>
@@ -403,58 +455,5 @@
     </div>
 </div>
 
-<th:block layout:fragment="scripts">
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // 거래 가능 토글
-    document.querySelectorAll('.tradable-toggle').forEach(function(toggle) {
-        toggle.addEventListener('change', function() {
-            const symbol = this.dataset.symbol;
-            const tradable = this.checked;
-
-            fetch(`/trading/instruments/${symbol}/toggle-tradable?tradable=${tradable}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    alert('변경 실패: ' + data.error);
-                    this.checked = !tradable;
-                }
-            })
-            .catch(err => {
-                console.error('Error:', err);
-                this.checked = !tradable;
-            });
-        });
-    });
-
-    // 거래 정지 토글
-    document.querySelectorAll('.halted-toggle').forEach(function(toggle) {
-        toggle.addEventListener('change', function() {
-            const symbol = this.dataset.symbol;
-            const halted = this.checked;
-
-            fetch(`/trading/instruments/${symbol}/toggle-halted?halted=${halted}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    alert('변경 실패: ' + data.error);
-                    this.checked = !halted;
-                }
-            })
-            .catch(err => {
-                console.error('Error:', err);
-                this.checked = !halted;
-            });
-        });
-    });
-});
-</script>
-</th:block>
 </body>
 </html>

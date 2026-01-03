@@ -4,227 +4,313 @@
       layout:decorate="~{layout/main}">
 <head>
     <title>Kill Switch 관리</title>
-    <style>
-        .kill-switch-container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+    <th:block layout:fragment="extra-css">
+        <style>
+            .kill-switch-container {
+                max-width: 900px;
+                margin: 0 auto;
+                padding: 20px;
+                padding-bottom: 40px;
+            }
 
-        .alert {
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-        }
+            .page-header {
+                margin-bottom: 30px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 30px 40px;
+                border-radius: 16px;
+                color: white;
+                box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+            }
+            [data-theme="dark"] .page-header {
+                background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
 
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
+            .page-header h2 {
+                font-size: 28px;
+                font-weight: 700;
+                margin: 0;
+                color: white;
+            }
 
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
+            .page-header p {
+                margin: 10px 0 0 0;
+                opacity: 0.9;
+                font-size: 15px;
+            }
 
-        .alert-warning {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeeba;
-        }
+            .alert {
+                padding: 15px 20px;
+                margin-bottom: 20px;
+                border-radius: 12px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            }
 
-        .status-card {
-            background: var(--bg-secondary);
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-            text-align: center;
-        }
+            .alert-success {
+                background: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
 
-        .kill-switch-indicator {
-            font-size: 72px;
-            margin-bottom: 20px;
-        }
+            .alert-error {
+                background: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+            }
 
-        .status-text {
-            font-size: 36px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
+            .alert-warning {
+                background: #fff3cd;
+                color: #856404;
+                border: 1px solid #ffeeba;
+            }
 
-        .status-OFF {
-            color: #27ae60;
-        }
+            .card {
+                background: var(--bg-secondary);
+                border: none;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                transition: background-color 0.3s ease;
+                margin-bottom: 20px;
+            }
 
-        .status-ON {
-            color: #e74c3c;
-        }
+            .card-body {
+                color: var(--text-primary);
+                padding: 30px;
+            }
 
-        .status-UNKNOWN {
-            color: var(--text-muted);
-        }
+            .status-card {
+                text-align: center;
+            }
 
-        .status-description {
-            color: var(--text-secondary);
-            font-size: 16px;
-            margin-bottom: 20px;
-        }
+            .kill-switch-indicator {
+                font-size: 80px;
+                margin-bottom: 20px;
+                display: block;
+            }
 
-        .reason-box {
-            background: var(--bg-tertiary);
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-            text-align: left;
-        }
+            .status-text {
+                font-size: 32px;
+                font-weight: 700;
+                margin-bottom: 10px;
+            }
 
-        .reason-box strong {
-            display: block;
-            margin-bottom: 5px;
-            color: var(--text-primary);
-        }
+            .status-OFF {
+                color: #28a745;
+            }
 
-        .control-section {
-            background: var(--bg-secondary);
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
+            .status-ON {
+                color: #dc3545;
+            }
 
-        .control-section h2 {
-            margin-top: 0;
-            margin-bottom: 20px;
-            color: var(--text-primary);
-        }
+            .status-UNKNOWN {
+                color: var(--text-muted);
+            }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
+            .status-description {
+                color: var(--text-muted);
+                font-size: 16px;
+                margin-bottom: 20px;
+            }
 
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text-primary);
-        }
+            .reason-box {
+                background: var(--bg-tertiary);
+                padding: 20px;
+                border-radius: 10px;
+                margin-top: 20px;
+                text-align: left;
+                border-left: 4px solid #dc3545;
+            }
 
-        .form-select, .form-input, .form-textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: inherit;
-        }
+            .reason-box strong {
+                display: block;
+                margin-bottom: 8px;
+                color: var(--text-primary);
+                font-size: 14px;
+            }
 
-        .form-select:focus, .form-input:focus, .form-textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
+            .reason-box p {
+                margin: 0;
+                color: var(--text-primary);
+            }
 
-        .form-textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
+            .card-header-custom {
+                font-size: 18px;
+                font-weight: 600;
+                color: var(--text-primary);
+                margin: 0 0 20px 0;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
 
-        .button-group {
-            display: flex;
-            gap: 15px;
-            margin-top: 25px;
-        }
+            .form-group {
+                margin-bottom: 20px;
+            }
 
-        .btn {
-            flex: 1;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
+            .form-label {
+                display: block;
+                font-weight: 600;
+                margin-bottom: 8px;
+                color: var(--text-primary);
+                font-size: 14px;
+            }
 
-        .btn-danger {
-            background: #e74c3c;
-            color: white;
-        }
+            .form-select, .form-control {
+                width: 100%;
+                padding: 12px 16px;
+                border: 2px solid var(--border-color);
+                border-radius: 8px;
+                font-size: 14px;
+                font-family: inherit;
+                background: var(--bg-tertiary);
+                color: var(--text-primary);
+                transition: all 0.3s ease;
+            }
 
-        .btn-danger:hover {
-            background: #c0392b;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
-        }
+            .form-select:focus, .form-control:focus {
+                outline: none;
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
 
-        .btn-success {
-            background: #27ae60;
-            color: white;
-        }
+            textarea.form-control {
+                resize: vertical;
+                min-height: 100px;
+            }
 
-        .btn-success:hover {
-            background: #229954;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
-        }
+            .button-group {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+                margin-top: 25px;
+            }
 
-        .info-box {
-            background: #e3f2fd;
-            padding: 20px;
-            border-radius: 8px;
-            border-left: 4px solid #2196f3;
-        }
+            .btn {
+                padding: 15px 30px;
+                border: none;
+                border-radius: 10px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }
 
-        .info-box h3 {
-            margin-top: 0;
-            color: #1976d2;
-        }
+            .btn-danger {
+                background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+                color: white;
+                box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+            }
 
-        .info-box ul {
-            margin: 10px 0;
-            padding-left: 20px;
-        }
+            .btn-danger:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+            }
 
-        .info-box li {
-            margin-bottom: 5px;
-            color: #424242;
-        }
+            .btn-success {
+                background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+                color: white;
+                box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+            }
 
-        .api-error {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-muted);
-        }
-    </style>
+            .btn-success:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+            }
+
+            .info-box {
+                background: var(--bg-tertiary);
+                padding: 25px;
+                border-radius: 12px;
+                border-left: 4px solid #667eea;
+            }
+
+            [data-theme="dark"] .info-box {
+                border-left-color: #8b9df0;
+            }
+
+            .info-box h3 {
+                margin: 0 0 15px 0;
+                color: #667eea;
+                font-size: 16px;
+                font-weight: 600;
+            }
+
+            [data-theme="dark"] .info-box h3 {
+                color: #8b9df0;
+            }
+
+            .info-box ul {
+                margin: 0;
+                padding-left: 20px;
+            }
+
+            .info-box li {
+                margin-bottom: 8px;
+                color: var(--text-primary);
+                font-size: 14px;
+                line-height: 1.6;
+            }
+
+            .info-box li strong {
+                color: var(--text-primary);
+            }
+
+            .api-error {
+                text-align: center;
+                padding: 40px;
+                color: var(--text-muted);
+                background: var(--bg-secondary);
+                border-radius: 12px;
+                margin-bottom: 20px;
+            }
+
+            .api-error i {
+                font-size: 48px;
+                display: block;
+                margin-bottom: 15px;
+            }
+
+            @media (max-width: 768px) {
+                .button-group {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+    </th:block>
 </head>
 <body>
-    <div layout:fragment="content">
-        <div class="kill-switch-container">
-            <header>
-                <h1>⚡ Kill Switch 관리</h1>
-                <p class="subtitle">긴급 매매 중단 스위치 - 모든 자동매매를 즉시 중단합니다</p>
-            </header>
+<div layout:fragment="content">
+    <div class="kill-switch-container">
+        <!-- 페이지 헤더 -->
+        <div class="page-header">
+            <h2><i class="bi bi-lightning-charge me-2"></i>Kill Switch 관리</h2>
+            <p>긴급 매매 중단 스위치 - 모든 자동매매를 즉시 중단합니다</p>
+        </div>
 
-            <!-- Flash Messages -->
-            <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
-            <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+        <!-- Flash Messages -->
+        <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
-            <!-- API Connection Error -->
-            <div th:if="${!apiConnected}" class="api-error">
-                <h2>⚠️ Trading System에 연결할 수 없습니다</h2>
-                <p>API 서버(포트 8099)가 실행 중인지 확인하세요.</p>
-                <p th:if="${errorDetail}" th:text="${errorDetail}"></p>
-            </div>
+        <!-- API Connection Error -->
+        <div th:if="${!apiConnected}" class="api-error">
+            <i class="bi bi-exclamation-triangle"></i>
+            <h3>Trading System에 연결할 수 없습니다</h3>
+            <p>API 서버(포트 8099)가 실행 중인지 확인하세요.</p>
+            <p th:if="${errorDetail}" th:text="${errorDetail}" class="text-muted small"></p>
+        </div>
 
-            <!-- Kill Switch Status -->
-            <div th:if="${apiConnected}" class="status-card">
+        <!-- Kill Switch Status -->
+        <div th:if="${apiConnected}" class="card">
+            <div class="card-body status-card">
                 <div class="kill-switch-indicator">
-                    <span th:if="${killSwitchStatus == 'OFF'}">✅</span>
-                    <span th:if="${killSwitchStatus == 'ON'}">🛑</span>
-                    <span th:if="${killSwitchStatus == 'UNKNOWN'}">❓</span>
+                    <i th:if="${killSwitchStatus == 'OFF'}" class="bi bi-check-circle-fill text-success"></i>
+                    <i th:if="${killSwitchStatus == 'ON'}" class="bi bi-stop-circle-fill text-danger"></i>
+                    <i th:if="${killSwitchStatus == 'UNKNOWN'}" class="bi bi-question-circle-fill text-muted"></i>
                 </div>
                 <div class="status-text" th:classappend="'status-' + ${killSwitchStatus}">
                     <span th:if="${killSwitchStatus == 'OFF'}">정상 운영 중</span>
@@ -238,20 +324,24 @@
                 </div>
 
                 <!-- Reason Display -->
-                <div th:if="${killSwitch.reason != null && killSwitch.reason != ''}" class="reason-box">
-                    <strong>중단 사유:</strong>
+                <div th:if="${killSwitch != null && killSwitch.reason != null && killSwitch.reason != ''}" class="reason-box">
+                    <strong><i class="bi bi-exclamation-circle me-1"></i>중단 사유</strong>
                     <p th:text="${killSwitch.reason}"></p>
                 </div>
             </div>
+        </div>
 
-            <!-- Control Panel -->
-            <div th:if="${apiConnected}" class="control-section">
-                <h2>Kill Switch 제어</h2>
+        <!-- Control Panel -->
+        <div th:if="${apiConnected}" class="card">
+            <div class="card-body">
+                <h3 class="card-header-custom">
+                    <i class="bi bi-sliders"></i>Kill Switch 제어
+                </h3>
 
                 <form th:action="@{/trading/kill-switch/toggle}" method="post">
                     <div class="form-group">
-                        <label for="scope">적용 범위</label>
-                        <select id="scope" name="accountId" class="form-select">
+                        <label class="form-label">적용 범위</label>
+                        <select name="accountId" class="form-select">
                             <option value="">전역 (모든 계좌)</option>
                             <option th:each="account : ${accounts}"
                                     th:value="${account.accountId}"
@@ -262,10 +352,9 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="reason">중단 사유 (선택)</label>
-                        <textarea id="reason"
-                                  name="reason"
-                                  class="form-textarea"
+                        <label class="form-label">중단 사유 (선택)</label>
+                        <textarea name="reason"
+                                  class="form-control"
                                   placeholder="예: 시장 급락, 시스템 점검, 전략 오작동 등"></textarea>
                     </div>
 
@@ -275,31 +364,36 @@
                                 value="ON"
                                 class="btn btn-danger"
                                 onclick="return confirm('정말로 Kill Switch를 활성화하시겠습니까?\n\n모든 자동매매가 즉시 중단됩니다.')">
-                            🛑 Kill Switch 활성화 (매매 중단)
+                            <i class="bi bi-stop-circle"></i>Kill Switch 활성화 (매매 중단)
                         </button>
                         <button type="submit"
                                 name="status"
                                 value="OFF"
                                 class="btn btn-success"
                                 onclick="return confirm('Kill Switch를 비활성화하시겠습니까?\n\n자동매매가 재개됩니다.')">
-                            ✅ Kill Switch 해제 (매매 재개)
+                            <i class="bi bi-check-circle"></i>Kill Switch 해제 (매매 재개)
                         </button>
                     </div>
                 </form>
             </div>
+        </div>
 
-            <!-- Information Box -->
-            <div th:if="${apiConnected}" class="info-box">
-                <h3>ℹ️ Kill Switch란?</h3>
-                <ul>
-                    <li><strong>전역 Kill Switch:</strong> 모든 계좌의 자동매매를 즉시 중단합니다.</li>
-                    <li><strong>계좌별 Kill Switch:</strong> 특정 계좌의 자동매매만 중단합니다.</li>
-                    <li><strong>효과:</strong> Kill Switch가 활성화되면 새로운 주문이 생성되지 않습니다. 이미 체결된 포지션은 유지됩니다.</li>
-                    <li><strong>사용 시기:</strong> 시장 급락, 시스템 오작동, 전략 검토 필요 시 등</li>
-                    <li><strong>해제:</strong> 문제가 해결된 후 Kill Switch를 해제하면 자동매매가 재개됩니다.</li>
-                </ul>
+        <!-- Information Box -->
+        <div th:if="${apiConnected}" class="card">
+            <div class="card-body">
+                <div class="info-box">
+                    <h3><i class="bi bi-info-circle me-1"></i>Kill Switch란?</h3>
+                    <ul>
+                        <li><strong>전역 Kill Switch:</strong> 모든 계좌의 자동매매를 즉시 중단합니다.</li>
+                        <li><strong>계좌별 Kill Switch:</strong> 특정 계좌의 자동매매만 중단합니다.</li>
+                        <li><strong>효과:</strong> Kill Switch가 활성화되면 새로운 주문이 생성되지 않습니다. 이미 체결된 포지션은 유지됩니다.</li>
+                        <li><strong>사용 시기:</strong> 시장 급락, 시스템 오작동, 전략 검토 필요 시 등</li>
+                        <li><strong>해제:</strong> 문제가 해결된 후 Kill Switch를 해제하면 자동매매가 재개됩니다.</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
+</div>
 </body>
 </html>

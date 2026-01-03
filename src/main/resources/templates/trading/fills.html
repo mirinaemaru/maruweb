@@ -4,233 +4,336 @@
       layout:decorate="~{layout/main}">
 <head>
     <title>체결 내역 조회</title>
-    <style>
-        .fills-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+    <th:block layout:fragment="extra-css">
+        <style>
+            .fills-container {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 20px;
+                padding-bottom: 40px;
+            }
 
-        .alert {
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-        }
+            .page-header {
+                margin-bottom: 30px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 30px 40px;
+                border-radius: 16px;
+                color: white;
+                box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+            }
+            [data-theme="dark"] .page-header {
+                background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
 
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
+            .page-header h2 {
+                font-size: 28px;
+                font-weight: 700;
+                margin: 0;
+                color: white;
+            }
 
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
+            .page-header p {
+                margin: 10px 0 0 0;
+                opacity: 0.9;
+                font-size: 15px;
+            }
 
-        .filter-section {
-            background: var(--bg-secondary);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            border: 1px solid var(--border-color);
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-        }
+            .alert {
+                padding: 15px 20px;
+                margin-bottom: 20px;
+                border-radius: 12px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            }
 
-        .filter-form {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
+            .alert-success {
+                background: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
 
-        .form-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+            .alert-error {
+                background: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+            }
 
-        .form-group label {
-            font-weight: 600;
-            color: var(--text-primary);
-            font-size: 14px;
-            white-space: nowrap;
-            height: 42px;
-            line-height: 42px;
-        }
+            .card {
+                background: var(--bg-secondary);
+                border: none;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                transition: background-color 0.3s ease;
+                margin-bottom: 20px;
+            }
 
-        .form-select, .form-input {
-            min-width: 200px;
-            padding: 10px 12px;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 14px;
-            height: 42px;
-            box-sizing: border-box;
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-        }
+            .card-body {
+                color: var(--text-primary);
+                padding: 20px;
+            }
 
-        .form-select:focus, .form-input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
+            .filter-form {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                align-items: center;
+            }
 
-        .btn {
-            padding: 10px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            height: 42px;
-            box-sizing: border-box;
-            transform: translateY(-8px);
-        }
+            .filter-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
 
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
+            .filter-buttons {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-left: auto;
+            }
 
-        .btn-primary:hover {
-            background: #5568d3;
-            transform: translateY(-10px);
-        }
+            .form-label {
+                color: var(--text-primary);
+                font-weight: 600;
+                font-size: 14px;
+                margin-bottom: 0;
+                white-space: nowrap;
+            }
 
-        .btn-secondary {
-            background: #95a5a6;
-            color: white;
-        }
+            .form-select, .form-control {
+                background: var(--bg-tertiary);
+                border: 2px solid var(--border-color);
+                color: var(--text-primary);
+                padding: 10px 12px;
+                border-radius: 8px;
+                transition: all 0.3s ease;
+            }
 
-        .btn-secondary:hover {
-            background: #7f8c8d;
-            transform: translateY(-10px);
-        }
+            .form-select:focus, .form-control:focus {
+                background: var(--bg-tertiary);
+                border-color: #667eea;
+                color: var(--text-primary);
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
 
-        .fills-section {
-            background: var(--bg-secondary);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border: 1px solid var(--border-color);
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-        }
+            .btn {
+                padding: 10px 24px;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 600;
+                transition: all 0.3s;
+            }
 
-        .fills-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid var(--border-color);
-        }
+            .btn-primary {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            }
 
-        .fills-count {
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            }
 
-        .fills-count strong {
-            color: #667eea;
-            font-size: 18px;
-        }
+            [data-theme="dark"] .btn-primary {
+                background: #6c757d;
+                box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+            }
 
-        .fills-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+            [data-theme="dark"] .btn-primary:hover {
+                background: #5a6268;
+            }
 
-        .fills-table thead {
-            background: var(--bg-tertiary);
-        }
+            .btn-outline-secondary {
+                border: 2px solid var(--border-color);
+                color: var(--text-primary);
+                background: transparent;
+            }
 
-        .fills-table th {
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-            color: var(--text-primary);
-            border-bottom: 2px solid var(--border-color);
-            font-size: 14px;
-        }
+            .btn-outline-secondary:hover {
+                background: var(--bg-tertiary);
+                border-color: var(--text-primary);
+                color: var(--text-primary);
+            }
 
-        .fills-table td {
-            padding: 12px;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 14px;
-            color: var(--text-primary);
-        }
+            .btn-success {
+                background: #28a745;
+                color: white;
+                border: none;
+            }
 
-        .fills-table tbody tr:hover {
-            background: var(--bg-tertiary);
-        }
+            .btn-success:hover {
+                background: #218838;
+                transform: translateY(-2px);
+            }
 
-        .side-buy {
-            color: #e74c3c;
-            font-weight: 600;
-        }
+            .table-responsive {
+                border-radius: 12px;
+                overflow: hidden;
+            }
 
-        .side-sell {
-            color: #3498db;
-            font-weight: 600;
-        }
+            .table {
+                color: var(--text-primary);
+                margin-bottom: 0;
+                width: 100%;
+            }
 
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-muted);
-        }
+            .table thead {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
 
-        .empty-state-icon {
-            font-size: 48px;
-            margin-bottom: 15px;
-        }
+            [data-theme="dark"] .table thead {
+                background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+            }
 
-        .api-error {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-muted);
-        }
+            .table thead th {
+                padding: 15px 12px;
+                font-weight: 600;
+                font-size: 13px;
+                text-transform: uppercase;
+                border: none;
+                white-space: nowrap;
+            }
 
-        .price-cell {
-            text-align: right;
-            font-family: 'Courier New', monospace;
-        }
+            .table thead th:first-child {
+                border-radius: 12px 0 0 0;
+            }
 
-        .number-cell {
-            text-align: right;
-        }
-    </style>
+            .table thead th:last-child {
+                border-radius: 0 12px 0 0;
+            }
+
+            .table tbody tr {
+                background: var(--bg-secondary);
+                border-bottom: 1px solid var(--border-color);
+                transition: background-color 0.2s;
+            }
+
+            .table tbody tr:hover {
+                background: var(--bg-tertiary);
+            }
+
+            .table tbody td {
+                padding: 15px 12px;
+                border: none;
+                vertical-align: middle;
+            }
+
+            .table a {
+                color: #667eea;
+                font-weight: 600;
+                text-decoration: none;
+            }
+
+            .table a:hover {
+                text-decoration: underline;
+            }
+
+            [data-theme="dark"] .table a {
+                color: #8b9df0;
+            }
+
+            .side-buy {
+                color: #e74c3c;
+                font-weight: 600;
+            }
+
+            .side-sell {
+                color: #3498db;
+                font-weight: 600;
+            }
+
+            .empty-state {
+                text-align: center;
+                padding: 60px 20px;
+                color: var(--text-muted);
+            }
+
+            .empty-state i {
+                font-size: 48px;
+                display: block;
+                margin-bottom: 15px;
+            }
+
+            .api-error {
+                text-align: center;
+                padding: 40px;
+                color: var(--text-muted);
+                background: var(--bg-secondary);
+                border-radius: 12px;
+                margin-bottom: 20px;
+            }
+
+            .price-cell {
+                text-align: right;
+                font-family: 'Courier New', monospace;
+            }
+
+            .number-cell {
+                text-align: right;
+            }
+
+            .fills-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+            }
+
+            .fills-header h3 {
+                margin: 0;
+                color: var(--text-primary);
+                font-size: 18px;
+            }
+
+            .fills-count {
+                color: var(--text-muted);
+                font-size: 14px;
+            }
+
+            .fills-count strong {
+                color: #667eea;
+                font-size: 18px;
+            }
+
+            [data-theme="dark"] .fills-count strong {
+                color: #8b9df0;
+            }
+        </style>
+    </th:block>
 </head>
 <body>
-    <div layout:fragment="content">
-        <div class="fills-container">
-            <header>
-                <h1>📋 체결 내역 조회</h1>
-                <p class="subtitle">실제 체결된 주문의 상세 내역을 확인합니다</p>
-            </header>
+<div layout:fragment="content">
+    <div class="fills-container">
+        <!-- 페이지 헤더 -->
+        <div class="page-header">
+            <h2><i class="bi bi-receipt me-2"></i>체결 내역 조회</h2>
+            <p>실제 체결된 주문의 상세 내역을 확인합니다</p>
+        </div>
 
-            <!-- Flash Messages -->
-            <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
-            <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+        <!-- Flash Messages -->
+        <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
-            <!-- API Connection Error -->
-            <div th:if="${!apiConnected}" class="api-error">
-                <h2>⚠️ Trading System에 연결할 수 없습니다</h2>
-                <p>API 서버(포트 8099)가 실행 중인지 확인하세요.</p>
-                <p th:if="${errorDetail}" th:text="${errorDetail}"></p>
-            </div>
+        <!-- API Connection Error -->
+        <div th:if="${!apiConnected}" class="api-error">
+            <i class="bi bi-exclamation-triangle fs-1 d-block mb-3"></i>
+            <h3>Trading System에 연결할 수 없습니다</h3>
+            <p>API 서버(포트 8099)가 실행 중인지 확인하세요.</p>
+            <p th:if="${errorDetail}" th:text="${errorDetail}" class="text-muted small"></p>
+        </div>
 
-            <!-- Filter Section -->
-            <div th:if="${apiConnected}" class="filter-section">
-                <h3 style="margin-bottom: 15px;">🔍 필터</h3>
-                <form th:action="@{/trading/fills}" method="get" class="filter-form" style="flex-wrap: wrap;">
-                    <div class="form-group">
-                        <label for="accountId">계좌 선택</label>
-                        <select id="accountId" name="accountId" class="form-select" required>
+        <!-- Filter Section -->
+        <div th:if="${apiConnected}" class="card">
+            <div class="card-body">
+                <form th:action="@{/trading/fills}" method="get" class="filter-form">
+                    <div class="filter-item">
+                        <label class="form-label">계좌</label>
+                        <select name="accountId" class="form-select" required>
                             <option value="">계좌를 선택하세요</option>
                             <option th:each="account : ${accounts}"
                                     th:value="${account.accountId}"
@@ -241,116 +344,127 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label for="startDate">시작일</label>
+                    <div class="filter-item">
+                        <label class="form-label">시작일</label>
                         <input type="date"
-                               id="startDate"
                                name="startDate"
                                th:value="${param.startDate != null ? param.startDate[0] : #temporals.format(#temporals.createToday(), 'yyyy-MM-dd')}"
-                               class="form-input">
+                               class="form-control">
                     </div>
 
-                    <div class="form-group">
-                        <label for="endDate">종료일</label>
+                    <div class="filter-item">
+                        <label class="form-label">종료일</label>
                         <input type="date"
-                               id="endDate"
                                name="endDate"
                                th:value="${param.endDate != null ? param.endDate[0] : #temporals.format(#temporals.createToday(), 'yyyy-MM-dd')}"
-                               class="form-input">
+                               class="form-control">
                     </div>
 
-                    <div class="form-group">
-                        <label for="symbol">종목코드 (선택)</label>
+                    <div class="filter-item">
+                        <label class="form-label">종목코드</label>
                         <input type="text"
-                               id="symbol"
                                name="symbol"
                                th:value="${selectedSymbol}"
                                placeholder="예: 005930"
-                               class="form-input">
+                               class="form-control">
                     </div>
 
-                    <div class="form-group">
-                        <label for="orderId">주문번호 (선택)</label>
+                    <div class="filter-item">
+                        <label class="form-label">주문번호</label>
                         <input type="text"
-                               id="orderId"
                                name="orderId"
                                th:value="${selectedOrderId}"
                                placeholder="주문번호"
-                               class="form-input">
+                               class="form-control">
                     </div>
 
-                    <button type="submit" class="btn btn-primary">조회</button>
-                    <a th:href="@{/trading/fills}" class="btn btn-secondary">초기화</a>
-                    <button type="button" class="btn btn-success" onclick="exportToExcel()">📥 Excel Export</button>
+                    <div class="filter-buttons">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search me-1"></i>조회
+                        </button>
+                        <a th:href="@{/trading/fills}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i>초기화
+                        </a>
+                        <button type="button" class="btn btn-success" onclick="exportToExcel()">
+                            <i class="bi bi-file-earmark-excel me-1"></i>Export
+                        </button>
+                    </div>
                 </form>
             </div>
+        </div>
 
-            <!-- Fills List -->
-            <div th:if="${apiConnected && selectedAccountId != null}" class="fills-section">
+        <!-- Fills List -->
+        <div th:if="${apiConnected && selectedAccountId != null}" class="card">
+            <div class="card-body">
                 <div class="fills-header">
-                    <h2>체결 내역</h2>
+                    <h3><i class="bi bi-list-ul me-2"></i>체결 내역</h3>
                     <div class="fills-count">
                         총 <strong th:text="${fillCount ?: 0}">0</strong>건
                     </div>
                 </div>
 
                 <div th:if="${fills == null || fills.isEmpty()}" class="empty-state">
-                    <div class="empty-state-icon">📭</div>
+                    <i class="bi bi-inbox"></i>
                     <p>조회된 체결 내역이 없습니다.</p>
-                    <p style="font-size: 14px; color: #999;">다른 조건으로 검색해보세요.</p>
+                    <p class="small text-muted">다른 조건으로 검색해보세요.</p>
                 </div>
 
-                <table th:if="${fills != null && !fills.isEmpty()}" class="fills-table">
-                    <thead>
-                        <tr>
-                            <th>체결일시</th>
-                            <th>종목</th>
-                            <th>구분</th>
-                            <th class="price-cell">체결가</th>
-                            <th class="number-cell">체결수량</th>
-                            <th class="price-cell">수수료</th>
-                            <th class="price-cell">세금</th>
-                            <th>주문번호</th>
-                            <th>증권사주문번호</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="fill : ${fills}">
-                            <td>
-                                <a th:href="@{/trading/fills/{id}(id=${fill.fillId})}"
-                                   th:text="${fill.fillTimestamp}"
-                                   style="color: #667eea; text-decoration: none; font-weight: 600;">2025-01-01 09:00:00</a>
-                            </td>
-                            <td th:text="${fill.symbol}">005930</td>
-                            <td>
-                                <span th:if="${fill.side == 'BUY'}" class="side-buy">매수</span>
-                                <span th:if="${fill.side == 'SELL'}" class="side-sell">매도</span>
-                            </td>
-                            <td class="price-cell" th:text="${#numbers.formatDecimal(fill.fillPrice, 0, 'COMMA', 2, 'POINT')}">70,000</td>
-                            <td class="number-cell" th:text="${#numbers.formatDecimal(fill.fillQty, 0, 'COMMA', 0, 'POINT')}">10</td>
-                            <td class="price-cell" th:text="${#numbers.formatDecimal(fill.fee, 0, 'COMMA', 0, 'POINT')}">350</td>
-                            <td class="price-cell" th:text="${#numbers.formatDecimal(fill.tax, 0, 'COMMA', 0, 'POINT')}">1,400</td>
-                            <td style="font-family: monospace; font-size: 12px;" th:text="${#strings.abbreviate(fill.orderId, 12)}">ord_...</td>
-                            <td style="font-family: monospace; font-size: 12px;" th:text="${fill.brokerOrderNo ?: '-'}">-</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div th:if="${fills != null && !fills.isEmpty()}" class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>체결일시</th>
+                                <th>종목</th>
+                                <th>구분</th>
+                                <th class="text-end">체결가</th>
+                                <th class="text-end">체결수량</th>
+                                <th class="text-end">수수료</th>
+                                <th class="text-end">세금</th>
+                                <th>주문번호</th>
+                                <th>증권사주문번호</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="fill : ${fills}">
+                                <td>
+                                    <a th:href="@{/trading/fills/{id}(id=${fill.fillId})}"
+                                       th:text="${fill.fillTimestamp}">2025-01-01 09:00:00</a>
+                                </td>
+                                <td th:text="${fill.symbol}">005930</td>
+                                <td>
+                                    <span th:if="${fill.side == 'BUY'}" class="side-buy">매수</span>
+                                    <span th:if="${fill.side == 'SELL'}" class="side-sell">매도</span>
+                                </td>
+                                <td class="text-end font-monospace" th:text="${#numbers.formatDecimal(fill.fillPrice, 0, 'COMMA', 2, 'POINT')}">70,000</td>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(fill.fillQty, 0, 'COMMA', 0, 'POINT')}">10</td>
+                                <td class="text-end font-monospace" th:text="${#numbers.formatDecimal(fill.fee, 0, 'COMMA', 0, 'POINT')}">350</td>
+                                <td class="text-end font-monospace" th:text="${#numbers.formatDecimal(fill.tax, 0, 'COMMA', 0, 'POINT')}">1,400</td>
+                                <td class="font-monospace small" th:text="${#strings.abbreviate(fill.orderId, 12)}">ord_...</td>
+                                <td class="font-monospace small" th:text="${fill.brokerOrderNo ?: '-'}">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
+        </div>
 
-            <!-- Initial State -->
-            <div th:if="${apiConnected && selectedAccountId == null}" class="empty-state">
-                <div class="empty-state-icon">🔍</div>
+        <!-- Initial State -->
+        <div th:if="${apiConnected && selectedAccountId == null}" class="card">
+            <div class="card-body empty-state">
+                <i class="bi bi-search"></i>
                 <p>계좌를 선택하고 조회 버튼을 클릭하세요.</p>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        // Export to Excel
-        function exportToExcel() {
-            const params = new URLSearchParams(window.location.search);
-            window.location.href = '/trading/fills/export?' + params.toString();
-        }
-    </script>
+<th:block layout:fragment="scripts">
+<script>
+    function exportToExcel() {
+        const params = new URLSearchParams(window.location.search);
+        window.location.href = '/trading/fills/export?' + params.toString();
+    }
+</script>
+</th:block>
 </body>
 </html>

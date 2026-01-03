@@ -32,10 +32,16 @@ public class InstrumentController {
             @RequestParam(required = false) String search,
             Model model) {
 
+        // 초기 페이지 로드 시 기본값 설정: KOSPI, 상장, 거래가능
+        if (market == null && status == null && tradable == null && search == null) {
+            market = "KOSPI";
+            status = "LISTED";
+            tradable = true;
+        }
+
         log.info("Listing instruments: market={}, status={}, tradable={}, search={}", market, status, tradable, search);
 
         Map<String, Object> result = tradingApiService.getInstruments(market, status, tradable, search);
-
         model.addAttribute("instruments", result.get("items"));
         model.addAttribute("total", result.get("total"));
         model.addAttribute("error", result.get("error"));

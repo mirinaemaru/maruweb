@@ -4,14 +4,247 @@
       layout:decorate="~{layout/main}">
 <head>
     <title>백테스트 관리</title>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .backtest-admin-container {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 20px;
+                padding-bottom: 40px;
+            }
+
+            .page-header {
+                margin-bottom: 30px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 30px 40px;
+                border-radius: 16px;
+                color: white;
+                box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            [data-theme="dark"] .page-header {
+                background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .page-header h2 {
+                font-size: 28px;
+                font-weight: 700;
+                margin: 0;
+                color: white;
+            }
+
+            .page-header .badge {
+                background: rgba(255, 255, 255, 0.2) !important;
+                color: white !important;
+                padding: 8px 16px;
+                border-radius: 20px;
+                font-size: 14px;
+                margin-left: 15px;
+            }
+
+            .btn-new {
+                background: rgba(255, 255, 255, 0.2);
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-weight: 600;
+                text-decoration: none;
+                transition: all 0.3s;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .btn-new:hover {
+                background: rgba(255, 255, 255, 0.3);
+                color: white;
+                transform: translateY(-2px);
+            }
+
+            .alert {
+                padding: 15px 20px;
+                border-radius: 12px;
+                margin-bottom: 20px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            }
+
+            .card {
+                background: var(--bg-secondary);
+                border: none;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                transition: background-color 0.3s ease;
+                margin-bottom: 30px;
+            }
+
+            .card-body {
+                color: var(--text-primary);
+                padding: 0;
+            }
+
+            .table-responsive {
+                border-radius: 12px;
+                overflow: hidden;
+            }
+
+            .table {
+                color: var(--text-primary);
+                margin-bottom: 0;
+                width: 100%;
+            }
+
+            .table thead {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+
+            [data-theme="dark"] .table thead {
+                background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+            }
+
+            .table thead th {
+                padding: 15px 12px;
+                font-weight: 600;
+                font-size: 13px;
+                text-transform: uppercase;
+                border: none;
+                white-space: nowrap;
+            }
+
+            .table thead th:first-child {
+                border-radius: 12px 0 0 0;
+            }
+
+            .table thead th:last-child {
+                border-radius: 0 12px 0 0;
+            }
+
+            .table tbody tr {
+                background: var(--bg-secondary);
+                border-bottom: 1px solid var(--border-color);
+                transition: background-color 0.2s;
+            }
+
+            .table tbody tr:hover {
+                background: var(--bg-tertiary);
+            }
+
+            .table tbody td {
+                padding: 15px 12px;
+                border: none;
+                vertical-align: middle;
+            }
+
+            .table a {
+                color: var(--text-primary);
+                font-weight: 600;
+            }
+
+            .table a:hover {
+                color: #667eea;
+            }
+
+            [data-theme="dark"] .table a:hover {
+                color: #8b9df0;
+            }
+
+            .btn-group {
+                display: flex;
+                gap: 5px;
+            }
+
+            .btn-group .btn {
+                padding: 6px 12px;
+                font-size: 12px;
+                border-radius: 6px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                white-space: nowrap;
+                transition: all 0.2s;
+            }
+
+            .btn-group .btn i {
+                font-size: 12px;
+            }
+
+            .btn-outline-primary {
+                border: 1px solid #667eea;
+                color: #667eea;
+                background: transparent;
+            }
+
+            .btn-outline-primary:hover {
+                background: #667eea;
+                color: white;
+                border-color: #667eea;
+            }
+
+            [data-theme="dark"] .btn-outline-primary {
+                border-color: #8b9df0;
+                color: #8b9df0;
+            }
+
+            [data-theme="dark"] .btn-outline-primary:hover {
+                background: #8b9df0;
+                color: #1a1d29;
+                border-color: #8b9df0;
+            }
+
+            .btn-outline-danger {
+                border: 1px solid #dc3545;
+                color: #dc3545;
+                background: transparent;
+            }
+
+            .btn-outline-danger:hover {
+                background: #dc3545;
+                color: white;
+                border-color: #dc3545;
+            }
+
+            [data-theme="dark"] .btn-outline-danger {
+                border-color: #f5a5ae;
+                color: #f5a5ae;
+            }
+
+            [data-theme="dark"] .btn-outline-danger:hover {
+                background: #dc3545;
+                color: white;
+                border-color: #dc3545;
+            }
+
+            .text-success {
+                color: #28a745 !important;
+            }
+
+            .text-danger {
+                color: #dc3545 !important;
+            }
+
+            .text-muted {
+                color: var(--text-muted) !important;
+            }
+        </style>
+    </th:block>
 </head>
 <body>
 <div layout:fragment="content">
-    <div class="container-fluid">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="bi bi-gear-wide-connected me-2"></i>백테스트 관리</h2>
-            <a href="/trading/backtests/admin/run" class="btn btn-primary">
-                <i class="bi bi-play-circle me-1"></i>새 백테스트 실행
+    <div class="backtest-admin-container">
+        <!-- 페이지 헤더 -->
+        <div class="page-header">
+            <h2>
+                <i class="bi bi-gear-wide-connected me-2"></i>백테스트 관리
+                <span class="badge" th:text="${backtests != null} ? '총 ' + ${#lists.size(backtests)} + '개' : '0개'"></span>
+            </h2>
+            <a href="/trading/backtests/admin/run" class="btn-new">
+                <i class="bi bi-play-circle"></i>새 백테스트 실행
             </a>
         </div>
 
@@ -98,13 +331,13 @@
                                         <a th:if="${bt['backtestId'] != null || bt['backtest_id'] != null}"
                                            th:href="@{/trading/backtests/admin/{id}(id=${bt['backtestId'] != null ? bt['backtestId'] : bt['backtest_id']})}"
                                            class="btn btn-outline-primary" title="상세">
-                                            <i class="bi bi-eye"></i>
+                                            <i class="bi bi-eye"></i> 상세
                                         </a>
                                         <button th:if="${bt['backtestId'] != null || bt['backtest_id'] != null}"
                                                 type="button" class="btn btn-outline-danger"
                                                 th:data-id="${bt['backtestId'] != null ? bt['backtestId'] : bt['backtest_id']}"
                                                 onclick="confirmDelete(this)" title="삭제">
-                                            <i class="bi bi-trash"></i>
+                                            <i class="bi bi-trash"></i> 삭제
                                         </button>
                                     </div>
                                 </td>
