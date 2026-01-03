@@ -6,9 +6,36 @@
     <title>Walk-Forward Analysis</title>
     <style>
         .analysis-container {
-            max-width: 900px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 30px;
+        }
+
+        .walk-forward-header {
+            margin-bottom: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            border-radius: 16px;
+            color: white;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+        }
+        [data-theme="dark"] .walk-forward-header {
+            background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .walk-forward-header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .walk-forward-header p {
+            font-size: 16px;
+            opacity: 0.95;
+            margin: 0;
         }
 
         .form-section {
@@ -70,8 +97,10 @@
 <body>
     <div layout:fragment="content">
         <div class="analysis-container">
-            <h1>🔄 Walk-Forward Analysis</h1>
-            <p>시간 분할 최적화로 과적합을 방지하고 전략의 실제 성능을 평가합니다.</p>
+            <div class="walk-forward-header">
+                <h1>🔄 Walk-Forward Analysis</h1>
+                <p>시간 분할 최적화로 과적합을 방지하고 전략의 실제 성능을 평가합니다.</p>
+            </div>
 
             <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
