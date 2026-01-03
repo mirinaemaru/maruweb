@@ -92,13 +92,25 @@
         }
 
         .btn-primary {
-            background: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
 
         .btn-primary:hover {
             background: #5568d3;
             transform: translateY(-10px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        [data-theme="dark"] .btn-primary {
+            background: #6c757d;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+
+        [data-theme="dark"] .btn-primary:hover {
+            background: #5a6268;
+            transform: translateY(-8px);
         }
 
         .balance-cards {
