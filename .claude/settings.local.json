@@ -85,7 +85,8 @@
       "Bash(bfg:*)",
       "Bash(git reflog:*)",
       "Bash(git gc:*)",
-      "mcp__playwright__browser_type"
+      "mcp__playwright__browser_type",
+      "mcp__playwright__browser_select_option"
     ]
   },
   "enableAllProjectMcpServers": true,
