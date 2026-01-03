@@ -79,6 +79,25 @@
             margin-left: 10px;
         }
 
+        .form-group small {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .form-group-inline {
+            flex-wrap: nowrap;
+        }
+
+        .form-group-inline select {
+            width: 400px;
+            flex: 0 0 auto;
+        }
+
+        .form-group-inline small {
+            white-space: nowrap;
+            margin-left: 15px;
+        }
+
         .btn-submit {
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             color: white;
@@ -141,7 +160,7 @@
                         <input type="date" id="endDate" name="endDate" required>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group form-group-inline">
                         <label for="allocationType">자산 배분 방식</label>
                         <select id="allocationType" name="allocationType">
                             <option value="EQUAL">균등 배분 (Equal Weight)</option>
