@@ -30,11 +30,13 @@
         }
 
         .filter-section {
-            background: white;
+            background: var(--bg-secondary);
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
 
         .filter-form {
@@ -51,7 +53,7 @@
 
         .form-group label {
             font-weight: 600;
-            color: #333;
+            color: var(--text-primary);
             font-size: 14px;
             white-space: nowrap;
             height: 42px;
@@ -61,11 +63,13 @@
         .form-select, .form-input {
             min-width: 200px;
             padding: 10px 12px;
-            border: 2px solid #e0e0e0;
+            border: 2px solid var(--border-color);
             border-radius: 8px;
             font-size: 14px;
             height: 42px;
             box-sizing: border-box;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
         }
 
         .form-select:focus, .form-input:focus {
@@ -108,10 +112,12 @@
         }
 
         .fills-section {
-            background: white;
+            background: var(--bg-secondary);
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
 
         .fills-header {
@@ -120,11 +126,11 @@
             align-items: center;
             margin-bottom: 20px;
             padding-bottom: 15px;
-            border-bottom: 2px solid #e0e0e0;
+            border-bottom: 2px solid var(--border-color);
         }
 
         .fills-count {
-            color: #666;
+            color: var(--text-secondary);
             font-size: 14px;
         }
 
@@ -139,26 +145,27 @@
         }
 
         .fills-table thead {
-            background: #f8f9fa;
+            background: var(--bg-tertiary);
         }
 
         .fills-table th {
             padding: 12px;
             text-align: left;
             font-weight: 600;
-            color: #333;
-            border-bottom: 2px solid #e0e0e0;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
             font-size: 14px;
         }
 
         .fills-table td {
             padding: 12px;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid var(--border-color);
             font-size: 14px;
+            color: var(--text-primary);
         }
 
         .fills-table tbody tr:hover {
-            background: #f8f9fa;
+            background: var(--bg-tertiary);
         }
 
         .side-buy {
@@ -174,7 +181,7 @@
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            color: #999;
+            color: var(--text-muted);
         }
 
         .empty-state-icon {
@@ -185,7 +192,7 @@
         .api-error {
             text-align: center;
             padding: 40px;
-            color: #999;
+            color: var(--text-muted);
         }
 
         .price-cell {
