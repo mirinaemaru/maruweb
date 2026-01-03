@@ -28,11 +28,12 @@
                     gap: 15px;
                 }
                 .form-container {
-                    background: white;
+                    background: var(--bg-secondary);
                     border-radius: 16px;
                     padding: 40px;
                     box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-                    border: 1px solid rgba(0,0,0,0.04);
+                    border: 1px solid var(--border-color);
+                    transition: background-color 0.3s ease, border-color 0.3s ease;
                 }
                 .form-group {
                     margin-bottom: 25px;
@@ -40,7 +41,7 @@
                 .form-group label {
                     display: block;
                     font-weight: 600;
-                    color: #2c3e50;
+                    color: var(--text-primary);
                     margin-bottom: 10px;
                     font-size: 15px;
                 }
@@ -51,11 +52,13 @@
                 .form-control {
                     width: 100%;
                     padding: 14px 18px;
-                    border: 2px solid #e0e0e0;
+                    border: 2px solid var(--border-color);
                     border-radius: 10px;
                     font-size: 15px;
                     transition: all 0.3s;
                     font-family: inherit;
+                    background: var(--bg-secondary);
+                    color: var(--text-primary);
                 }
                 .form-control:focus {
                     outline: none;
@@ -71,7 +74,7 @@
                     gap: 15px;
                     margin-top: 35px;
                     padding-top: 25px;
-                    border-top: 2px solid #f0f0f0;
+                    border-top: 2px solid var(--border-color);
                 }
                 .btn {
                     padding: 14px 32px;
@@ -94,15 +97,15 @@
                     box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
                 }
                 .btn-secondary {
-                    background: #e8e8e8;
-                    color: #666;
+                    background: var(--bg-tertiary);
+                    color: var(--text-secondary);
                 }
                 .btn-secondary:hover {
-                    background: #d0d0d0;
+                    background: var(--filter-tab-hover);
                 }
                 .help-text {
                     font-size: 13px;
-                    color: #7f8c8d;
+                    color: var(--text-muted);
                     margin-top: 6px;
                 }
                 .alert {

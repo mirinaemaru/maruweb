@@ -37,12 +37,12 @@
                     gap: 15px;
                 }
                 .strategy-card {
-                    background: white;
+                    background: var(--bg-secondary);
                     border-radius: 16px;
                     padding: 28px;
                     box-shadow: 0 4px 20px rgba(0,0,0,0.08);
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    border: 1px solid rgba(0,0,0,0.04);
+                    border: 1px solid var(--border-color);
                 }
                 .strategy-card:hover {
                     box-shadow: 0 12px 40px rgba(0,0,0,0.12);
@@ -57,7 +57,7 @@
                 .strategy-name {
                     font-size: 22px;
                     font-weight: 700;
-                    color: #2c3e50;
+                    color: var(--text-primary);
                     letter-spacing: -0.3px;
                 }
                 .strategy-status {
@@ -70,7 +70,7 @@
                     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
                     gap: 15px;
                     padding: 15px 0;
-                    border-top: 2px solid #f0f0f0;
+                    border-top: 2px solid var(--border-color);
                 }
                 .strategy-info {
                     display: flex;
@@ -78,12 +78,12 @@
                     gap: 5px;
                 }
                 .info-label {
-                    color: #666;
+                    color: var(--text-secondary);
                     font-size: 12px;
                     text-transform: uppercase;
                 }
                 .info-value {
-                    color: #333;
+                    color: var(--text-primary);
                     font-weight: 600;
                     font-size: 16px;
                 }
@@ -101,8 +101,8 @@
                     color: #0a472e;
                 }
                 .badge-inactive {
-                    background: #e8e8e8;
-                    color: #666;
+                    background: var(--bg-tertiary);
+                    color: var(--text-secondary);
                 }
                 .badge-paused {
                     background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
@@ -111,7 +111,7 @@
                 .empty-state {
                     text-align: center;
                     padding: 60px 20px;
-                    background: white;
+                    background: var(--bg-secondary);
                     border-radius: 8px;
                     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
                 }
@@ -120,11 +120,11 @@
                     margin-bottom: 20px;
                 }
                 .empty-message {
-                    color: #666;
+                    color: var(--text-secondary);
                     font-size: 18px;
                 }
                 .stats-row {
-                    background: #f8f9fa;
+                    background: var(--bg-tertiary);
                     padding: 15px;
                     border-radius: 6px;
                     margin-top: 10px;
@@ -136,7 +136,7 @@
                     text-align: center;
                 }
                 .stat-label {
-                    color: #666;
+                    color: var(--text-secondary);
                     font-size: 11px;
                     margin-bottom: 5px;
                 }
@@ -216,7 +216,7 @@
                     gap: 10px;
                     margin-top: 20px;
                     padding-top: 15px;
-                    border-top: 2px solid #f0f0f0;
+                    border-top: 2px solid var(--border-color);
                     flex-wrap: wrap;
                 }
                 .alert {
@@ -290,7 +290,7 @@
                     line-height: 1.8;
                 }
                 .alert-help pre {
-                    background: white;
+                    background: var(--bg-secondary);
                     padding: 10px;
                     border-radius: 6px;
                     margin: 8px 0;
@@ -343,7 +343,7 @@
         
                         <!-- Action Header -->
                         <div class="action-header">
-                            <h2 style="font-size: 20px; color: #2c3e50; margin: 0;">전략 목록</h2>
+                            <h2 style="font-size: 20px; color: var(--text-primary); margin: 0;">전략 목록</h2>
                             <a th:href="@{/trading/strategies/new}" class="btn btn-primary">+ 전략 등록</a>
                         </div>
         
@@ -389,9 +389,9 @@
                                         <div class="stat-value" th:text="${strategy.stats.profitLoss}">0</div>
                                     </div>
                                 </div>
-                                <div th:if="${strategy.description}" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #f0f0f0;">
+                                <div th:if="${strategy.description}" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border-color);">
                                     <div class="info-label" style="margin-bottom: 5px;">설명</div>
-                                    <div style="color: #666; font-size: 14px; line-height: 1.6;" th:text="${strategy.description}">Description</div>
+                                    <div style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;" th:text="${strategy.description}">Description</div>
                                 </div>
         
                                 <!-- Strategy Actions -->

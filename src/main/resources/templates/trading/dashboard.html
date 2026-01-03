@@ -325,7 +325,7 @@
                     </div>
                     <ul class="activity-list">
                         <li th:if="${recentActivities == null || #lists.isEmpty(recentActivities)}" class="activity-item">
-                            <div class="activity-desc" style="text-align: center; color: #999;">최근 활동이 없습니다.</div>
+                            <div class="activity-desc" style="text-align: center; color: var(--text-muted);">최근 활동이 없습니다.</div>
                         </li>
                         <li th:each="activity : ${recentActivities}" class="activity-item">
                             <div class="activity-time" th:text="${activity.timestamp}">2024-01-01 10:00:00</div>
@@ -376,12 +376,12 @@
                         </div>
                     </div>
                     <div style="margin-bottom: 20px;">
-                        <div style="font-size: 14px; color: #666; margin-bottom: 10px;">활성 계좌</div>
-                        <div style="font-size: 28px; font-weight: 700; color: #667eea;" th:text="${accountCount != null ? accountCount : 0}">0</div>
+                        <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px;">활성 계좌</div>
+                        <div style="font-size: 28px; font-weight: 700; color: var(--accent-primary);" th:text="${accountCount != null ? accountCount : 0}">0</div>
                     </div>
                     <div>
-                        <div style="font-size: 14px; color: #666; margin-bottom: 10px;">실행 중인 전략</div>
-                        <div style="font-size: 28px; font-weight: 700; color: #667eea;" th:text="${activeStrategyCount != null ? activeStrategyCount : 0}">0</div>
+                        <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px;">실행 중인 전략</div>
+                        <div style="font-size: 28px; font-weight: 700; color: var(--accent-primary);" th:text="${activeStrategyCount != null ? activeStrategyCount : 0}">0</div>
                     </div>
                 </div>
             </div>

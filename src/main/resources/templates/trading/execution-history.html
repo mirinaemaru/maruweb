@@ -32,7 +32,7 @@
         }
 
         .filter-section {
-            background: white;
+            background: var(--bg-secondary);
             padding: 25px;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -50,7 +50,7 @@
             display: block;
             margin-bottom: 5px;
             font-weight: 600;
-            color: #333;
+            color: var(--text-primary);
             font-size: 14px;
         }
 
@@ -58,7 +58,7 @@
         .filter-grid select {
             width: 100%;
             padding: 10px;
-            border: 2px solid #e0e0e0;
+            border: 2px solid var(--border-color);
             border-radius: 8px;
             font-size: 14px;
         }
@@ -84,8 +84,8 @@
         }
 
         .btn-secondary {
-            background: #f5f7fa;
-            color: #333;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
         }
 
         .btn:hover {
@@ -94,7 +94,7 @@
         }
 
         .execution-table {
-            background: white;
+            background: var(--bg-secondary);
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             overflow: hidden;
@@ -113,14 +113,14 @@
             padding: 18px 15px;
             text-align: left;
             font-weight: 700;
-            color: #333;
+            color: var(--text-primary);
             font-size: 14px;
             border-bottom: 2px solid #ddd;
         }
 
         td {
             padding: 15px;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid var(--border-color);
             font-size: 14px;
             color: #555;
         }
@@ -165,7 +165,7 @@
         .no-data {
             text-align: center;
             padding: 60px 20px;
-            color: #999;
+            color: var(--text-muted);
             font-size: 16px;
         }
 
@@ -177,7 +177,7 @@
         }
 
         .summary-card {
-            background: white;
+            background: var(--bg-secondary);
             padding: 25px;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -185,7 +185,7 @@
 
         .summary-card h3 {
             font-size: 14px;
-            color: #666;
+            color: var(--text-secondary);
             margin: 0 0 10px 0;
             font-weight: 600;
         }
@@ -193,12 +193,32 @@
         .summary-card .value {
             font-size: 28px;
             font-weight: 700;
-            color: #333;
+            color: var(--text-primary);
         }
 
         .summary-card .change {
             font-size: 12px;
             margin-top: 5px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
         }
     </style>
 </head>
@@ -209,6 +229,15 @@
                 <h1>📊 전략 실행 히스토리</h1>
                 <p class="subtitle">전략별 실행 내역과 성과를 확인할 수 있습니다</p>
             </header>
+
+            <!-- Error/Warning Messages -->
+            <div th:if="${error}" class="alert alert-error">
+                <strong>오류:</strong> <span th:text="${error}">오류 메시지</span>
+            </div>
+
+            <div th:if="${warning}" class="alert alert-warning">
+                <strong>경고:</strong> <span th:text="${warning}">경고 메시지</span>
+            </div>
 
             <!-- Summary Cards -->
             <div class="summary-cards">
@@ -247,7 +276,7 @@
                                 <option value="">전체 전략</option>
                                 <option th:each="strategy : ${strategies}"
                                         th:value="${strategy.id}"
-                                        th:text="${strategy.name}"
+                                        th:text="${strategy.title}"
                                         th:selected="${strategyId != null && strategyId == strategy.id.toString()}">
                                     Strategy
                                 </option>

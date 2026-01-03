@@ -24,8 +24,11 @@
             <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${errorMessage}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-        <div th:if="${error}" class="alert alert-warning" role="alert">
+        <div th:if="${error}" class="alert alert-danger" role="alert">
             <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${error}"></span>
+        </div>
+        <div th:if="${warning}" class="alert alert-warning" role="alert">
+            <i class="bi bi-exclamation-circle me-2"></i><span th:text="${warning}"></span>
         </div>
 
         <!-- 백테스트 목록 -->
@@ -57,37 +60,49 @@
                             </tr>
                             <tr th:each="bt : ${backtests}">
                                 <td>
-                                    <a th:href="@{/trading/backtests/admin/{id}(id=${bt.backtestId})}"
-                                       th:text="${#strings.abbreviate(bt.backtestId, 12)}"
+                                    <a th:if="${bt['backtestId'] != null || bt['backtest_id'] != null}"
+                                       th:href="@{/trading/backtests/admin/{id}(id=${bt['backtestId'] != null ? bt['backtestId'] : bt['backtest_id']})}"
+                                       th:text="${#strings.abbreviate(bt['backtestId'] != null ? bt['backtestId'] : bt['backtest_id'], 12)}"
                                        class="text-decoration-none" title="상세 보기"></a>
+                                    <span th:unless="${bt['backtestId'] != null || bt['backtest_id'] != null}">-</span>
                                 </td>
-                                <td th:text="${bt.strategyId}" class="fw-bold"></td>
+                                <td th:text="${bt['strategyId'] != null ? bt['strategyId'] : (bt['strategy_id'] != null ? bt['strategy_id'] : '-')}" class="fw-bold"></td>
                                 <td>
-                                    <span th:each="symbol, iter : ${bt.symbols}">
+                                    <span th:if="${bt['symbols'] != null}" th:each="symbol, iter : ${bt['symbols']}">
                                         <span th:text="${symbol}"></span>
                                         <span th:if="${!iter.last}">, </span>
                                     </span>
+                                    <span th:unless="${bt['symbols'] != null}">-</span>
                                 </td>
                                 <td class="small">
-                                    <span th:text="${bt.startDate}"></span> ~
-                                    <span th:text="${bt.endDate}"></span>
+                                    <span th:text="${bt['startDate'] != null ? bt['startDate'] : (bt['start_date'] != null ? bt['start_date'] : '-')}"></span> ~
+                                    <span th:text="${bt['endDate'] != null ? bt['endDate'] : (bt['end_date'] != null ? bt['end_date'] : '-')}"></span>
                                 </td>
                                 <td class="text-end"
-                                    th:classappend="${bt.totalReturn != null and bt.totalReturn >= 0} ? 'text-success' : 'text-danger'">
-                                    <span th:text="${bt.totalReturn != null} ? ${#numbers.formatDecimal(bt.totalReturn, 1, 2)} + '%' : '-'"></span>
+                                    th:with="totalRet=${bt['totalReturn'] != null ? bt['totalReturn'] : bt['total_return']}"
+                                    th:classappend="${totalRet != null and totalRet >= 0} ? 'text-success' : 'text-danger'">
+                                    <span th:text="${totalRet != null} ? ${#numbers.formatDecimal(totalRet, 1, 2)} + '%' : '-'"></span>
                                 </td>
-                                <td class="text-end" th:text="${bt.sharpeRatio != null} ? ${#numbers.formatDecimal(bt.sharpeRatio, 1, 2)} : '-'"></td>
-                                <td class="text-end text-danger" th:text="${bt.maxDrawdown != null} ? ${#numbers.formatDecimal(bt.maxDrawdown, 1, 2)} + '%' : '-'"></td>
-                                <td th:text="${bt.totalTrades}"></td>
-                                <td class="small" th:text="${bt.createdAt}"></td>
+                                <td class="text-end"
+                                    th:with="sharpe=${bt['sharpeRatio'] != null ? bt['sharpeRatio'] : bt['sharpe_ratio']}">
+                                    <span th:text="${sharpe != null} ? ${#numbers.formatDecimal(sharpe, 1, 2)} : '-'"></span>
+                                </td>
+                                <td class="text-end text-danger"
+                                    th:with="mdd=${bt['maxDrawdown'] != null ? bt['maxDrawdown'] : bt['max_drawdown']}">
+                                    <span th:text="${mdd != null} ? ${#numbers.formatDecimal(mdd, 1, 2)} + '%' : '-'"></span>
+                                </td>
+                                <td th:text="${bt['totalTrades'] != null ? bt['totalTrades'] : (bt['total_trades'] != null ? bt['total_trades'] : '-')}"></td>
+                                <td class="small" th:text="${bt['createdAt'] != null ? bt['createdAt'] : (bt['created_at'] != null ? bt['created_at'] : '-')}"></td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
-                                        <a th:href="@{/trading/backtests/admin/{id}(id=${bt.backtestId})}"
+                                        <a th:if="${bt['backtestId'] != null || bt['backtest_id'] != null}"
+                                           th:href="@{/trading/backtests/admin/{id}(id=${bt['backtestId'] != null ? bt['backtestId'] : bt['backtest_id']})}"
                                            class="btn btn-outline-primary" title="상세">
                                             <i class="bi bi-eye"></i>
                                         </a>
-                                        <button type="button" class="btn btn-outline-danger"
-                                                th:data-id="${bt.backtestId}"
+                                        <button th:if="${bt['backtestId'] != null || bt['backtest_id'] != null}"
+                                                type="button" class="btn btn-outline-danger"
+                                                th:data-id="${bt['backtestId'] != null ? bt['backtestId'] : bt['backtest_id']}"
                                                 onclick="confirmDelete(this)" title="삭제">
                                             <i class="bi bi-trash"></i>
                                         </button>

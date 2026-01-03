@@ -38,7 +38,7 @@
         }
 
         .filter-section {
-            background: white;
+            background: var(--bg-secondary);
             padding: 20px;
             border-radius: 12px;
             margin-bottom: 20px;
@@ -50,7 +50,7 @@
 
         .filter-section select {
             padding: 10px;
-            border: 2px solid #e0e0e0;
+            border: 2px solid var(--border-color);
             border-radius: 6px;
             font-size: 14px;
         }
@@ -70,7 +70,7 @@
         }
 
         .notification-list {
-            background: white;
+            background: var(--bg-secondary);
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             overflow: hidden;
@@ -78,7 +78,7 @@
 
         .notification-item {
             padding: 20px;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             gap: 15px;
             align-items: flex-start;
@@ -87,7 +87,7 @@
         }
 
         .notification-item:hover {
-            background: #f8f9fa;
+            background: var(--bg-tertiary);
         }
 
         .notification-item.unread {
@@ -115,16 +115,16 @@
         .notification-title {
             font-weight: 700;
             font-size: 16px;
-            color: #333;
+            color: var(--text-primary);
         }
 
         .notification-time {
             font-size: 12px;
-            color: #999;
+            color: var(--text-muted);
         }
 
         .notification-message {
-            color: #666;
+            color: var(--text-secondary);
             font-size: 14px;
             line-height: 1.6;
         }
@@ -173,13 +173,13 @@
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            color: #999;
+            color: var(--text-muted);
         }
 
         .bulk-actions {
             padding: 15px 20px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e0e0e0;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             gap: 10px;
         }

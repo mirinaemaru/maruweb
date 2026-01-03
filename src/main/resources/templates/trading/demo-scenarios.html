@@ -71,7 +71,7 @@
         }
 
         .scenario-card {
-            background: white;
+            background: var(--bg-secondary);
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -94,11 +94,11 @@
             font-size: 22px;
             font-weight: 700;
             margin: 0 0 12px 0;
-            color: #333;
+            color: var(--text-primary);
         }
 
         .scenario-card .description {
-            color: #666;
+            color: var(--text-secondary);
             font-size: 14px;
             line-height: 1.6;
             margin-bottom: 20px;
@@ -106,7 +106,7 @@
         }
 
         .scenario-card .use-case {
-            background: #f5f7fa;
+            background: var(--bg-tertiary);
             padding: 12px 16px;
             border-radius: 8px;
             margin-bottom: 20px;
@@ -115,7 +115,7 @@
         }
 
         .scenario-card .use-case strong {
-            color: #333;
+            color: var(--text-primary);
             display: block;
             margin-bottom: 5px;
         }
@@ -338,36 +338,36 @@
                     <h3>커스텀 시나리오 설정</h3>
                     <form th:action="@{/trading/demo-scenarios/custom}" method="post" style="text-align: left;">
                         <div style="margin-bottom: 20px;">
-                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">
                                 시나리오 이름
                             </label>
                             <input type="text" name="scenarioName"
                                    placeholder="예: 고변동성 단기 매매 테스트"
-                                   style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;"
+                                   style="width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 14px;"
                                    required>
                         </div>
 
                         <div style="margin-bottom: 20px;">
-                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">
                                 계좌 ID (선택사항)
                             </label>
                             <input type="text" name="accountId"
                                    placeholder="계좌 ID를 입력하세요 (미입력 시 기본 계좌)"
-                                   style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                                   style="width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 14px;">
                         </div>
 
                         <div style="margin-bottom: 20px;">
-                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">
                                 종목 코드 (선택사항)
                             </label>
                             <input type="text" name="symbol"
                                    placeholder="예: 005930 (미입력 시 기본 종목)"
-                                   style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                                   style="width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 14px;">
                         </div>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                             <div>
-                                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">
                                     거래 횟수
                                 </label>
                                 <input type="number" name="tradeCount"
@@ -375,15 +375,15 @@
                                        min="1"
                                        max="100"
                                        value="10"
-                                       style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                                       style="width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 14px;">
                             </div>
 
                             <div>
-                                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">
                                     시나리오 유형
                                 </label>
                                 <select name="scenarioType"
-                                        style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                                        style="width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 14px;">
                                     <option value="MIXED">혼합</option>
                                     <option value="BUY_ONLY">매수만</option>
                                     <option value="SELL_ONLY">매도만</option>
@@ -395,36 +395,36 @@
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                             <div>
-                                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">
                                     최소 가격 (원)
                                 </label>
                                 <input type="number" name="minPrice"
                                        placeholder="50000"
                                        min="0"
                                        value="50000"
-                                       style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                                       style="width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 14px;">
                             </div>
 
                             <div>
-                                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">
                                     최대 가격 (원)
                                 </label>
                                 <input type="number" name="maxPrice"
                                        placeholder="100000"
                                        min="0"
                                        value="100000"
-                                       style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                                       style="width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 14px;">
                             </div>
                         </div>
 
                         <div style="margin-bottom: 25px;">
-                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">
                                 시나리오 설명 (선택사항)
                             </label>
                             <textarea name="description"
                                       rows="3"
                                       placeholder="이 시나리오에 대한 설명을 입력하세요..."
-                                      style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; resize: vertical;"></textarea>
+                                      style="width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 14px; resize: vertical;"></textarea>
                         </div>
 
                         <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">

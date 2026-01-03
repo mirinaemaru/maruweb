@@ -50,7 +50,7 @@
         }
 
         .health-card {
-            background: white;
+            background: var(--bg-secondary);
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -66,7 +66,7 @@
             font-size: 18px;
             font-weight: 700;
             margin: 0 0 20px 0;
-            color: #333;
+            color: var(--text-primary);
             display: flex;
             align-items: center;
             gap: 10px;
@@ -94,7 +94,7 @@
 
         .status-unknown {
             background: #e8e8e8;
-            color: #666;
+            color: var(--text-secondary);
         }
 
         .metric-row {
@@ -102,7 +102,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 15px 0;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .metric-row:last-child {
@@ -110,14 +110,14 @@
         }
 
         .metric-label {
-            color: #666;
+            color: var(--text-secondary);
             font-size: 14px;
         }
 
         .metric-value {
             font-size: 20px;
             font-weight: 700;
-            color: #333;
+            color: var(--text-primary);
         }
 
         .metric-value.positive {
@@ -140,14 +140,14 @@
         }
 
         .stat-box {
-            background: #f8f9fa;
+            background: var(--bg-tertiary);
             padding: 20px;
             border-radius: 8px;
             text-align: center;
         }
 
         .stat-label {
-            color: #666;
+            color: var(--text-secondary);
             font-size: 13px;
             margin-bottom: 10px;
         }
@@ -170,14 +170,14 @@
         .current-time {
             text-align: center;
             padding: 20px;
-            background: white;
+            background: var(--bg-secondary);
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             margin-bottom: 30px;
         }
 
         .current-time .time-label {
-            color: #666;
+            color: var(--text-secondary);
             font-size: 14px;
             margin-bottom: 8px;
         }
@@ -185,7 +185,7 @@
         .current-time .time-value {
             font-size: 24px;
             font-weight: 700;
-            color: #333;
+            color: var(--text-primary);
         }
 
         @keyframes pulse {

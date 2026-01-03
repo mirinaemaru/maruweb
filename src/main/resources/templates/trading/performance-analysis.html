@@ -26,7 +26,7 @@
         }
 
         .filter-section {
-            background: white;
+            background: var(--bg-secondary);
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -46,13 +46,13 @@
         .filter-group label {
             font-size: 13px;
             font-weight: 600;
-            color: #666;
+            color: var(--text-secondary);
         }
 
         .filter-group select,
         .filter-group input {
             padding: 8px 12px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 6px;
             font-size: 14px;
         }
@@ -80,7 +80,7 @@
         }
 
         .summary-card {
-            background: white;
+            background: var(--bg-secondary);
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -88,7 +88,7 @@
 
         .summary-card h3 {
             font-size: 14px;
-            color: #666;
+            color: var(--text-secondary);
             margin: 0 0 10px 0;
             font-weight: 600;
         }
@@ -96,7 +96,7 @@
         .summary-value {
             font-size: 28px;
             font-weight: 700;
-            color: #333;
+            color: var(--text-primary);
         }
 
         .summary-value.positive {
@@ -108,7 +108,7 @@
         }
 
         .chart-section {
-            background: white;
+            background: var(--bg-secondary);
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -118,12 +118,12 @@
         .chart-section h2 {
             font-size: 18px;
             font-weight: 700;
-            color: #333;
+            color: var(--text-primary);
             margin: 0 0 20px 0;
         }
 
         .data-table {
-            background: white;
+            background: var(--bg-secondary);
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -136,11 +136,11 @@
         }
 
         .data-table th {
-            background: #f8f9fa;
+            background: var(--bg-tertiary);
             padding: 12px;
             text-align: left;
             font-weight: 600;
-            color: #333;
+            color: var(--text-primary);
             border-bottom: 2px solid #dee2e6;
         }
 
@@ -150,7 +150,7 @@
         }
 
         .data-table tr:hover {
-            background: #f8f9fa;
+            background: var(--bg-tertiary);
         }
 
         .error-message {
@@ -289,7 +289,7 @@
             </div>
 
             <div th:if="${performanceData == null || #lists.isEmpty(performanceData)}"
-                 style="text-align: center; padding: 40px; color: #666;">
+                 style="text-align: center; padding: 40px; color: var(--text-secondary);">
                 조회된 데이터가 없습니다. 필터를 조정해 주세요.
             </div>
         </div>

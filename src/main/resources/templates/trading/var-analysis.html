@@ -26,7 +26,7 @@
         }
 
         .filter-section {
-            background: white;
+            background: var(--bg-secondary);
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -46,13 +46,13 @@
         .filter-group label {
             font-size: 13px;
             font-weight: 600;
-            color: #666;
+            color: var(--text-secondary);
         }
 
         .filter-group select,
         .filter-group input {
             padding: 8px 12px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 6px;
             font-size: 14px;
         }
@@ -80,7 +80,7 @@
         }
 
         .var-card {
-            background: white;
+            background: var(--bg-secondary);
             padding: 25px;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -88,7 +88,7 @@
 
         .var-card h3 {
             font-size: 14px;
-            color: #666;
+            color: var(--text-secondary);
             margin: 0 0 10px 0;
             font-weight: 600;
         }
@@ -101,12 +101,12 @@
 
         .var-description {
             font-size: 13px;
-            color: #666;
+            color: var(--text-secondary);
             margin-top: 10px;
         }
 
         .chart-section {
-            background: white;
+            background: var(--bg-secondary);
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -116,12 +116,12 @@
         .chart-section h2 {
             font-size: 18px;
             font-weight: 700;
-            color: #333;
+            color: var(--text-primary);
             margin: 0 0 20px 0;
         }
 
         .statistics-section {
-            background: white;
+            background: var(--bg-secondary);
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -134,21 +134,21 @@
         }
 
         .stat-item {
-            background: #f8f9fa;
+            background: var(--bg-tertiary);
             padding: 15px;
             border-radius: 8px;
         }
 
         .stat-label {
             font-size: 13px;
-            color: #666;
+            color: var(--text-secondary);
             margin-bottom: 5px;
         }
 
         .stat-value {
             font-size: 20px;
             font-weight: 700;
-            color: #333;
+            color: var(--text-primary);
         }
 
         .error-message {
@@ -324,7 +324,7 @@
                 </div>
             </div>
 
-            <div th:if="${varData == null}" style="text-align: center; padding: 40px; color: #666;">
+            <div th:if="${varData == null}" style="text-align: center; padding: 40px; color: var(--text-secondary);">
                 조회된 데이터가 없습니다. 필터를 조정해 주세요.
             </div>
         </div>

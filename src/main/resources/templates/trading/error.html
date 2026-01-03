@@ -10,7 +10,7 @@
                     max-width: 800px;
                     margin: 50px auto;
                     padding: 40px;
-                    background: white;
+                    background: var(--bg-secondary);
                     border-radius: 8px;
                     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
                     text-align: center;
@@ -27,12 +27,12 @@
                 }
                 .error-message {
                     font-size: 16px;
-                    color: #666;
+                    color: var(--text-secondary);
                     margin-bottom: 20px;
                     line-height: 1.6;
                 }
                 .error-detail {
-                    background: #f8f9fa;
+                    background: var(--bg-tertiary);
                     padding: 15px;
                     border-radius: 4px;
                     font-family: monospace;
@@ -87,7 +87,7 @@
                             <ol style="color: #856404; line-height: 1.8;">
                                 <li>Trading System API 서버가 실행 중인지 확인하세요 (포트 8099)</li>
                                 <li>터미널에서 다음 명령어를 실행하세요:
-                                    <pre style="background: white; padding: 10px; border-radius: 4px; margin: 10px 0;">cd /Users/changsupark/projects/cautostock
+                                    <pre style="background: var(--bg-secondary); padding: 10px; border-radius: 4px; margin: 10px 0;">cd /Users/changsupark/projects/cautostock
         ./run-with-env.sh</pre>
                                 </li>
                                 <li>Health Check 확인: <a href="http://localhost:8099/health" target="_blank">http://localhost:8099/health</a></li>

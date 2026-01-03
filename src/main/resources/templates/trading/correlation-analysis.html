@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>상관관계 분석</title>
+    <style>
+        .correlation-container {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .correlation-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .correlation-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+        }
+
+        .filter-section {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .btn-filter {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .btn-filter:hover {
+            opacity: 0.9;
+        }
+
+        .info-box {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #93c5fd;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #fecaca;
+        }
+
+        .matrix-section {
+            background: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+
+        .matrix-section h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 20px 0;
+        }
+
+        .correlation-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .correlation-table th,
+        .correlation-table td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #e5e7eb;
+        }
+
+        .correlation-table th {
+            background: #f3f4f6;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .correlation-table td {
+            font-weight: 500;
+        }
+
+        .corr-strong-positive {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .corr-moderate-positive {
+            background-color: #86efac;
+            color: #064e3b;
+        }
+
+        .corr-weak-positive {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .corr-neutral {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+
+        .corr-weak-negative {
+            background-color: #fecaca;
+            color: #7f1d1d;
+        }
+
+        .corr-moderate-negative {
+            background-color: #f87171;
+            color: white;
+        }
+
+        .corr-strong-negative {
+            background-color: #dc2626;
+            color: white;
+        }
+
+        .legend-section {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .legend-section h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 15px 0;
+        }
+
+        .legend-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-color {
+            width: 40px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .legend-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="correlation-container">
+            <div class="correlation-header">
+                <h1>📊 상관관계 분석</h1>
+                <p>전략 간 상관관계를 분석하여 포트폴리오 다각화를 평가합니다</p>
+            </div>
+
+            <div th:if="${error}" class="error-message">
+                <span th:text="${error}">오류 메시지</span>
+            </div>
+
+            <div class="info-box">
+                <strong>ℹ️ 상관계수란?</strong> 두 전략의 수익률이 얼마나 함께 움직이는지를 나타내는 지표입니다.
+                +1에 가까우면 같이 움직이고, -1에 가까우면 반대로 움직이며, 0에 가까우면 독립적으로 움직입니다.
+            </div>
+
+            <!-- 필터 섹션 -->
+            <form method="get" th:action="@{/trading/risk/correlation}">
+                <div class="filter-section">
+                    <div class="filter-group">
+                        <label>시작일</label>
+                        <input type="date" name="startDate" th:value="${startDate}" required>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>종료일</label>
+                        <input type="date" name="endDate" th:value="${endDate}" required>
+                    </div>
+
+                    <button type="submit" class="btn-filter">📊 분석</button>
+                </div>
+            </form>
+
+            <!-- 범례 섹션 -->
+            <div class="legend-section" th:if="${correlationMatrix != null}">
+                <h3>상관계수 범례</h3>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <div class="legend-color corr-strong-positive"></div>
+                        <div class="legend-label">강한 양의 상관 (0.7 ~ 1.0)</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color corr-moderate-positive"></div>
+                        <div class="legend-label">중간 양의 상관 (0.3 ~ 0.7)</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color corr-weak-positive"></div>
+                        <div class="legend-label">약한 양의 상관 (0.0 ~ 0.3)</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color corr-neutral"></div>
+                        <div class="legend-label">무상관 (0.0)</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color corr-weak-negative"></div>
+                        <div class="legend-label">약한 음의 상관 (-0.3 ~ 0.0)</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color corr-moderate-negative"></div>
+                        <div class="legend-label">중간 음의 상관 (-0.7 ~ -0.3)</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color corr-strong-negative"></div>
+                        <div class="legend-label">강한 음의 상관 (-1.0 ~ -0.7)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 상관관계 매트릭스 -->
+            <div class="matrix-section" th:if="${correlationMatrix != null && strategies != null}">
+                <h2>전략 간 상관관계 매트릭스</h2>
+                <table class="correlation-table">
+                    <thead>
+                        <tr>
+                            <th>전략</th>
+                            <th th:each="strategy : ${strategies}" th:text="${strategy}">전략1</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="rowStrategy, rowStat : ${strategies}">
+                            <th th:text="${rowStrategy}">전략1</th>
+                            <td th:each="colStrategy, colStat : ${strategies}"
+                                th:with="corrValue=${correlationMatrix[rowStat.index][colStat.index]}"
+                                th:text="${#numbers.formatDecimal(corrValue, 1, 'COMMA', 2, 'POINT')}"
+                                th:classappend="${corrValue >= 0.7} ? 'corr-strong-positive' :
+                                                ${corrValue >= 0.3} ? 'corr-moderate-positive' :
+                                                ${corrValue > 0.0} ? 'corr-weak-positive' :
+                                                ${corrValue == 0.0} ? 'corr-neutral' :
+                                                ${corrValue > -0.3} ? 'corr-weak-negative' :
+                                                ${corrValue > -0.7} ? 'corr-moderate-negative' :
+                                                'corr-strong-negative'">
+                                1.00
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 인사이트 섹션 -->
+            <div class="matrix-section" th:if="${correlationMatrix != null}">
+                <h2>💡 포트폴리오 다각화 인사이트</h2>
+                <div style="line-height: 1.8; color: #374151;">
+                    <p><strong>낮은 상관관계 (0에 가까운 값):</strong> 전략들이 독립적으로 움직여 리스크 분산에 유리합니다.</p>
+                    <p><strong>높은 양의 상관관계 (1에 가까운 값):</strong> 전략들이 비슷하게 움직여 리스크가 집중될 수 있습니다.</p>
+                    <p><strong>음의 상관관계 (-1에 가까운 값):</strong> 전략들이 반대로 움직여 손실을 상쇄하는 효과가 있습니다.</p>
+                </div>
+            </div>
+
+            <div th:if="${correlationMatrix == null}" class="empty-state">
+                조회된 데이터가 없습니다. 기간을 조정하거나 전략 실행 데이터가 충분한지 확인해 주세요.
+            </div>
+        </div>
+    </div>
+</body>
+</html>
