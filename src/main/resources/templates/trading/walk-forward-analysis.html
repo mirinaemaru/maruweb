@@ -109,10 +109,23 @@
             font-weight: 600;
             cursor: pointer;
             width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
 
         .btn-submit:hover {
             opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        [data-theme="dark"] .btn-submit {
+            background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
+            box-shadow: 0 4px 15px rgba(90, 111, 214, 0.3);
+        }
+
+        [data-theme="dark"] .btn-submit:hover {
+            box-shadow: 0 6px 20px rgba(90, 111, 214, 0.4);
         }
 
         .info-box {
