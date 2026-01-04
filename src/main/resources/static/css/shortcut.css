@@ -312,6 +312,114 @@ select.form-input option:disabled {
     font-size: 1.1em;
 }
 
+/* Dark Mode Styles */
+[data-theme="dark"] .btn-add {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .btn-add:hover {
+    background: #4a5568;
+}
+
+[data-theme="dark"] .btn-edit {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .btn-edit:hover {
+    background: #4a5568;
+}
+
+[data-theme="dark"] .btn-delete {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .btn-delete:hover {
+    background: #4a5568;
+}
+
+/* Shortcut item의 Edit, Delete 버튼은 투명 배경 */
+[data-theme="dark"] .shortcut-actions .btn-edit,
+[data-theme="dark"] .shortcut-actions .btn-delete {
+    background: transparent;
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .shortcut-actions .btn-edit:hover,
+[data-theme="dark"] .shortcut-actions .btn-delete:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--text-secondary);
+}
+
+/* Active 탭 배경을 투명하게 */
+[data-theme="dark"] .category-tab.active {
+    background: transparent;
+    border-color: var(--accent-primary);
+}
+
+[data-theme="dark"] .modal-content {
+    background: var(--bg-secondary);
+}
+
+[data-theme="dark"] .modal-content h2 {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .modal-subtitle {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .close {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .close:hover {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .form-group-vertical label {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .form-input {
+    background: var(--bg-tertiary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .form-input:focus {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+[data-theme="dark"] .form-input::placeholder {
+    color: var(--text-muted);
+}
+
+[data-theme="dark"] select.form-input {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+}
+
+[data-theme="dark"] select.form-input option {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] select.form-input option.order-available {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] select.form-input option.order-disabled {
+    color: var(--text-muted);
+}
+
+[data-theme="dark"] select.form-input option:disabled {
+    color: var(--text-muted);
+    background: var(--bg-tertiary);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .action-bar {
