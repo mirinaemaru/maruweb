@@ -242,6 +242,25 @@
     background: #4a5568 !important;
 }
 
+[data-theme="dark"] .streak-badge {
+    background: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .check-btn {
+    background: var(--bg-tertiary) !important;
+    border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .check-btn.checked {
+    background: #4a5568 !important;
+    border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .check-btn:hover {
+    background: #4a5568 !important;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .add-habit-form {
