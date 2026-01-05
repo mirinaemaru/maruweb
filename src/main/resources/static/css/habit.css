@@ -217,6 +217,31 @@
     font-size: 10px;
 }
 
+/* Dark Mode */
+[data-theme="dark"] .habit-table thead th {
+    background: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .habit-table thead th.today {
+    background: #4a5568 !important;
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .btn-primary,
+[data-theme="dark"] .btn-edit,
+[data-theme="dark"] .btn-delete {
+    background: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .btn-primary:hover,
+[data-theme="dark"] .btn-edit:hover,
+[data-theme="dark"] .btn-delete:hover {
+    background: #4a5568 !important;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .add-habit-form {
