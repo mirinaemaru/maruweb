@@ -27,8 +27,8 @@
     justify-content: space-between;
     align-items: center;
     padding: 18px 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: transparent;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .card-header h2 {
@@ -38,6 +38,7 @@
     align-items: center;
     gap: 8px;
     margin: 0;
+    color: var(--text-primary);
 }
 
 .card-icon {
@@ -45,7 +46,8 @@
 }
 
 .card-badge {
-    background: rgba(255, 255, 255, 0.25);
+    background: var(--accent-primary);
+    color: white;
     padding: 4px 12px;
     border-radius: 20px;
     font-size: 0.9em;
@@ -181,6 +183,28 @@
 
 .card-link:hover {
     color: var(--accent-secondary);
+}
+
+/* Dark Mode */
+[data-theme="dark"] .card-badge {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .card-link {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .card-link:hover {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .item-dday {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .shortcut-category-preview h4 {
+    color: var(--text-primary);
 }
 
 /* Responsive */
