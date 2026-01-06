@@ -91,9 +91,10 @@
                                         <span class="item-title">
                                             <span th:text="${dday.icon}">🎯</span>
                                             <span th:text="${dday.title}">D-Day Title</span>
+                                            <small style="font-size: 0.85em; color: var(--text-muted); margin-left: 8px;"
+                                                   th:text="'(' + ${#temporals.format(dday.targetDate, 'yyyy-MM-dd')} + ', ' + ${#temporals.format(dday.targetDate, 'E')} + ')'">(2026-02-09, 월)</small>
                                         </span>
-                                        <small class="item-dday" th:classappend="${dday.today} ? 'today' : ''"
-                                               th:text="${dday.DDayDisplay} + ' (' + ${#temporals.format(dday.targetDate, 'yyyy-MM-dd')} + ', ' + ${#temporals.format(dday.targetDate, 'E')} + ')'">D-30</small>
+                                        <small class="item-dday" th:classappend="${dday.today} ? 'today' : ''" th:text="${dday.DDayDisplay}">D-30</small>
                                     </li>
                                 </ul>
                             </div>
