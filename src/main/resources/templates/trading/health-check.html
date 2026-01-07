@@ -32,6 +32,12 @@
             opacity: 0.95;
         }
 
+        [data-theme="dark"] header {
+            background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
         .refresh-info {
             background: #e3f2fd;
             padding: 15px 20px;
@@ -40,6 +46,11 @@
             text-align: center;
             color: #1976d2;
             font-weight: 600;
+        }
+
+        [data-theme="dark"] .refresh-info {
+            background: rgba(102, 126, 234, 0.2);
+            color: #8b9df0;
         }
 
         .health-grid {
@@ -94,6 +105,11 @@
 
         .status-unknown {
             background: #e8e8e8;
+            color: var(--text-secondary);
+        }
+
+        [data-theme="dark"] .status-unknown {
+            background: #3a3d5c;
             color: var(--text-secondary);
         }
 
@@ -165,6 +181,11 @@
             color: #856404;
             font-size: 13px;
             margin-top: 15px;
+        }
+
+        [data-theme="dark"] .error-message {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
         }
 
         .current-time {

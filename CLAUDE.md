@@ -29,13 +29,14 @@ mysql -u $DB_USERNAME -p$DB_PASSWORD maruweb
 ### 모듈 구조
 애플리케이션은 기능별로 구분된 모듈식 아키텍처를 따릅니다:
 
+- **dashboard**: 모든 모듈의 통합 대시보드
+- **kanban**: 프로젝트 기반 태스크 관리 및 워크플로우 (파일 첨부 지원)
 - **todo**: 상태 추적이 가능한 작업 관리
 - **calendar**: Google Calendar 양방향 동기화를 지원하는 이벤트 관리
 - **note**: 노트 작성 및 정리
 - **shortcut**: 카테고리별 빠른 링크 관리
 - **dday**: D-Day 카운트다운 추적
 - **habit**: 습관 추적 기능
-- **dashboard**: 모든 모듈의 통합 대시보드
 - **trading**: 외부 Trading System API 연동 (포트 8099)
 - **strategy**: 조건 기반 자동매매 전략 관리
 
@@ -53,6 +54,26 @@ LocalDate 필드는 HTML 폼 바인딩을 위해 `@DateTimeFormat(pattern = "yyy
 
 **Thymeleaf 템플릿 레이아웃**
 모든 페이지는 `layout:decorate="~{layout/main}"`을 사용하고 `<div layout:fragment="content">`에 내용을 정의합니다. 메인 레이아웃은 모든 모듈로 이동할 수 있는 사이드바를 포함합니다.
+
+### UI 스타일 가이드라인
+
+**다크모드 스타일 규칙:**
+- 텍스트 색상: 흰색 (`var(--text-primary)` 사용)
+- 버튼 배경색: 그레이 (`var(--bg-tertiary)` 또는 `#4a5568` 사용)
+- 카드/컨테이너 배경: 다크 그레이 (`var(--bg-secondary)` → `#2d2d2d`)
+- 페이지 배경: 더 어두운 그레이 (`var(--bg-primary)` → `#1a1a1a`)
+
+**CSS 변수 사용:**
+- 항상 하드코딩된 색상 대신 CSS 변수 사용
+- 다크모드 변수는 `style.css`의 `[data-theme="dark"]` 섹션에 정의됨
+- 새 컴포넌트 추가 시 기존 변수 재사용 권장
+
+**버튼 스타일:**
+- 라이트모드: 각 버튼별 고유 색상 (primary=보라색, edit=노란색, delete=빨간색, save=초록색)
+- **다크모드: 모든 버튼 배경색은 그레이** (`var(--bg-tertiary)` 또는 `#4a5568`)
+- 다크모드에서 버튼 hover: `#4a5568`
+- 다크모드 버튼 텍스트: 흰색 (`var(--text-primary)`)
+- 적용 대상: `.btn-primary`, `.btn-edit`, `.btn-delete`, `.btn-save`, `.btn-secondary`
 
 ### 자동매매 시스템 연동
 
@@ -220,3 +241,51 @@ SpEL 평가 오류를 피하기 위해 복합 조건에서 항상 null 체크:
 - Google Cloud Console의 OAuth2 자격 증명 필요
 - 각 환경에 대해 인증된 리디렉션 URI 구성 필요
 - API 스코프: `https://www.googleapis.com/auth/calendar`
+
+## 칸반 보드 워크플로우
+
+### 태스크 상태 관리
+
+칸반 보드는 4단계 워크플로우를 사용합니다:
+
+1. **등록 (REGISTERED)**: 새로 생성된 태스크
+2. **응답대기중 (WAITING_RESPONSE)**: 사용자의 의견/결정 필요
+3. **진행중 (IN_PROGRESS)**: 현재 작업 중인 태스크
+4. **완료 (COMPLETED)**: 작업 완료
+
+### Claude의 태스크 처리 규칙
+
+**Claude는 다음 상태의 태스크를 개발합니다:**
+- **등록 (REGISTERED)** 상태의 태스크
+- **응답대기중 (WAITING_RESPONSE)** 상태에서 사용자 응답을 받은 태스크
+
+**워크플로우:**
+1. 등록된 태스크 개발 시작 → **진행중**으로 이동
+2. 개발 중 사용자 의견/결정 필요 → **응답대기중**으로 이동
+3. 사용자 응답 확인 → 다시 **진행중**으로 이동하여 개발 계속
+4. 개발 완료 → **완료**로 이동
+
+### 파일 첨부 기능
+
+칸반 보드는 태스크당 1개 파일 첨부를 지원합니다:
+
+**업로드 방법:**
+- 파일 선택 버튼 클릭
+- **Ctrl+V** (Mac: Cmd+V)로 스크린샷 직접 붙여넣기
+- 드래그 앤 드롭
+
+**지원 형식:**
+- 문서: `.txt`, `.md`, `.pdf`, `.doc`, `.docx`
+- 이미지: `.png`, `.jpg`, `.jpeg`
+- 최대 크기: 10MB
+
+**저장 위치:**
+- `/uploads/kanban/{taskId}/{UUID_filename}`
+- UUID 기반 파일명으로 중복 방지
+
+### 프로젝트 디렉토리 매핑
+
+각 프로젝트는 실제 디렉토리 경로와 연결됩니다:
+- 프로젝트 생성 시 `directory_path` 설정 (예: `~/projects/maruweb`)
+- Claude 실행 노트에 작성된 지시사항을 해당 디렉토리에서 수동 실행
+- 향후 자동 실행 기능 추가 예정

@@ -1,5 +1,82 @@
 /* Notes Styles */
 
+/* Page Header */
+.page-header {
+    margin-bottom: 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 40px;
+    border-radius: 16px;
+    color: white;
+    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+}
+
+[data-theme="dark"] .page-header {
+    background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.page-header h1 {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.page-header p {
+    font-size: 16px;
+    opacity: 0.95;
+    margin: 0;
+}
+
+/* Header Actions Row */
+.header-actions-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
+/* Dark mode button styles */
+[data-theme="dark"] .btn-primary {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .btn-primary:hover {
+    background: #4a5568;
+}
+
+[data-theme="dark"] .btn-edit {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .btn-edit:hover {
+    background: #4a5568;
+}
+
+[data-theme="dark"] .btn-delete {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .btn-delete:hover {
+    background: #4a5568;
+}
+
+[data-theme="dark"] .btn-search {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .btn-search:hover {
+    background: #4a5568;
+}
+
 /* Filter Row */
 .filter-row {
     display: flex;
@@ -35,6 +112,22 @@
     color: white;
 }
 
+/* Dark mode category filter */
+[data-theme="dark"] .category-filter a {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .category-filter a:hover {
+    background: #4a5568;
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .category-filter a.active {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
 .search-form {
     display: flex;
     gap: 8px;
@@ -50,6 +143,17 @@
 
 .search-input:focus {
     outline: none;
+    border-color: #667eea;
+}
+
+/* Dark mode search input */
+[data-theme="dark"] .search-input {
+    background: var(--bg-tertiary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .search-input:focus {
     border-color: #667eea;
 }
 
@@ -81,6 +185,21 @@
     background: linear-gradient(135deg, rgba(255, 193, 7, 0.05) 0%, rgba(255, 193, 7, 0.1) 100%);
 }
 
+/* Dark mode note cards */
+[data-theme="dark"] .note-card {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .note-card:hover {
+    border-color: #667eea;
+}
+
+[data-theme="dark"] .note-card.pinned {
+    border-color: var(--border-color);
+    background: var(--bg-secondary);
+}
+
 .note-header {
     display: flex;
     justify-content: space-between;
@@ -94,6 +213,11 @@
     background: #e8e8e8;
     border-radius: 12px;
     color: #666;
+}
+
+[data-theme="dark"] .note-category {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
 }
 
 .pin-form {
@@ -126,11 +250,19 @@
     margin-bottom: 8px;
 }
 
+[data-theme="dark"] .note-link h3 {
+    color: var(--text-primary);
+}
+
 .note-preview {
     color: #666;
     font-size: 0.9em;
     line-height: 1.5;
     margin-bottom: 15px;
+}
+
+[data-theme="dark"] .note-preview {
+    color: var(--text-secondary);
 }
 
 .note-footer {
@@ -141,8 +273,16 @@
     border-top: 1px solid #f0f0f0;
 }
 
+[data-theme="dark"] .note-footer {
+    border-top-color: var(--border-color);
+}
+
 .note-footer small {
     color: #999;
+}
+
+[data-theme="dark"] .note-footer small {
+    color: var(--text-muted);
 }
 
 .note-actions {
@@ -164,6 +304,11 @@
     font-size: 1em;
     color: #333;
     min-height: 300px;
+}
+
+[data-theme="dark"] .note-content-view {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
 }
 
 .empty-content {
@@ -203,6 +348,16 @@
     outline: none;
     border-color: #667eea;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+[data-theme="dark"] .note-textarea {
+    background: var(--bg-tertiary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .note-textarea:focus {
+    border-color: #667eea;
 }
 
 /* Responsive */

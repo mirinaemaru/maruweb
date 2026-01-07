@@ -8,10 +8,10 @@
 <body>
     <div layout:fragment="content">
 <div class="container">
-        <header>
-            <h1>Todo List</h1>
-            <p class="subtitle">Manage your tasks efficiently</p>
-        </header>
+        <div class="page-header">
+            <h1>📝 Todo List</h1>
+            <p>Manage your tasks efficiently</p>
+        </div>
 
         <!-- Flash Messages -->
         <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>

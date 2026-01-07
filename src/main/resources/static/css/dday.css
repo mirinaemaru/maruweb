@@ -1,5 +1,36 @@
 /* D-Day Styles */
 
+/* Page Header */
+.page-header {
+    margin-bottom: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 40px;
+    border-radius: 16px;
+    color: white;
+    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+}
+
+[data-theme="dark"] .page-header {
+    background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.page-header h1 {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.page-header p {
+    font-size: 16px;
+    opacity: 0.95;
+    margin: 0;
+}
+
 /* Add D-Day Section */
 .add-dday-section {
     background: var(--bg-tertiary);
@@ -76,6 +107,10 @@
     border-bottom: 2px solid #667eea;
 }
 
+[data-theme="dark"] .section-title {
+    border-bottom-color: var(--text-primary);
+}
+
 .section-title.past {
     border-bottom-color: var(--text-muted);
     color: var(--text-secondary);
@@ -150,6 +185,10 @@
     color: #667eea;
     min-width: 100px;
     text-align: center;
+}
+
+[data-theme="dark"] .dday-count {
+    color: var(--text-primary);
 }
 
 .dday-count.today {

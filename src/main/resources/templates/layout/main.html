@@ -40,6 +40,9 @@
                     <li th:classappend="${#httpServletRequest.requestURI == '/'} ? 'active' : ''">
                         <a th:href="@{/}"><span class="menu-icon">🏠</span><span class="menu-text">Dashboard</span></a>
                     </li>
+                    <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/kanban')} ? 'active' : ''">
+                        <a th:href="@{/kanban}"><span class="menu-icon">📋</span><span class="menu-text">Kanban</span></a>
+                    </li>
                     <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/todos')} ? 'active' : ''">
                         <a th:href="@{/todos}"><span class="menu-icon">📝</span><span class="menu-text">Todo</span></a>
                     </li>

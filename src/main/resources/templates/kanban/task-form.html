@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>태스크 수정</title>
+    <link rel="stylesheet" th:href="@{/css/kanban.css}">
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="form-container">
+        <div class="form-header">
+            <h2>태스크 수정</h2>
+            <a th:href="@{/kanban(projectId=${task.project.id})}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> 뒤로
+            </a>
+        </div>
+
+        <!-- Flash Messages -->
+        <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+            <span th:text="${errorMessage}"></span>
+        </div>
+
+        <form th:action="@{/kanban/tasks/{id}(id=${task.id})}"
+              method="post"
+              enctype="multipart/form-data"
+              th:object="${task}"
+              class="task-form">
+
+            <!-- Title -->
+            <div class="form-group">
+                <label for="title">태스크 제목 <span class="required">*</span></label>
+                <input type="text"
+                       id="title"
+                       th:field="*{title}"
+                       class="form-control"
+                       placeholder="예: API 연동 구현"
+                       required>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+                <label for="description">설명</label>
+                <textarea id="description"
+                          th:field="*{description}"
+                          class="form-control"
+                          rows="6"
+                          placeholder="태스크 상세 설명을 입력하세요..."></textarea>
+            </div>
+
+            <!-- Priority -->
+            <div class="form-group">
+                <label for="priority">우선순위</label>
+                <select id="priority" th:field="*{priority}" class="form-control">
+                    <option value="LOW">낮음</option>
+                    <option value="MEDIUM">보통</option>
+                    <option value="HIGH">높음</option>
+                </select>
+            </div>
+
+            <!-- Automation Notes -->
+            <div class="form-group">
+                <label for="automationNotes">
+                    <i class="fas fa-robot"></i> Claude 실행 노트
+                </label>
+                <textarea id="automationNotes"
+                          th:field="*{automationNotes}"
+                          class="form-control"
+                          rows="4"
+                          placeholder="예: 파일에 작성된 요구사항을 읽고 구현하세요"></textarea>
+                <small class="form-text">
+                    프로젝트 디렉토리에서 Claude를 수동 실행할 때 사용할 지시사항입니다.
+                </small>
+            </div>
+
+            <!-- File Upload -->
+            <div class="form-group">
+                <label for="file">
+                    <i class="fas fa-paperclip"></i> 첨부 파일
+                </label>
+
+                <!-- Existing File -->
+                <div th:if="${task.hasFile()}" class="current-file">
+                    <div class="file-info">
+                        <i class="fas fa-file"></i>
+                        <span th:text="${task.fileOriginalName}">current-file.pdf</span>
+                        <small th:text="'(' + ${#numbers.formatDecimal(task.fileSize / 1024.0, 1, 1)} + ' KB)'">
+                            (123.4 KB)
+                        </small>
+                    </div>
+                    <a th:href="@{/kanban/tasks/{id}/download(id=${task.id})}"
+                       class="btn btn-sm btn-secondary"
+                       download>
+                        <i class="fas fa-download"></i> 다운로드
+                    </a>
+                </div>
+
+                <!-- File Input -->
+                <input type="file"
+                       id="file"
+                       name="file"
+                       class="form-control"
+                       accept=".txt,.md,.pdf,.doc,.docx,.png,.jpg,.jpeg">
+                <small class="form-text">
+                    최대 10MB. 허용 확장자: .txt, .md, .pdf, .doc, .docx, .png, .jpg
+                    <br>
+                    새 파일을 업로드하면 기존 파일이 교체됩니다.
+                </small>
+            </div>
+
+            <!-- Task Status (read-only) -->
+            <div class="form-group">
+                <label>현재 상태</label>
+                <div class="status-badge" th:classappend="${task.status.toLowerCase()}">
+                    <span th:text="${task.status == 'REGISTERED' ? '등록' :
+                                    task.status == 'WAITING_RESPONSE' ? '응답대기중' :
+                                    task.status == 'IN_PROGRESS' ? '진행중' : '완료'}">
+                        Status
+                    </span>
+                </div>
+                <small class="form-text">
+                    상태는 칸반 보드에서 변경할 수 있습니다.
+                </small>
+            </div>
+
+            <!-- Metadata (read-only) -->
+            <div class="metadata">
+                <div class="metadata-item">
+                    <strong>생성일:</strong>
+                    <span th:text="${#temporals.format(task.createdAt, 'yyyy-MM-dd HH:mm')}">
+                        2024-01-07 10:30
+                    </span>
+                </div>
+                <div class="metadata-item">
+                    <strong>최종 수정:</strong>
+                    <span th:text="${#temporals.format(task.updatedAt, 'yyyy-MM-dd HH:mm')}">
+                        2024-01-07 15:45
+                    </span>
+                </div>
+                <div class="metadata-item" th:if="${task.completedAt != null}">
+                    <strong>완료일:</strong>
+                    <span th:text="${#temporals.format(task.completedAt, 'yyyy-MM-dd HH:mm')}">
+                        2024-01-08 09:20
+                    </span>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> 수정 저장
+                </button>
+                <a th:href="@{/kanban(projectId=${task.project.id})}" class="btn btn-secondary">
+                    취소
+                </a>
+            </div>
+        </form>
+
+        <!-- Comments Section (WAITING_RESPONSE status only) -->
+        <div th:if="${task.status == 'WAITING_RESPONSE'}" class="comments-section">
+            <h3>
+                <i class="fas fa-comments"></i> 사용자 의견
+            </h3>
+
+            <!-- Existing Comments -->
+            <div th:if="${comments != null && !comments.isEmpty()}" class="comments-list">
+                <div th:each="comment : ${comments}" class="comment-item">
+                    <div class="comment-header">
+                        <span class="comment-date" th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}">
+                            2024-01-07 14:30
+                        </span>
+                        <form th:action="@{/kanban/comments/{id}/delete(id=${comment.id})}"
+                              method="post"
+                              style="display: inline;"
+                              onsubmit="return confirm('댓글을 삭제하시겠습니까?')">
+                            <input type="hidden" name="projectId" th:value="${task.project.id}">
+                            <button type="submit" class="btn-icon-small" title="삭제">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </form>
+                    </div>
+                    <div class="comment-text" th:text="${comment.commentText}">
+                        Comment text here
+                    </div>
+                </div>
+            </div>
+
+            <!-- No Comments -->
+            <div th:if="${comments == null || comments.isEmpty()}" class="no-comments">
+                <i class="fas fa-inbox"></i>
+                <p>아직 의견이 없습니다</p>
+            </div>
+
+            <!-- Add Comment Form -->
+            <form th:action="@{/kanban/tasks/{id}/comments(id=${task.id})}"
+                  method="post"
+                  class="add-comment-form">
+                <input type="hidden" name="projectId" th:value="${task.project.id}">
+                <div class="form-group">
+                    <label for="commentText">
+                        <i class="fas fa-paper-plane"></i> 새 의견 추가
+                    </label>
+                    <textarea id="commentText"
+                              name="commentText"
+                              class="form-control"
+                              rows="4"
+                              placeholder="이 태스크에 대한 의견이나 지시사항을 입력하세요..."
+                              required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i> 의견 제출
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Clipboard Paste & Drag-Drop File Upload Script -->
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('file');
+            const taskForm = document.querySelector('.task-form');
+
+            if (!fileInput || !taskForm) return;
+
+            // Create paste area indicator
+            const pasteIndicator = document.createElement('div');
+            pasteIndicator.className = 'paste-indicator';
+            pasteIndicator.innerHTML = '<i class="fas fa-paste"></i> Ctrl+V로 캡처 이미지 붙여넣기 가능';
+            pasteIndicator.style.display = 'none';
+            fileInput.parentNode.insertBefore(pasteIndicator, fileInput.nextSibling);
+
+            // Show paste indicator when file input is focused
+            fileInput.addEventListener('focus', function() {
+                pasteIndicator.style.display = 'block';
+            });
+
+            fileInput.addEventListener('blur', function() {
+                setTimeout(() => {
+                    pasteIndicator.style.display = 'none';
+                }, 200);
+            });
+
+            // Clipboard paste handler
+            document.addEventListener('paste', function(e) {
+                const items = e.clipboardData.items;
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].type.indexOf('image') !== -1) {
+                        e.preventDefault();
+
+                        const blob = items[i].getAsFile();
+                        const timestamp = new Date().getTime();
+                        const fileName = 'screenshot_' + timestamp + '.png';
+
+                        // Create File object from blob
+                        const file = new File([blob], fileName, { type: 'image/png' });
+
+                        // Create DataTransfer to set file input value
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        fileInput.files = dataTransfer.files;
+
+                        // Show success message
+                        showPasteSuccess(fileName);
+                        break;
+                    }
+                }
+            });
+
+            // Drag and drop handlers
+            const dropZone = fileInput.parentNode;
+
+            dropZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.add('drag-over');
+            });
+
+            dropZone.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.remove('drag-over');
+            });
+
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.remove('drag-over');
+
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    // Only take first file
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(files[0]);
+                    fileInput.files = dataTransfer.files;
+
+                    showPasteSuccess(files[0].name);
+                }
+            });
+
+            // Show paste success message
+            function showPasteSuccess(fileName) {
+                const successMsg = document.createElement('div');
+                successMsg.className = 'paste-success';
+                successMsg.innerHTML = '<i class="fas fa-check-circle"></i> ' + fileName + ' 첨부됨';
+                fileInput.parentNode.insertBefore(successMsg, fileInput.nextSibling);
+
+                setTimeout(() => {
+                    successMsg.remove();
+                }, 3000);
+            }
+        });
+    </script>
+</div>
+</body>
+</html>

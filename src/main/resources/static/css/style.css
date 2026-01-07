@@ -437,6 +437,39 @@ header h1 {
     margin-top: 5px;
 }
 
+/* Page Header */
+.page-header {
+    margin-bottom: 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 40px;
+    border-radius: 16px;
+    color: white;
+    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+}
+
+[data-theme="dark"] .page-header {
+    background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.page-header h1 {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: white;
+}
+
+.page-header p {
+    font-size: 16px;
+    opacity: 0.95;
+    margin: 0;
+    color: white;
+}
+
 /* Alerts */
 .alert {
     padding: 12px 20px;
@@ -579,6 +612,53 @@ header h1 {
     background: #218838;
 }
 
+/* Dark Mode Button Styles */
+[data-theme="dark"] .btn-primary {
+    background: transparent !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .btn-primary:hover {
+    background: #4a5568 !important;
+}
+
+[data-theme="dark"] .btn-edit {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .btn-edit:hover {
+    background: #4a5568;
+}
+
+[data-theme="dark"] .btn-delete {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .btn-delete:hover {
+    background: #4a5568;
+}
+
+[data-theme="dark"] .btn-save {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .btn-save:hover {
+    background: #4a5568;
+}
+
+[data-theme="dark"] .btn-secondary {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .btn-secondary:hover {
+    background: #4a5568;
+}
+
 /* Filter Row */
 .filter-row {
     display: flex;
@@ -615,6 +695,13 @@ header h1 {
 .filter-tabs a.active {
     background: var(--accent-primary);
     color: white;
+}
+
+/* Dark mode filter tabs */
+[data-theme="dark"] .filter-tabs a.active {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
 }
 
 /* Search Filter */

@@ -11,13 +11,14 @@
 <body>
     <div layout:fragment="content">
 <div class="container">
-                    <header>
-                        <div>
-                            <h1>Notes</h1>
-                            <p class="subtitle">Your personal notebook</p>
-                        </div>
+                    <div class="page-header">
+                        <h1>📒 Notes</h1>
+                        <p>Your personal notebook</p>
+                    </div>
+
+                    <div class="header-actions-row">
                         <a th:href="@{/notes/new}" class="btn btn-primary">+ New Note</a>
-                    </header>
+                    </div>
 
                     <!-- Flash Messages -->
                     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>

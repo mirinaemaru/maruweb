@@ -41,6 +41,7 @@
       "Bash(ps:*)",
       "Bash(echo:*)",
       "Bash(mysql:*)",
+      "Bash(source .env && mysql:*)",
       "Bash(tail:* /Users/changsupark/maruweb.log:*)",
       "Read(/opt/homebrew/Cellar/tomcat@9/9.0.113/libexec/logs/**)",
       "Read(/opt/homebrew/Cellar/tomcat@9/9.0.113/libexec/webapps/ROOT/WEB-INF/**)",
@@ -86,7 +87,19 @@
       "Bash(git reflog:*)",
       "Bash(git gc:*)",
       "mcp__playwright__browser_type",
-      "mcp__playwright__browser_select_option"
+      "mcp__playwright__browser_select_option",
+      "Bash(claude mcp add --scope user context7 npx -y @upstash/context7-mcp)",
+      "Bash(claude mcp add --scope user context7 -- npx -y @upstash/context7-mcp)",
+      "Bash(claude mcp add:*)",
+      "Bash(claude mcp:*)",
+      "Bash(npm view:*)",
+      "mcp__github__get_file_contents",
+      "WebFetch(domain:api.github.com)",
+      "Bash(npx -y @berthojoris/mcp-mysql-server:*)",
+      "Bash(claude plugins:*)",
+      "Bash(claude plugin list:*)",
+      "Bash(claude plugin --help:*)",
+      "Bash(find:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

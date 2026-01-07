@@ -170,6 +170,15 @@
                 transform: translateY(-2px);
             }
 
+            [data-theme="dark"] .btn-success {
+                background: #6c757d !important;
+                box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+            }
+
+            [data-theme="dark"] .btn-success:hover {
+                background: #5a6268 !important;
+            }
+
             .table-responsive {
                 border-radius: 12px;
                 overflow: hidden;
@@ -334,11 +343,10 @@
                     <div class="filter-item">
                         <label class="form-label">계좌</label>
                         <select name="accountId" class="form-select" required>
-                            <option value="">계좌를 선택하세요</option>
-                            <option th:each="account : ${accounts}"
+                            <option th:each="account, accountStat : ${accounts}"
                                     th:value="${account.accountId}"
                                     th:text="${account.alias} + ' (' + ${account.cano} + ')'"
-                                    th:selected="${account.accountId == selectedAccountId}">
+                                    th:selected="${account.accountId == selectedAccountId or (selectedAccountId == null and accountStat.first)}">
                                 Account
                             </option>
                         </select>

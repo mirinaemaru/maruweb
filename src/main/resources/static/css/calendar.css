@@ -1,5 +1,36 @@
 /* Calendar Specific Styles */
 
+/* Page Header */
+.page-header {
+    margin-bottom: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 40px;
+    border-radius: 16px;
+    color: white;
+    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+}
+
+[data-theme="dark"] .page-header {
+    background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.page-header h1 {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.page-header p {
+    font-size: 16px;
+    opacity: 0.95;
+    margin: 0;
+}
+
 /* Google Connection Banner */
 .google-connection-banner {
     margin-bottom: 20px;
@@ -22,7 +53,8 @@
 }
 
 [data-theme="dark"] .connection-status.connected {
-    background: #064e3b;
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
 }
 
 .connection-status.disconnected {
@@ -31,7 +63,8 @@
 }
 
 [data-theme="dark"] .connection-status.disconnected {
-    background: #78350f;
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
 }
 
 .status-info {
@@ -56,6 +89,10 @@
 .status-text {
     font-weight: 600;
     color: #333;
+}
+
+[data-theme="dark"] .status-text {
+    color: var(--text-primary);
 }
 
 .status-actions {
@@ -122,6 +159,20 @@
     background: #da190b;
 }
 
+/* Dark mode button styles */
+[data-theme="dark"] .btn-connect,
+[data-theme="dark"] .btn-sync,
+[data-theme="dark"] .btn-disconnect {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .btn-connect:hover,
+[data-theme="dark"] .btn-sync:hover,
+[data-theme="dark"] .btn-disconnect:hover {
+    background: #4a5568;
+}
+
 .calendar-header {
     display: flex;
     justify-content: space-between;
@@ -168,6 +219,30 @@
     background: #5568d3;
 }
 
+[data-theme="dark"] .btn-nav,
+[data-theme="dark"] .btn-today {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .btn-nav:hover,
+[data-theme="dark"] .btn-today:hover {
+    background: #4a5568;
+}
+
+/* + Add Event button dark mode */
+[data-theme="dark"] .add-event-section .btn-primary,
+[data-theme="dark"] .btn-primary {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .add-event-section .btn-primary:hover,
+[data-theme="dark"] .btn-primary:hover {
+    background: #4a5568 !important;
+}
+
 .add-event-section {
     margin-bottom: 20px;
     text-align: right;
@@ -185,6 +260,10 @@
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+[data-theme="dark"] .calendar-header-row {
+    background: var(--bg-secondary);
 }
 
 .calendar-header-cell {
@@ -302,6 +381,29 @@
 
 .event-title {
     color: #333;
+}
+
+/* Dark mode event styles */
+[data-theme="dark"] .event-item {
+    background: #374151;
+    border-left-color: #60a5fa;
+}
+
+[data-theme="dark"] .event-item:hover {
+    background: #4b5563;
+}
+
+[data-theme="dark"] .event-item.all-day {
+    background: #4c1d95;
+    border-left-color: #a78bfa;
+}
+
+[data-theme="dark"] .event-time {
+    color: #93c5fd;
+}
+
+[data-theme="dark"] .event-title {
+    color: var(--text-primary);
 }
 
 /* Modal Styles */
@@ -441,6 +543,54 @@
 
 .btn-secondary:hover {
     background: #e5e7eb;
+}
+
+/* Dark mode modal styles */
+[data-theme="dark"] .modal-content {
+    background-color: var(--bg-secondary);
+}
+
+[data-theme="dark"] .modal-header {
+    border-bottom-color: var(--border-color);
+}
+
+[data-theme="dark"] .modal-header h2 {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .close {
+    color: var(--text-muted);
+}
+
+[data-theme="dark"] .close:hover {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .form-group label {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .form-control {
+    background: var(--bg-tertiary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .form-control:focus {
+    border-color: #667eea;
+}
+
+[data-theme="dark"] .modal-footer {
+    border-top-color: var(--border-color);
+}
+
+[data-theme="dark"] .btn-secondary {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .btn-secondary:hover {
+    background: #4a5568;
 }
 
 /* Responsive */

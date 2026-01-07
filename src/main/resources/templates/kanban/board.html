@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Kanban Board</title>
+    <link rel="stylesheet" th:href="@{/css/kanban.css}">
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="kanban-container">
+        <!-- Header -->
+        <div class="kanban-header">
+            <h2>칸반 보드</h2>
+
+            <!-- Project Selection -->
+            <div class="project-controls">
+                <select id="projectSelector" class="form-control"
+                        onchange="location.href='/kanban?projectId=' + this.value">
+                    <option value="">프로젝트 선택</option>
+                    <option th:each="project : ${projects}"
+                            th:value="${project.id}"
+                            th:text="${project.name}"
+                            th:selected="${selectedProject != null && selectedProject.id == project.id}">
+                        Project
+                    </option>
+                </select>
+
+                <div class="project-buttons">
+                    <a th:href="@{/kanban/projects/new}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> 새 프로젝트
+                    </a>
+                    <a th:if="${selectedProject != null}"
+                       th:href="@{/kanban/projects/{id}/view(id=${selectedProject.id})}"
+                       class="btn btn-info">
+                        <i class="fas fa-eye"></i> 조회
+                    </a>
+                    <a th:if="${selectedProject != null}"
+                       th:href="@{/kanban/projects/{id}/edit(id=${selectedProject.id})}"
+                       class="btn btn-secondary">
+                        <i class="fas fa-edit"></i> 수정
+                    </a>
+                    <form th:if="${selectedProject != null}"
+                          th:action="@{/kanban/projects/{id}/delete(id=${selectedProject.id})}"
+                          method="post"
+                          style="display: inline;"
+                          onsubmit="return confirm('프로젝트를 삭제하시겠습니까? (모든 태스크도 삭제됩니다)')">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> 삭제
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Info -->
+        <div th:if="${selectedProject != null}" class="project-info">
+            <div class="project-name">
+                <span class="project-color" th:style="'background-color: ' + ${selectedProject.color}"></span>
+                <strong th:text="${selectedProject.name}">Project Name</strong>
+            </div>
+            <div class="project-path">
+                <i class="fas fa-folder"></i>
+                <code th:text="${selectedProject.directoryPath}">~/projects/example</code>
+            </div>
+            <p th:if="${selectedProject.description}"
+               class="project-description"
+               th:text="${selectedProject.description}">
+                Description
+            </p>
+        </div>
+
+        <!-- Quick Add Task Form -->
+        <div th:if="${selectedProject != null}" class="quick-add-task">
+            <form th:action="@{/kanban/tasks}" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="projectId" th:value="${selectedProject.id}">
+                <!-- Row 1: Title, Priority, Add Button -->
+                <div class="quick-add-row-1">
+                    <input type="text" name="title" class="form-control"
+                           placeholder="새 태스크 제목..." required>
+                    <select name="priority" class="form-control priority-select">
+                        <option value="LOW">낮음</option>
+                        <option value="MEDIUM" selected>보통</option>
+                        <option value="HIGH">높음</option>
+                    </select>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-plus"></i> 추가
+                    </button>
+                </div>
+                <!-- Row 2: File Upload (Single Row) -->
+                <div class="quick-add-row-2">
+                    <label class="file-upload-label" for="quick-file-upload">
+                        <i class="fas fa-paperclip"></i> 파일 첨부 (선택사항)
+                    </label>
+                    <input type="file" id="quick-file-upload" name="file" class="form-control file-input"
+                           accept=".txt,.md,.pdf,.doc,.docx,.png,.jpg,.jpeg">
+                </div>
+            </form>
+        </div>
+
+        <!-- Flash Messages -->
+        <div th:if="${successMessage}" class="alert alert-success" role="alert">
+            <span th:text="${successMessage}"></span>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+            <span th:text="${errorMessage}"></span>
+        </div>
+
+        <!-- Kanban Board -->
+        <div th:if="${selectedProject != null}" class="kanban-board">
+            <!-- Column for each status -->
+            <div th:each="status : ${statuses}" class="kanban-column">
+                <div class="column-header" th:classappend="${status.name()}">
+                    <h3 th:text="${status.koreanName}">Status</h3>
+                    <span class="task-count"
+                          th:text="${tasksByStatus.get(status.name()).size()}">0</span>
+                </div>
+
+                <div class="column-body">
+                    <!-- Task Cards -->
+                    <div th:each="task : ${tasksByStatus.get(status.name())}" class="task-card">
+                        <div class="task-header">
+                            <span class="task-priority" th:classappend="${task.priority.toLowerCase()}">
+                                <span class="task-id">#<span th:text="${task.id}">1</span></span>
+                                <span th:text="${task.priority == 'LOW' ? '낮음' : task.priority == 'MEDIUM' ? '보통' : '높음'}">Priority</span>
+                            </span>
+                            <div class="task-actions">
+                                <a th:href="@{/kanban/tasks/{id}/edit(id=${task.id})}"
+                                   class="btn-icon" title="조회">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a th:href="@{/kanban/tasks/{id}/edit(id=${task.id})}"
+                                   class="btn-icon" title="수정">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form th:action="@{/kanban/tasks/{id}/delete(id=${task.id})}"
+                                      method="post"
+                                      style="display: inline;"
+                                      onsubmit="return confirm('태스크를 삭제하시겠습니까?')">
+                                    <input type="hidden" name="projectId" th:value="${selectedProject.id}">
+                                    <button type="submit" class="btn-icon" title="삭제">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <h4 class="task-title" th:text="${task.title}">Task Title</h4>
+
+                        <p th:if="${task.description}"
+                           class="task-description"
+                           th:text="${task.description}">
+                            Description
+                        </p>
+
+                        <!-- File Attachment -->
+                        <div th:if="${task.hasFile()}" class="task-file">
+                            <i class="fas fa-paperclip"></i>
+                            <a th:href="@{/kanban/tasks/{id}/download(id=${task.id})}"
+                               th:text="${task.fileOriginalName}">
+                                file.pdf
+                            </a>
+                            <form th:action="@{/kanban/tasks/{id}/delete-file(id=${task.id})}"
+                                  method="post"
+                                  style="display: inline;"
+                                  onsubmit="return confirm('파일을 삭제하시겠습니까?')">
+                                <input type="hidden" name="projectId" th:value="${selectedProject.id}">
+                                <button type="submit" class="btn-icon-small" title="파일 삭제">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Automation Notes -->
+                        <div th:if="${task.automationNotes}" class="task-notes">
+                            <small>
+                                <i class="fas fa-robot"></i>
+                                <span th:text="${task.automationNotes}">Automation notes</span>
+                            </small>
+                        </div>
+
+                        <!-- Comments Section (WAITING_RESPONSE only) -->
+                        <div th:if="${status.name() == 'WAITING_RESPONSE'}" class="task-comments">
+                            <div class="comment-header">
+                                <i class="fas fa-comments"></i>
+                                <span>사용자 의견</span>
+                            </div>
+                            <form th:action="@{/kanban/tasks/{id}/comments(id=${task.id})}"
+                                  method="post"
+                                  class="comment-form">
+                                <input type="hidden" name="projectId" th:value="${selectedProject.id}">
+                                <textarea name="commentText"
+                                          class="comment-input"
+                                          placeholder="이 태스크에 대한 의견이나 지시사항을 입력하세요..."
+                                          rows="3"
+                                          required></textarea>
+                                <button type="submit" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-paper-plane"></i> 의견 제출
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Status Change Buttons -->
+                        <div class="task-footer">
+                            <div class="task-footer-buttons">
+                                <!-- Next Status Button -->
+                                <form th:if="${status.name() != 'COMPLETED'}"
+                                      th:action="@{/kanban/tasks/{id}/status(id=${task.id})}"
+                                      method="post"
+                                      style="display: inline;">
+                                    <input type="hidden" name="projectId" th:value="${selectedProject.id}">
+                                    <input type="hidden" name="status"
+                                           th:value="${status.name() == 'REGISTERED' ? 'WAITING_RESPONSE' :
+                                                      status.name() == 'WAITING_RESPONSE' ? 'IN_PROGRESS' :
+                                                      'COMPLETED'}">
+                                    <button type="submit" class="btn btn-sm btn-move">
+                                        <i class="fas fa-arrow-right"></i>
+                                        <span th:text="${status.name() == 'REGISTERED' ? '응답대기중으로' :
+                                                        status.name() == 'WAITING_RESPONSE' ? '진행중으로' :
+                                                        '완료'}">
+                                            Move
+                                        </span>
+                                    </button>
+                                </form>
+
+                                <!-- Quick Complete Button (only for REGISTERED and WAITING_RESPONSE) -->
+                                <form th:if="${status.name() == 'REGISTERED' || status.name() == 'WAITING_RESPONSE'}"
+                                      th:action="@{/kanban/tasks/{id}/status(id=${task.id})}"
+                                      method="post"
+                                      style="display: inline;">
+                                    <input type="hidden" name="projectId" th:value="${selectedProject.id}">
+                                    <input type="hidden" name="status" value="COMPLETED">
+                                    <button type="submit" class="btn btn-sm btn-complete">
+                                        <i class="fas fa-check-circle"></i>
+                                        완료로
+                                    </button>
+                                </form>
+                            </div>
+
+                            <small class="task-date" th:text="'생성일: ' + ${#temporals.format(task.createdAt, 'yyyy-MM-dd')}">
+                                Created: 2024-01-07
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div th:if="${tasksByStatus.get(status.name()).isEmpty()}" class="empty-column">
+                        <i class="fas fa-inbox"></i>
+                        <p>태스크가 없습니다</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- No Project Selected State -->
+        <div th:if="${selectedProject == null}" class="empty-state">
+            <i class="fas fa-clipboard-list"></i>
+            <h3>프로젝트를 선택하거나 생성하세요</h3>
+            <p>칸반 보드로 프로젝트 태스크를 관리하세요</p>
+            <a th:href="@{/kanban/projects/new}" class="btn btn-primary btn-lg">
+                <i class="fas fa-plus"></i> 새 프로젝트 만들기
+            </a>
+        </div>
+    </div>
+
+    <!-- Clipboard Paste & Drag-Drop File Upload Script -->
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.querySelector('.quick-add-task input[type="file"]');
+            const quickAddForm = document.querySelector('.quick-add-task form');
+
+            if (!fileInput || !quickAddForm) return;
+
+            // Create paste area indicator
+            const pasteIndicator = document.createElement('div');
+            pasteIndicator.className = 'paste-indicator';
+            pasteIndicator.innerHTML = '<i class="fas fa-paste"></i> Ctrl+V로 캡처 이미지 붙여넣기 가능';
+            pasteIndicator.style.display = 'none';
+            fileInput.parentNode.insertBefore(pasteIndicator, fileInput.nextSibling);
+
+            // Show paste indicator when file input is focused
+            fileInput.addEventListener('focus', function() {
+                pasteIndicator.style.display = 'block';
+            });
+
+            fileInput.addEventListener('blur', function() {
+                setTimeout(() => {
+                    pasteIndicator.style.display = 'none';
+                }, 200);
+            });
+
+            // Clipboard paste handler
+            document.addEventListener('paste', function(e) {
+                // Only handle paste when quick add form is visible
+                if (!quickAddForm.offsetParent) return;
+
+                const items = e.clipboardData.items;
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].type.indexOf('image') !== -1) {
+                        e.preventDefault();
+
+                        const blob = items[i].getAsFile();
+                        const timestamp = new Date().getTime();
+                        const fileName = 'screenshot_' + timestamp + '.png';
+
+                        // Create File object from blob
+                        const file = new File([blob], fileName, { type: 'image/png' });
+
+                        // Create DataTransfer to set file input value
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        fileInput.files = dataTransfer.files;
+
+                        // Show success message
+                        showPasteSuccess(fileName);
+                        break;
+                    }
+                }
+            });
+
+            // Drag and drop handlers
+            const dropZone = quickAddForm;
+
+            dropZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.add('drag-over');
+            });
+
+            dropZone.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.remove('drag-over');
+            });
+
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.remove('drag-over');
+
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    // Only take first file
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(files[0]);
+                    fileInput.files = dataTransfer.files;
+
+                    showPasteSuccess(files[0].name);
+                }
+            });
+
+            // Show paste success message
+            function showPasteSuccess(fileName) {
+                const successMsg = document.createElement('div');
+                successMsg.className = 'paste-success';
+                successMsg.innerHTML = '<i class="fas fa-check-circle"></i> ' + fileName + ' 첨부됨';
+                fileInput.parentNode.insertBefore(successMsg, fileInput.nextSibling);
+
+                setTimeout(() => {
+                    successMsg.remove();
+                }, 3000);
+            }
+        });
+    </script>
+</div>
+</body>
+</html>

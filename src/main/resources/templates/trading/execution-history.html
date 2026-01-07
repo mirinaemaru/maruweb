@@ -20,6 +20,12 @@
             box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
         }
 
+        [data-theme="dark"] header {
+            background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
         header h1 {
             font-size: 36px;
             font-weight: 700;
@@ -61,6 +67,28 @@
             border: 2px solid var(--border-color);
             border-radius: 8px;
             font-size: 14px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .filter-grid input:focus,
+        .filter-grid select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        [data-theme="dark"] .filter-grid input,
+        [data-theme="dark"] .filter-grid select {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .filter-grid input:focus,
+        [data-theme="dark"] .filter-grid select:focus {
+            border-color: #8b9df0;
+            box-shadow: 0 0 0 3px rgba(139, 157, 240, 0.2);
         }
 
         .filter-actions {
@@ -81,6 +109,15 @@
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+        }
+
+        [data-theme="dark"] .btn-primary {
+            background: #6c757d !important;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+
+        [data-theme="dark"] .btn-primary:hover {
+            background: #5a6268 !important;
         }
 
         .btn-secondary {
@@ -109,24 +146,32 @@
             background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
         }
 
+        [data-theme="dark"] thead {
+            background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+        }
+
         th {
             padding: 18px 15px;
             text-align: left;
             font-weight: 700;
             color: var(--text-primary);
             font-size: 14px;
-            border-bottom: 2px solid #ddd;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        [data-theme="dark"] th {
+            color: white;
         }
 
         td {
             padding: 15px;
             border-bottom: 1px solid var(--border-color);
             font-size: 14px;
-            color: #555;
+            color: var(--text-primary);
         }
 
         tbody tr:hover {
-            background: #f9fafb;
+            background: var(--bg-tertiary);
         }
 
         .status-badge {

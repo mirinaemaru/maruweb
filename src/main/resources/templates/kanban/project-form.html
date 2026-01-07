@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title th:text="${isEdit ? '프로젝트 수정' : '새 프로젝트'}">Project Form</title>
+    <link rel="stylesheet" th:href="@{/css/kanban.css}">
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="form-container">
+        <div class="form-header">
+            <h2 th:text="${isEdit ? '프로젝트 수정' : '새 프로젝트 만들기'}">Project Form</h2>
+            <a th:href="@{/kanban}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> 뒤로
+            </a>
+        </div>
+
+        <!-- Flash Messages -->
+        <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+            <span th:text="${errorMessage}"></span>
+        </div>
+
+        <form th:action="${isEdit ? '/kanban/projects/' + project.id : '/kanban/projects'}"
+              method="post"
+              th:object="${project}"
+              class="project-form">
+
+            <!-- Name -->
+            <div class="form-group">
+                <label for="name">프로젝트 이름 <span class="required">*</span></label>
+                <input type="text"
+                       id="name"
+                       th:field="*{name}"
+                       class="form-control"
+                       placeholder="예: MaruWeb Frontend"
+                       required>
+            </div>
+
+            <!-- Directory Path -->
+            <div class="form-group">
+                <label for="directoryPath">프로젝트 디렉토리 경로 <span class="required">*</span></label>
+                <input type="text"
+                       id="directoryPath"
+                       th:field="*{directoryPath}"
+                       class="form-control"
+                       placeholder="예: ~/projects/maruweb"
+                       required>
+                <small class="form-text">
+                    실제 프로젝트 디렉토리 경로를 입력하세요. Claude가 이 경로에서 실행됩니다.
+                </small>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+                <label for="description">설명</label>
+                <textarea id="description"
+                          th:field="*{description}"
+                          class="form-control"
+                          rows="4"
+                          placeholder="프로젝트 설명을 입력하세요..."></textarea>
+            </div>
+
+            <!-- Color -->
+            <div class="form-group">
+                <label for="color">프로젝트 색상</label>
+                <div class="color-picker-group">
+                    <input type="color"
+                           id="color"
+                           th:field="*{color}"
+                           class="form-control color-input">
+                    <span class="color-label" th:text="*{color} ?: '#667eea'">#667eea</span>
+                </div>
+                <small class="form-text">
+                    칸반 보드에서 프로젝트를 구분하기 위한 색상입니다.
+                </small>
+            </div>
+
+            <!-- Display Order -->
+            <div class="form-group" th:if="${isEdit}">
+                <label for="displayOrder">표시 순서</label>
+                <input type="number"
+                       id="displayOrder"
+                       th:field="*{displayOrder}"
+                       class="form-control"
+                       min="0">
+                <small class="form-text">
+                    프로젝트 목록에서의 순서입니다. 작은 숫자가 먼저 표시됩니다.
+                </small>
+            </div>
+
+            <!-- Buttons -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    <span th:text="${isEdit ? '수정' : '생성'}">Save</span>
+                </button>
+                <a th:href="@{/kanban}" class="btn btn-secondary">취소</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Update color label when color input changes
+        document.getElementById('color').addEventListener('change', function() {
+            document.querySelector('.color-label').textContent = this.value;
+        });
+    </script>
+</div>
+</body>
+</html>
