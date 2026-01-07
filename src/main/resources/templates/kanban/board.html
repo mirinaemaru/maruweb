@@ -31,11 +31,6 @@
                         <i class="fas fa-plus"></i> 새 프로젝트
                     </a>
                     <a th:if="${selectedProject != null}"
-                       th:href="@{/kanban/projects/{id}/view(id=${selectedProject.id})}"
-                       class="btn btn-info">
-                        <i class="fas fa-eye"></i> 조회
-                    </a>
-                    <a th:if="${selectedProject != null}"
                        th:href="@{/kanban/projects/{id}/edit(id=${selectedProject.id})}"
                        class="btn btn-secondary">
                         <i class="fas fa-edit"></i> 수정
@@ -108,8 +103,8 @@
 
         <!-- Kanban Board -->
         <div th:if="${selectedProject != null}" class="kanban-board">
-            <!-- Column for each status -->
-            <div th:each="status : ${statuses}" class="kanban-column">
+            <!-- REGISTERED Column -->
+            <div th:each="status : ${statuses}" th:if="${status.name() == 'REGISTERED'}" class="kanban-column">
                 <div class="column-header" th:classappend="${status.name()}">
                     <h3 th:text="${status.koreanName}">Status</h3>
                     <span class="task-count"
@@ -156,7 +151,19 @@
                         <!-- File Attachment -->
                         <div th:if="${task.hasFile()}" class="task-file">
                             <i class="fas fa-paperclip"></i>
-                            <a th:href="@{/kanban/tasks/{id}/download(id=${task.id})}"
+                            <!-- Image file: Preview -->
+                            <a th:if="${task.isImageFile()}"
+                               href="javascript:void(0)"
+                               th:data-task-id="${task.id}"
+                               th:data-file-name="${task.fileOriginalName}"
+                               class="image-preview-link"
+                               onclick="openImagePreview(this)"
+                               th:text="${task.fileOriginalName}">
+                                image.png
+                            </a>
+                            <!-- Non-image file: Download -->
+                            <a th:unless="${task.isImageFile()}"
+                               th:href="@{/kanban/tasks/{id}/download(id=${task.id})}"
                                th:text="${task.fileOriginalName}">
                                 file.pdf
                             </a>
@@ -237,6 +244,372 @@
                                 </form>
                             </div>
 
+                            <small class="task-date" th:text="'생성일: ' + ${#temporals.format(task.createdAt, 'yyyy-MM-dd')}">
+                                Created: 2024-01-07
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div th:if="${tasksByStatus.get(status.name()).isEmpty()}" class="empty-column">
+                        <i class="fas fa-inbox"></i>
+                        <p>태스크가 없습니다</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WAITING_RESPONSE + IN_PROGRESS Wrapper -->
+            <div class="kanban-column-wrapper">
+                <!-- WAITING_RESPONSE Column -->
+                <div th:each="status : ${statuses}" th:if="${status.name() == 'WAITING_RESPONSE'}" class="kanban-column kanban-column-half">
+                    <div class="column-header" th:classappend="${status.name()}">
+                        <h3 th:text="${status.koreanName}">Status</h3>
+                        <span class="task-count"
+                              th:text="${tasksByStatus.get(status.name()).size()}">0</span>
+                    </div>
+
+                    <div class="column-body">
+                        <!-- Task Cards -->
+                        <div th:each="task : ${tasksByStatus.get(status.name())}" class="task-card">
+                            <div class="task-header">
+                                <span class="task-priority" th:classappend="${task.priority.toLowerCase()}">
+                                    <span class="task-id">#<span th:text="${task.id}">1</span></span>
+                                    <span th:text="${task.priority == 'LOW' ? '낮음' : task.priority == 'MEDIUM' ? '보통' : '높음'}">Priority</span>
+                                </span>
+                                <div class="task-actions">
+                                    <a th:href="@{/kanban/tasks/{id}/edit(id=${task.id})}"
+                                       class="btn-icon" title="조회">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a th:href="@{/kanban/tasks/{id}/edit(id=${task.id})}"
+                                       class="btn-icon" title="수정">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form th:action="@{/kanban/tasks/{id}/delete(id=${task.id})}"
+                                          method="post"
+                                          style="display: inline;"
+                                          onsubmit="return confirm('태스크를 삭제하시겠습니까?')">
+                                        <input type="hidden" name="projectId" th:value="${selectedProject.id}">
+                                        <button type="submit" class="btn-icon" title="삭제">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <h4 class="task-title" th:text="${task.title}">Task Title</h4>
+
+                            <p th:if="${task.description}"
+                               class="task-description"
+                               th:text="${task.description}">
+                                Description
+                            </p>
+
+                            <!-- File Attachment -->
+                            <div th:if="${task.hasFile()}" class="task-file">
+                                <i class="fas fa-paperclip"></i>
+                                <a th:href="@{/kanban/tasks/{id}/download(id=${task.id})}"
+                                   th:text="${task.fileOriginalName}">
+                                    file.pdf
+                                </a>
+                                <form th:action="@{/kanban/tasks/{id}/delete-file(id=${task.id})}"
+                                      method="post"
+                                      style="display: inline;"
+                                      onsubmit="return confirm('파일을 삭제하시겠습니까?')">
+                                    <input type="hidden" name="projectId" th:value="${selectedProject.id}">
+                                    <button type="submit" class="btn-icon-small" title="파일 삭제">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Automation Notes -->
+                            <div th:if="${task.automationNotes}" class="task-notes">
+                                <small>
+                                    <i class="fas fa-robot"></i>
+                                    <span th:text="${task.automationNotes}">Automation notes</span>
+                                </small>
+                            </div>
+
+                            <!-- Comments Section (WAITING_RESPONSE only) -->
+                            <div th:if="${status.name() == 'WAITING_RESPONSE'}" class="task-comments">
+                                <div class="comment-header">
+                                    <i class="fas fa-comments"></i>
+                                    <span>사용자 의견</span>
+                                </div>
+                                <form th:action="@{/kanban/tasks/{id}/comments(id=${task.id})}"
+                                      method="post"
+                                      class="comment-form">
+                                    <input type="hidden" name="projectId" th:value="${selectedProject.id}">
+                                    <textarea name="commentText"
+                                              class="comment-input"
+                                              placeholder="이 태스크에 대한 의견이나 지시사항을 입력하세요..."
+                                              rows="3"
+                                              required></textarea>
+                                    <button type="submit" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-paper-plane"></i> 의견 제출
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Status Change Buttons -->
+                            <div class="task-footer">
+                                <div class="task-footer-buttons">
+                                    <!-- Next Status Button -->
+                                    <form th:if="${status.name() != 'COMPLETED'}"
+                                          th:action="@{/kanban/tasks/{id}/status(id=${task.id})}"
+                                          method="post"
+                                          style="display: inline;">
+                                        <input type="hidden" name="projectId" th:value="${selectedProject.id}">
+                                        <input type="hidden" name="status"
+                                               th:value="${status.name() == 'REGISTERED' ? 'WAITING_RESPONSE' :
+                                                          status.name() == 'WAITING_RESPONSE' ? 'IN_PROGRESS' :
+                                                          'COMPLETED'}">
+                                        <button type="submit" class="btn btn-sm btn-move">
+                                            <i class="fas fa-arrow-right"></i>
+                                            <span th:text="${status.name() == 'REGISTERED' ? '응답대기중으로' :
+                                                            status.name() == 'WAITING_RESPONSE' ? '진행중으로' :
+                                                            '완료'}">
+                                                Move
+                                            </span>
+                                        </button>
+                                    </form>
+
+                                    <!-- Quick Complete Button (only for REGISTERED and WAITING_RESPONSE) -->
+                                    <form th:if="${status.name() == 'REGISTERED' || status.name() == 'WAITING_RESPONSE'}"
+                                          th:action="@{/kanban/tasks/{id}/status(id=${task.id})}"
+                                          method="post"
+                                          style="display: inline;">
+                                        <input type="hidden" name="projectId" th:value="${selectedProject.id}">
+                                        <input type="hidden" name="status" value="COMPLETED">
+                                        <button type="submit" class="btn btn-sm btn-complete">
+                                            <i class="fas fa-check-circle"></i>
+                                            완료로
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <small class="task-date" th:text="'생성일: ' + ${#temporals.format(task.createdAt, 'yyyy-MM-dd')}">
+                                    Created: 2024-01-07
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div th:if="${tasksByStatus.get(status.name()).isEmpty()}" class="empty-column">
+                            <i class="fas fa-inbox"></i>
+                            <p>태스크가 없습니다</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- IN_PROGRESS Column -->
+                <div th:each="status : ${statuses}" th:if="${status.name() == 'IN_PROGRESS'}" class="kanban-column kanban-column-half">
+                    <div class="column-header" th:classappend="${status.name()}">
+                        <h3 th:text="${status.koreanName}">Status</h3>
+                        <span class="task-count"
+                              th:text="${tasksByStatus.get(status.name()).size()}">0</span>
+                    </div>
+
+                    <div class="column-body">
+                        <!-- Task Cards -->
+                        <div th:each="task : ${tasksByStatus.get(status.name())}" class="task-card">
+                            <div class="task-header">
+                                <span class="task-priority" th:classappend="${task.priority.toLowerCase()}">
+                                    <span class="task-id">#<span th:text="${task.id}">1</span></span>
+                                    <span th:text="${task.priority == 'LOW' ? '낮음' : task.priority == 'MEDIUM' ? '보통' : '높음'}">Priority</span>
+                                </span>
+                                <div class="task-actions">
+                                    <a th:href="@{/kanban/tasks/{id}/edit(id=${task.id})}"
+                                       class="btn-icon" title="조회">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a th:href="@{/kanban/tasks/{id}/edit(id=${task.id})}"
+                                       class="btn-icon" title="수정">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form th:action="@{/kanban/tasks/{id}/delete(id=${task.id})}"
+                                          method="post"
+                                          style="display: inline;"
+                                          onsubmit="return confirm('태스크를 삭제하시겠습니까?')">
+                                        <input type="hidden" name="projectId" th:value="${selectedProject.id}">
+                                        <button type="submit" class="btn-icon" title="삭제">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <h4 class="task-title" th:text="${task.title}">Task Title</h4>
+
+                            <p th:if="${task.description}"
+                               class="task-description"
+                               th:text="${task.description}">
+                                Description
+                            </p>
+
+                            <!-- File Attachment -->
+                            <div th:if="${task.hasFile()}" class="task-file">
+                                <i class="fas fa-paperclip"></i>
+                                <!-- Image file: Preview -->
+                                <a th:if="${task.isImageFile()}"
+                                   href="javascript:void(0)"
+                                   th:data-task-id="${task.id}"
+                                   th:data-file-name="${task.fileOriginalName}"
+                                   class="image-preview-link"
+                                   onclick="openImagePreview(this)"
+                                   th:text="${task.fileOriginalName}">
+                                    image.png
+                                </a>
+                                <!-- Non-image file: Download -->
+                                <a th:unless="${task.isImageFile()}"
+                                   th:href="@{/kanban/tasks/{id}/download(id=${task.id})}"
+                                   th:text="${task.fileOriginalName}">
+                                    file.pdf
+                                </a>
+                                <form th:action="@{/kanban/tasks/{id}/delete-file(id=${task.id})}"
+                                      method="post"
+                                      style="display: inline;"
+                                      onsubmit="return confirm('파일을 삭제하시겠습니까?')">
+                                    <input type="hidden" name="projectId" th:value="${selectedProject.id}">
+                                    <button type="submit" class="btn-icon-small" title="파일 삭제">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Automation Notes -->
+                            <div th:if="${task.automationNotes}" class="task-notes">
+                                <small>
+                                    <i class="fas fa-robot"></i>
+                                    <span th:text="${task.automationNotes}">Automation notes</span>
+                                </small>
+                            </div>
+
+                            <!-- Status Change Buttons -->
+                            <div class="task-footer">
+                                <div class="task-footer-buttons">
+                                    <!-- Next Status Button -->
+                                    <form th:if="${status.name() != 'COMPLETED'}"
+                                          th:action="@{/kanban/tasks/{id}/status(id=${task.id})}"
+                                          method="post"
+                                          style="display: inline;">
+                                        <input type="hidden" name="projectId" th:value="${selectedProject.id}">
+                                        <input type="hidden" name="status"
+                                               th:value="${status.name() == 'REGISTERED' ? 'WAITING_RESPONSE' :
+                                                          status.name() == 'WAITING_RESPONSE' ? 'IN_PROGRESS' :
+                                                          'COMPLETED'}">
+                                        <button type="submit" class="btn btn-sm btn-move">
+                                            <i class="fas fa-arrow-right"></i>
+                                            <span th:text="${status.name() == 'REGISTERED' ? '응답대기중으로' :
+                                                            status.name() == 'WAITING_RESPONSE' ? '진행중으로' :
+                                                            '완료'}">
+                                                Move
+                                            </span>
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <small class="task-date" th:text="'생성일: ' + ${#temporals.format(task.createdAt, 'yyyy-MM-dd')}">
+                                    Created: 2024-01-07
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div th:if="${tasksByStatus.get(status.name()).isEmpty()}" class="empty-column">
+                            <i class="fas fa-inbox"></i>
+                            <p>태스크가 없습니다</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COMPLETED Column -->
+            <div th:each="status : ${statuses}" th:if="${status.name() == 'COMPLETED'}" class="kanban-column">
+                <div class="column-header" th:classappend="${status.name()}">
+                    <h3 th:text="${status.koreanName}">Status</h3>
+                    <span class="task-count"
+                          th:text="${tasksByStatus.get(status.name()).size()}">0</span>
+                </div>
+
+                <div class="column-body">
+                    <!-- Task Cards -->
+                    <div th:each="task : ${tasksByStatus.get(status.name())}" class="task-card">
+                        <div class="task-header">
+                            <span class="task-priority" th:classappend="${task.priority.toLowerCase()}">
+                                <span class="task-id">#<span th:text="${task.id}">1</span></span>
+                                <span th:text="${task.priority == 'LOW' ? '낮음' : task.priority == 'MEDIUM' ? '보통' : '높음'}">Priority</span>
+                            </span>
+                            <div class="task-actions">
+                                <a th:href="@{/kanban/tasks/{id}/edit(id=${task.id})}"
+                                   class="btn-icon" title="조회">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a th:href="@{/kanban/tasks/{id}/edit(id=${task.id})}"
+                                   class="btn-icon" title="수정">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form th:action="@{/kanban/tasks/{id}/delete(id=${task.id})}"
+                                      method="post"
+                                      style="display: inline;"
+                                      onsubmit="return confirm('태스크를 삭제하시겠습니까?')">
+                                    <input type="hidden" name="projectId" th:value="${selectedProject.id}">
+                                    <button type="submit" class="btn-icon" title="삭제">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <h4 class="task-title" th:text="${task.title}">Task Title</h4>
+
+                        <p th:if="${task.description}"
+                           class="task-description"
+                           th:text="${task.description}">
+                            Description
+                        </p>
+
+                        <!-- File Attachment -->
+                        <div th:if="${task.hasFile()}" class="task-file">
+                            <i class="fas fa-paperclip"></i>
+                            <!-- Image file: Preview -->
+                            <a th:if="${task.isImageFile()}"
+                               href="javascript:void(0)"
+                               th:data-task-id="${task.id}"
+                               th:data-file-name="${task.fileOriginalName}"
+                               class="image-preview-link"
+                               onclick="openImagePreview(this)"
+                               th:text="${task.fileOriginalName}">
+                                image.png
+                            </a>
+                            <!-- Non-image file: Download -->
+                            <a th:unless="${task.isImageFile()}"
+                               th:href="@{/kanban/tasks/{id}/download(id=${task.id})}"
+                               th:text="${task.fileOriginalName}">
+                                file.pdf
+                            </a>
+                            <form th:action="@{/kanban/tasks/{id}/delete-file(id=${task.id})}"
+                                  method="post"
+                                  style="display: inline;"
+                                  onsubmit="return confirm('파일을 삭제하시겠습니까?')">
+                                <input type="hidden" name="projectId" th:value="${selectedProject.id}">
+                                <button type="submit" class="btn-icon-small" title="파일 삭제">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Automation Notes -->
+                        <div th:if="${task.automationNotes}" class="task-notes">
+                            <small>
+                                <i class="fas fa-robot"></i>
+                                <span th:text="${task.automationNotes}">Automation notes</span>
+                            </small>
+                        </div>
+
+                        <!-- Status Change Buttons -->
+                        <div class="task-footer">
                             <small class="task-date" th:text="'생성일: ' + ${#temporals.format(task.createdAt, 'yyyy-MM-dd')}">
                                 Created: 2024-01-07
                             </small>
@@ -361,6 +734,86 @@
                 }, 3000);
             }
         });
+
+        // Image Preview Modal Functions
+        function openImagePreview(element) {
+            const taskId = element.getAttribute('data-task-id');
+            const fileName = element.getAttribute('data-file-name');
+            const previewUrl = '/kanban/tasks/' + taskId + '/preview';
+
+            // Create modal overlay
+            const overlay = document.createElement('div');
+            overlay.className = 'image-preview-overlay';
+            overlay.onclick = function(e) {
+                if (e.target === overlay) {
+                    closeImagePreview();
+                }
+            };
+
+            // Create modal content
+            const modal = document.createElement('div');
+            modal.className = 'image-preview-modal';
+
+            // Header with filename and close button
+            const header = document.createElement('div');
+            header.className = 'image-preview-header';
+            header.innerHTML = '<span class="image-preview-title">' + fileName + '</span>' +
+                '<button class="image-preview-close" onclick="closeImagePreview()">' +
+                '<i class="fas fa-times"></i></button>';
+
+            // Image container
+            const imgContainer = document.createElement('div');
+            imgContainer.className = 'image-preview-container';
+
+            // Loading spinner
+            const spinner = document.createElement('div');
+            spinner.className = 'image-preview-loading';
+            spinner.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 이미지 로딩 중...';
+            imgContainer.appendChild(spinner);
+
+            // Image
+            const img = document.createElement('img');
+            img.className = 'image-preview-img';
+            img.src = previewUrl;
+            img.alt = fileName;
+            img.onload = function() {
+                spinner.style.display = 'none';
+                img.style.display = 'block';
+            };
+            img.onerror = function() {
+                spinner.innerHTML = '<i class="fas fa-exclamation-triangle"></i> 이미지를 불러올 수 없습니다';
+            };
+            imgContainer.appendChild(img);
+
+            // Download button
+            const footer = document.createElement('div');
+            footer.className = 'image-preview-footer';
+            footer.innerHTML = '<a href="/kanban/tasks/' + taskId + '/download" class="btn btn-primary">' +
+                '<i class="fas fa-download"></i> 다운로드</a>';
+
+            modal.appendChild(header);
+            modal.appendChild(imgContainer);
+            modal.appendChild(footer);
+            overlay.appendChild(modal);
+            document.body.appendChild(overlay);
+
+            // Add escape key listener
+            document.addEventListener('keydown', handleEscapeKey);
+        }
+
+        function closeImagePreview() {
+            const overlay = document.querySelector('.image-preview-overlay');
+            if (overlay) {
+                overlay.remove();
+            }
+            document.removeEventListener('keydown', handleEscapeKey);
+        }
+
+        function handleEscapeKey(e) {
+            if (e.key === 'Escape') {
+                closeImagePreview();
+            }
+        }
     </script>
 </div>
 </body>

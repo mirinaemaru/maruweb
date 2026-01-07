@@ -94,4 +94,11 @@ public class KanbanTask {
     public boolean hasFile() {
         return fileStoredName != null && !fileStoredName.isEmpty();
     }
+
+    // Helper method to check if file is an image
+    @Transient
+    public boolean isImageFile() {
+        if (fileContentType == null) return false;
+        return fileContentType.startsWith("image/");
+    }
 }

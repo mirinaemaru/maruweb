@@ -98,38 +98,6 @@ public class KanbanController {
     }
 
     /**
-     * Show project view (read-only)
-     */
-    @GetMapping("/projects/{id}/view")
-    public String viewProjectForm(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
-        return projectService.findProjectById(id)
-                .map(project -> {
-                    model.addAttribute("project", project);
-                    model.addAttribute("isEdit", false);
-                    model.addAttribute("isViewOnly", true);
-
-                    // Get task statistics for this project
-                    long registeredTasks = taskService.findTasksByProjectAndStatus(id, "REGISTERED").size();
-                    long waitingTasks = taskService.findTasksByProjectAndStatus(id, "WAITING_RESPONSE").size();
-                    long inProgressTasks = taskService.findTasksByProjectAndStatus(id, "IN_PROGRESS").size();
-                    long completedTasks = taskService.findTasksByProjectAndStatus(id, "COMPLETED").size();
-                    long totalTasks = registeredTasks + waitingTasks + inProgressTasks + completedTasks;
-
-                    model.addAttribute("totalTasks", totalTasks);
-                    model.addAttribute("completedTasks", completedTasks);
-                    model.addAttribute("registeredTasks", registeredTasks);
-                    model.addAttribute("waitingTasks", waitingTasks);
-                    model.addAttribute("inProgressTasks", inProgressTasks);
-
-                    return "kanban/project-view";
-                })
-                .orElseGet(() -> {
-                    redirectAttributes.addFlashAttribute("errorMessage", "프로젝트를 찾을 수 없습니다.");
-                    return "redirect:/kanban";
-                });
-    }
-
-    /**
      * Show project edit form
      */
     @GetMapping("/projects/{id}/edit")
@@ -301,6 +269,32 @@ public class KanbanController {
                     .body(resource);
         } catch (Exception e) {
             log.error("Failed to download file: taskId={}", id, e);
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Preview task image file (inline display)
+     */
+    @GetMapping("/tasks/{id}/preview")
+    public ResponseEntity<Resource> previewFile(@PathVariable Long id) {
+        try {
+            KanbanTask task = taskService.findTaskById(id)
+                    .orElseThrow(() -> new RuntimeException("Task not found: " + id));
+
+            if (!task.hasFile() || !task.isImageFile()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            Resource resource = fileStorageService.loadFileAsResource(task.getId(), task.getFileStoredName());
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(task.getFileContentType()))
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "inline; filename=\"" + task.getFileOriginalName() + "\"")
+                    .body(resource);
+        } catch (Exception e) {
+            log.error("Failed to preview file: taskId={}", id, e);
             return ResponseEntity.notFound().build();
         }
     }
