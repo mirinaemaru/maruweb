@@ -265,8 +265,8 @@
                         <span class="metric-label">엔드포인트</span>
                         <span class="metric-value" style="font-size: 14px;">localhost:8099</span>
                     </div>
-                    <div th:if="${tradingApiHealth.error}" class="error-message">
-                        <strong>오류:</strong> <span th:text="${tradingApiHealth.error}">Error message</span>
+                    <div th:if="${tradingApiHealth['error'] != null}" class="error-message">
+                        <strong>오류:</strong> <span th:text="${tradingApiHealth['error']}">Error message</span>
                     </div>
                 </div>
 

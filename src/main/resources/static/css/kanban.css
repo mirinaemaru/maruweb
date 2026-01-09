@@ -187,35 +187,35 @@
 }
 
 .column-header.REGISTERED {
-    background: #e3f2fd;
+    background: #e0e0e0;
 }
 
 .column-header.WAITING_RESPONSE {
-    background: #fff3e0;
+    background: #e0e0e0;
 }
 
 .column-header.IN_PROGRESS {
-    background: #e8f5e9;
+    background: #e0e0e0;
 }
 
 .column-header.COMPLETED {
-    background: #f3e5f5;
+    background: #e0e0e0;
 }
 
 [data-theme="dark"] .column-header.REGISTERED {
-    background: #1e3a5f;
+    background: #4a5568;
 }
 
 [data-theme="dark"] .column-header.WAITING_RESPONSE {
-    background: #5f4d1e;
+    background: #4a5568;
 }
 
 [data-theme="dark"] .column-header.IN_PROGRESS {
-    background: #1e5f2d;
+    background: #4a5568;
 }
 
 [data-theme="dark"] .column-header.COMPLETED {
-    background: #4d1e5f;
+    background: #4a5568;
 }
 
 .task-count {

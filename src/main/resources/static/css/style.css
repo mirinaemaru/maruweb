@@ -614,7 +614,7 @@ header h1 {
 
 /* Dark Mode Button Styles */
 [data-theme="dark"] .btn-primary {
-    background: transparent !important;
+    background: var(--bg-tertiary) !important;
     color: var(--text-primary) !important;
     border: 1px solid var(--border-color);
 }
