@@ -190,6 +190,38 @@
             box-shadow: none;
         }
 
+        /* Dark mode header styles */
+        [data-theme="dark"] header {
+            background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Dark mode table header styles */
+        [data-theme="dark"] .rules-table thead {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        /* Dark mode badge styles */
+        [data-theme="dark"] .badge-global {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        [data-theme="dark"] .badge-account {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        [data-theme="dark"] .badge-symbol {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
         .action-buttons {
             display: flex;
             gap: 10px;
