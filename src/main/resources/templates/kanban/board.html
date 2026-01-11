@@ -916,8 +916,17 @@
         }
 
         function updateTaskStatus(taskId, newStatus, targetColumn) {
+            // Store local reference to the card before async operation
+            // (handleDragEnd may set draggedCard = null before .then() executes)
+            const card = draggedCard;
+
+            if (!card) {
+                console.error('No card reference available');
+                return;
+            }
+
             // Show loading state
-            draggedCard.classList.add('updating');
+            card.classList.add('updating');
 
             fetch('/kanban/api/tasks/' + taskId + '/status', {
                 method: 'POST',
@@ -937,9 +946,9 @@
 
                     // Insert the card before the empty state or at the end
                     if (emptyState) {
-                        targetColumn.insertBefore(draggedCard, emptyState);
+                        targetColumn.insertBefore(card, emptyState);
                     } else {
-                        targetColumn.appendChild(draggedCard);
+                        targetColumn.appendChild(card);
                     }
 
                     // Update task count badges
@@ -949,7 +958,7 @@
                     showDragFeedback('success', '태스크가 이동되었습니다');
 
                     // Update the status buttons on the card based on new status
-                    updateCardButtons(draggedCard, newStatus);
+                    updateCardButtons(card, newStatus);
                 } else {
                     showDragFeedback('error', data.message || '이동에 실패했습니다');
                 }
@@ -959,7 +968,9 @@
                 showDragFeedback('error', '서버 오류가 발생했습니다');
             })
             .finally(() => {
-                draggedCard.classList.remove('updating');
+                if (card) {
+                    card.classList.remove('updating');
+                }
             });
         }
 

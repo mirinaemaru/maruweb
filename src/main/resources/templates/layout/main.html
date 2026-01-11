@@ -9,6 +9,14 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <th:block th:replace="~{fragments/notifications :: notification-styles}"></th:block>
     <th:block layout:fragment="extra-css"></th:block>
+    <!-- HTMX Library for smooth partial page updates -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script>
+        // HTMX Configuration
+        htmx.config.defaultSwapStyle = 'innerHTML';
+        htmx.config.defaultSettleDelay = 100;
+        htmx.config.useTemplateFragments = true;
+    </script>
     <!-- LiveReload Script -->
     <script th:if="${@environment.getProperty('spring.devtools.livereload.enabled') != 'false'}">
         document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>');
@@ -185,8 +193,94 @@
         </main>
     </div>
 
+    <!-- Loading Overlay for page transitions -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
     <!-- Notification Widget -->
     <th:block th:replace="~{fragments/notifications :: notification-widget}"></th:block>
+    <script>
+        // Page Transition Script - Smooth navigation without flickering
+        (function() {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+
+            // Handle all internal link clicks with smooth transition
+            document.addEventListener('click', function(e) {
+                const link = e.target.closest('a[href^="/"]');
+                if (!link) return;
+
+                // Skip if modifier keys are pressed (open in new tab)
+                if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+
+                // Skip if link has htmx attributes (HTMX will handle it)
+                if (link.hasAttribute('hx-get') || link.hasAttribute('hx-post')) return;
+
+                // Skip download links and external links
+                if (link.hasAttribute('download') || link.getAttribute('target') === '_blank') return;
+
+                // Skip if it's the same page
+                if (link.href === window.location.href) return;
+
+                e.preventDefault();
+
+                // Add transition class for fade-out effect
+                document.body.classList.add('page-transitioning');
+
+                // Navigate after transition
+                setTimeout(function() {
+                    window.location.href = link.href;
+                }, 200);
+            });
+
+            // Handle form submissions with loading indicator
+            document.addEventListener('submit', function(e) {
+                const form = e.target;
+
+                // Skip if form has htmx attributes
+                if (form.hasAttribute('hx-post') || form.hasAttribute('hx-get')) return;
+
+                // Show loading overlay for regular form submissions
+                if (loadingOverlay && !form.hasAttribute('data-no-loading')) {
+                    loadingOverlay.classList.add('active');
+                }
+            });
+
+            // HTMX event handlers for smooth transitions
+            document.body.addEventListener('htmx:beforeRequest', function(e) {
+                // Add loading state to the target element
+                const target = e.detail.target;
+                if (target) {
+                    target.style.opacity = '0.7';
+                    target.style.transition = 'opacity 0.2s ease';
+                }
+            });
+
+            document.body.addEventListener('htmx:afterSwap', function(e) {
+                // Restore opacity after content swap
+                const target = e.detail.target;
+                if (target) {
+                    target.style.opacity = '1';
+                }
+            });
+
+            document.body.addEventListener('htmx:afterSettle', function(e) {
+                // Animate new content
+                const target = e.detail.target;
+                if (target) {
+                    target.style.animation = 'htmxFadeIn 0.3s ease-out';
+                }
+            });
+
+            // Hide loading overlay when page loads
+            window.addEventListener('pageshow', function() {
+                document.body.classList.remove('page-transitioning');
+                if (loadingOverlay) {
+                    loadingOverlay.classList.remove('active');
+                }
+            });
+        })();
+    </script>
     <script>
         // Theme Toggle Functionality
         (function() {

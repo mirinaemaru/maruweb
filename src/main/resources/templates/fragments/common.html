@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!-- Common Fragments for HTMX partial page updates -->
+
+<!-- Success Message Fragment -->
+<div th:fragment="success-message (message)" class="alert alert-success htmx-added" th:text="${message}">
+    Success message
+</div>
+
+<!-- Error Message Fragment -->
+<div th:fragment="error-message (message)" class="alert alert-error htmx-added" th:text="${message}">
+    Error message
+</div>
+
+<!-- Loading Indicator -->
+<div th:fragment="loading-indicator" class="htmx-indicator">
+    <div class="loading-spinner-small"></div>
+    <span>처리 중...</span>
+</div>
+
+<!-- Toast Notification -->
+<div th:fragment="toast (type, message)"
+     class="toast-notification htmx-added"
+     th:classappend="${type}"
+     th:text="${message}">
+    Notification message
+</div>
+
+<!-- Empty State -->
+<div th:fragment="empty-state (icon, message)" class="empty-state htmx-added">
+    <span class="empty-icon" th:text="${icon}">📭</span>
+    <p th:text="${message}">No items found</p>
+</div>
+
+</html>
