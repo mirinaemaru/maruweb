@@ -60,6 +60,22 @@
             border: 1px solid var(--border-color);
             border-radius: 6px;
             font-size: 14px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        [data-theme="dark"] .filter-group select:focus,
+        [data-theme="dark"] .filter-group input:focus {
+            border-color: #8b9df0;
+            box-shadow: 0 0 0 3px rgba(139, 157, 240, 0.1);
         }
 
         .btn-filter {
@@ -71,10 +87,22 @@
             font-weight: 600;
             cursor: pointer;
             margin-top: 20px;
+            transition: all 0.3s ease;
         }
 
         .btn-filter:hover {
             opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        [data-theme="dark"] .btn-filter {
+            background: #6c757d;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+
+        [data-theme="dark"] .btn-filter:hover {
+            background: #5a6268;
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
         }
 
         .summary-cards {
@@ -176,10 +204,23 @@
             font-weight: 600;
             cursor: pointer;
             margin-left: 10px;
+            margin-top: 20px;
+            transition: all 0.3s ease;
         }
 
         .btn-export:hover {
             background: #059669;
+            transform: translateY(-2px);
+        }
+
+        [data-theme="dark"] .btn-export {
+            background: #6c757d;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+
+        [data-theme="dark"] .btn-export:hover {
+            background: #5a6268;
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
         }
     </style>
 </head>

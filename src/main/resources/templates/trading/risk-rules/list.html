@@ -99,11 +99,20 @@
             font-size: 14px;
             height: 42px;
             box-sizing: border-box;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
         }
 
         .form-select:focus {
             outline: none;
             border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        [data-theme="dark"] .form-select:focus {
+            border-color: #8b9df0;
+            box-shadow: 0 0 0 3px rgba(139, 157, 240, 0.1);
         }
 
         .btn {

@@ -814,6 +814,196 @@
                 closeImagePreview();
             }
         }
+
+        // ===== Drag and Drop Functionality =====
+        document.addEventListener('DOMContentLoaded', function() {
+            initDragAndDrop();
+        });
+
+        function initDragAndDrop() {
+            // Make all task cards draggable
+            const taskCards = document.querySelectorAll('.task-card');
+            taskCards.forEach(card => {
+                card.setAttribute('draggable', 'true');
+
+                card.addEventListener('dragstart', handleDragStart);
+                card.addEventListener('dragend', handleDragEnd);
+            });
+
+            // Setup drop zones (column bodies)
+            const columnBodies = document.querySelectorAll('.column-body');
+            columnBodies.forEach(column => {
+                column.addEventListener('dragover', handleDragOver);
+                column.addEventListener('dragenter', handleDragEnter);
+                column.addEventListener('dragleave', handleDragLeave);
+                column.addEventListener('drop', handleDrop);
+            });
+        }
+
+        let draggedCard = null;
+
+        function handleDragStart(e) {
+            draggedCard = this;
+            this.classList.add('dragging');
+
+            // Set drag data
+            const taskId = this.querySelector('.task-id span').textContent;
+            e.dataTransfer.setData('text/plain', taskId);
+            e.dataTransfer.effectAllowed = 'move';
+
+            // Add dragging state to body for cursor styling
+            document.body.classList.add('is-dragging');
+
+            // Delay to show the drag ghost properly
+            setTimeout(() => {
+                this.classList.add('drag-ghost');
+            }, 0);
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging', 'drag-ghost');
+            document.body.classList.remove('is-dragging');
+
+            // Remove all drop indicators
+            document.querySelectorAll('.column-body').forEach(col => {
+                col.classList.remove('drag-over', 'drag-valid', 'drag-invalid');
+            });
+
+            draggedCard = null;
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault();
+            if (this.classList.contains('column-body')) {
+                this.classList.add('drag-over');
+            }
+        }
+
+        function handleDragLeave(e) {
+            // Only remove if leaving the actual column body
+            if (e.relatedTarget && !this.contains(e.relatedTarget)) {
+                this.classList.remove('drag-over');
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            this.classList.remove('drag-over');
+
+            if (!draggedCard) return;
+
+            // Get the target column's status
+            const columnHeader = this.previousElementSibling;
+            const statusClass = columnHeader.className.split(' ').find(cls =>
+                ['REGISTERED', 'WAITING_RESPONSE', 'IN_PROGRESS', 'COMPLETED'].includes(cls)
+            );
+
+            if (!statusClass) {
+                console.error('Could not determine target status');
+                return;
+            }
+
+            // Get task ID
+            const taskId = draggedCard.querySelector('.task-id span').textContent;
+
+            // Update task status via API
+            updateTaskStatus(taskId, statusClass, this);
+        }
+
+        function updateTaskStatus(taskId, newStatus, targetColumn) {
+            // Show loading state
+            draggedCard.classList.add('updating');
+
+            fetch('/kanban/api/tasks/' + taskId + '/status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ status: newStatus })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Move card to new column
+                    const emptyState = targetColumn.querySelector('.empty-column');
+                    if (emptyState) {
+                        emptyState.style.display = 'none';
+                    }
+
+                    // Insert the card before the empty state or at the end
+                    if (emptyState) {
+                        targetColumn.insertBefore(draggedCard, emptyState);
+                    } else {
+                        targetColumn.appendChild(draggedCard);
+                    }
+
+                    // Update task count badges
+                    updateTaskCounts();
+
+                    // Show success feedback
+                    showDragFeedback('success', '태스크가 이동되었습니다');
+
+                    // Update the status buttons on the card based on new status
+                    updateCardButtons(draggedCard, newStatus);
+                } else {
+                    showDragFeedback('error', data.message || '이동에 실패했습니다');
+                }
+            })
+            .catch(error => {
+                console.error('Error updating task status:', error);
+                showDragFeedback('error', '서버 오류가 발생했습니다');
+            })
+            .finally(() => {
+                draggedCard.classList.remove('updating');
+            });
+        }
+
+        function updateTaskCounts() {
+            document.querySelectorAll('.kanban-column, .kanban-column-half').forEach(column => {
+                const columnBody = column.querySelector('.column-body');
+                const countBadge = column.querySelector('.task-count');
+                if (columnBody && countBadge) {
+                    const taskCount = columnBody.querySelectorAll('.task-card').length;
+                    countBadge.textContent = taskCount;
+
+                    // Show/hide empty state
+                    const emptyState = columnBody.querySelector('.empty-column');
+                    if (emptyState) {
+                        emptyState.style.display = taskCount === 0 ? 'block' : 'none';
+                    }
+                }
+            });
+        }
+
+        function updateCardButtons(card, newStatus) {
+            // Refresh the page to update button states properly
+            // This is simpler than updating all the forms/buttons manually
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+        }
+
+        function showDragFeedback(type, message) {
+            // Create feedback toast
+            const toast = document.createElement('div');
+            toast.className = 'drag-feedback ' + type;
+            toast.innerHTML = '<i class="fas fa-' + (type === 'success' ? 'check-circle' : 'exclamation-circle') + '"></i> ' + message;
+            document.body.appendChild(toast);
+
+            // Animate in
+            setTimeout(() => toast.classList.add('show'), 10);
+
+            // Remove after delay
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 2000);
+        }
     </script>
 </div>
 </body>

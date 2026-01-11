@@ -14,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import java.util.HashMap;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -351,5 +352,37 @@ public class KanbanController {
             redirectAttributes.addFlashAttribute("errorMessage", "댓글 삭제 실패: " + e.getMessage());
         }
         return "redirect:/kanban?projectId=" + projectId;
+    }
+
+    // ===== REST API for Drag and Drop =====
+
+    /**
+     * Update task status via AJAX (for drag and drop)
+     */
+    @PostMapping("/api/tasks/{id}/status")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateTaskStatusApi(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> payload) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            String status = payload.get("status");
+            if (status == null || status.isEmpty()) {
+                response.put("success", false);
+                response.put("message", "Status is required");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            taskService.updateTaskStatus(id, status);
+            response.put("success", true);
+            response.put("message", "Task status updated successfully");
+            response.put("newStatus", status);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Failed to update task status via API: id={}", id, e);
+            response.put("success", false);
+            response.put("message", "Failed to update status: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
     }
 }
