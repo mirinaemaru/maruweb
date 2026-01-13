@@ -58,7 +58,7 @@
                                     <th class="streak-col">Streak</th>
                                     <th th:each="day : ${days}"
                                         th:text="${day.dayOfMonth}"
-                                        th:classappend="${day.equals(today)} ? 'today' : ''"
+                                        th:classappend="${(day.equals(today) ? 'today' : '') + (day.dayOfWeek.value == 6 or day.dayOfWeek.value == 7 ? ' weekend' : '')}"
                                         class="day-col">1</th>
                                     <th class="action-col">Actions</th>
                                 </tr>
@@ -72,7 +72,7 @@
                                     <td class="streak-cell">
                                         <span class="streak-badge" th:text="${streaks[habit.id] + ' days'}">0 days</span>
                                     </td>
-                                    <td th:each="day : ${days}" class="check-cell" th:classappend="${day.equals(today)} ? 'today' : ''">
+                                    <td th:each="day : ${days}" class="check-cell" th:classappend="${(day.equals(today) ? 'today' : '') + (day.dayOfWeek.value == 6 or day.dayOfWeek.value == 7 ? ' weekend' : '')}">
                                         <form th:action="@{/habits/{id}/toggle(id=${habit.id})}" method="post">
                                             <input type="hidden" name="date" th:value="${day}">
                                             <input type="hidden" name="year" th:value="${year}">

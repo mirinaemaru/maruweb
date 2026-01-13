@@ -276,6 +276,15 @@
     background: #4a5568 !important;
 }
 
+/* Weekend (Saturday, Sunday) - Dark Mode */
+[data-theme="dark"] .habit-table thead th.weekend {
+    background: #3a3f4b !important;
+}
+
+[data-theme="dark"] .check-cell.weekend {
+    background: rgba(58, 63, 75, 0.5);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .add-habit-form {
