@@ -186,6 +186,56 @@
             color: var(--text-muted);
             font-size: 16px;
         }
+
+        /* Dark mode styles */
+        [data-theme="dark"] header {
+            background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="dark"] .btn-primary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .btn-primary:hover {
+            background: #4a5568;
+        }
+
+        [data-theme="dark"] .btn-secondary {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+        }
+
+        [data-theme="dark"] .btn-secondary:hover {
+            background: #4a5568;
+        }
+
+        [data-theme="dark"] .backtest-card:hover {
+            border-color: #8b9df0;
+        }
+
+        [data-theme="dark"] .view-detail-btn {
+            background: var(--bg-tertiary);
+        }
+
+        [data-theme="dark"] .view-detail-btn:hover {
+            background: #4a5568;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="dark"] .filter-grid input,
+        [data-theme="dark"] .filter-grid select {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .filter-grid input:focus,
+        [data-theme="dark"] .filter-grid select:focus {
+            border-color: #8b9df0;
+            outline: none;
+        }
     </style>
 </head>
 <body>

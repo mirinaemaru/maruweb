@@ -75,6 +75,19 @@
                 color: white;
             }
 
+            [data-theme="dark"] .btn-header-danger {
+                background: rgba(220, 53, 69, 0.4);
+            }
+
+            [data-theme="dark"] .btn-header-back {
+                background: var(--bg-tertiary);
+                border-color: var(--border-color);
+            }
+
+            [data-theme="dark"] .btn-header-back:hover {
+                background: #4a5568;
+            }
+
             .alert {
                 padding: 15px 20px;
                 border-radius: 12px;
@@ -377,17 +390,15 @@
     <form id="deleteForm" th:action="@{/trading/backtests/admin/{id}/delete(id=${backtest.backtestId})}"
           method="post" style="display: none;">
     </form>
-</div>
 
-<th:block layout:fragment="scripts">
-<script th:inline="javascript">
-function confirmDelete() {
-    const backtestId = [[${backtest.backtestId}]];
-    if (confirm('이 백테스트를 삭제하시겠습니까?')) {
-        document.getElementById('deleteForm').submit();
+    <script th:inline="javascript">
+    function confirmDelete() {
+        const backtestId = [[${backtest.backtestId}]];
+        if (confirm('이 백테스트를 삭제하시겠습니까?\nID: ' + backtestId)) {
+            document.getElementById('deleteForm').submit();
+        }
     }
-}
-</script>
-</th:block>
+    </script>
+</div>
 </body>
 </html>

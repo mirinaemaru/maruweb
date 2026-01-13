@@ -4,148 +4,395 @@
       layout:decorate="~{layout/main}">
 <head>
     <title>백테스트 실행</title>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .backtest-run-container {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 20px;
+                padding-bottom: 40px;
+            }
+
+            .page-header {
+                margin-bottom: 30px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 30px 40px;
+                border-radius: 16px;
+                color: white;
+                box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+            }
+            [data-theme="dark"] .page-header {
+                background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .page-header h2 {
+                font-size: 28px;
+                font-weight: 700;
+                margin: 0;
+                color: white;
+            }
+
+            .breadcrumb-nav {
+                margin-bottom: 20px;
+            }
+
+            .breadcrumb-nav a {
+                color: var(--text-muted);
+                text-decoration: none;
+            }
+
+            .breadcrumb-nav a:hover {
+                color: #667eea;
+            }
+
+            [data-theme="dark"] .breadcrumb-nav a:hover {
+                color: #8b9df0;
+            }
+
+            .breadcrumb-nav span {
+                color: var(--text-primary);
+            }
+
+            .alert {
+                padding: 15px 20px;
+                border-radius: 12px;
+                margin-bottom: 20px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            }
+
+            .card {
+                background: var(--bg-secondary);
+                border: none;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                transition: background-color 0.3s ease;
+                margin-bottom: 20px;
+            }
+
+            .card-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border-radius: 12px 12px 0 0 !important;
+                padding: 15px 20px;
+                border: none;
+            }
+
+            [data-theme="dark"] .card-header {
+                background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+            }
+
+            .card-header h5, .card-header h6 {
+                margin: 0;
+                font-size: 16px;
+                font-weight: 600;
+                color: white;
+            }
+
+            .card-body {
+                color: var(--text-primary);
+                padding: 25px;
+            }
+
+            .form-label {
+                font-weight: 600;
+                color: var(--text-primary);
+                margin-bottom: 8px;
+            }
+
+            .form-control, .form-select {
+                background: var(--bg-primary);
+                border: 2px solid var(--border-color);
+                border-radius: 8px;
+                padding: 10px 14px;
+                color: var(--text-primary);
+                transition: border-color 0.2s, box-shadow 0.2s;
+            }
+
+            .form-control:focus, .form-select:focus {
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+                outline: none;
+                background: var(--bg-primary);
+                color: var(--text-primary);
+            }
+
+            [data-theme="dark"] .form-control, [data-theme="dark"] .form-select {
+                background: var(--bg-tertiary);
+                border-color: var(--border-color);
+            }
+
+            [data-theme="dark"] .form-control:focus, [data-theme="dark"] .form-select:focus {
+                background: var(--bg-tertiary);
+                border-color: #8b9df0;
+            }
+
+            .form-text {
+                color: var(--text-muted);
+                font-size: 12px;
+                margin-top: 5px;
+            }
+
+            .input-group-text {
+                background: var(--bg-tertiary);
+                border: 2px solid var(--border-color);
+                border-left: none;
+                color: var(--text-primary);
+            }
+
+            .input-group .form-control {
+                border-right: none;
+            }
+
+            .text-danger {
+                color: #dc3545 !important;
+            }
+
+            .btn-run {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-weight: 600;
+                transition: all 0.3s;
+            }
+
+            .btn-run:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                color: white;
+            }
+
+            [data-theme="dark"] .btn-run {
+                background: var(--bg-tertiary);
+            }
+
+            [data-theme="dark"] .btn-run:hover {
+                background: #4a5568;
+            }
+
+            .btn-cancel {
+                background: var(--bg-tertiary);
+                color: var(--text-primary);
+                border: 2px solid var(--border-color);
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-weight: 600;
+                text-decoration: none;
+                transition: all 0.3s;
+            }
+
+            .btn-cancel:hover {
+                background: var(--bg-primary);
+                color: var(--text-primary);
+            }
+
+            .help-card {
+                background: var(--bg-tertiary);
+            }
+
+            .help-card .card-body h6 {
+                color: var(--text-primary);
+                font-weight: 600;
+                margin-bottom: 10px;
+            }
+
+            .help-card ul {
+                padding-left: 20px;
+                margin-bottom: 0;
+            }
+
+            .help-card li {
+                color: var(--text-secondary);
+                margin-bottom: 5px;
+            }
+
+            .help-card code {
+                background: var(--bg-secondary);
+                padding: 2px 6px;
+                border-radius: 4px;
+                color: #667eea;
+            }
+
+            [data-theme="dark"] .help-card code {
+                color: #8b9df0;
+            }
+
+            .row-form {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+
+            .row-form-3 {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+            }
+
+            @media (max-width: 768px) {
+                .row-form, .row-form-3 {
+                    grid-template-columns: 1fr;
+                }
+                .main-grid {
+                    grid-template-columns: 1fr !important;
+                }
+            }
+
+            .main-grid {
+                display: grid;
+                grid-template-columns: 2fr 1fr;
+                gap: 20px;
+            }
+        </style>
+    </th:block>
 </head>
 <body>
 <div layout:fragment="content">
-    <div class="container-fluid">
+    <div class="backtest-run-container">
         <!-- 브레드크럼 -->
-        <nav aria-label="breadcrumb" class="mb-3">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/trading/backtests/admin">백테스트 관리</a></li>
-                <li class="breadcrumb-item active">새 백테스트 실행</li>
-            </ol>
-        </nav>
+        <div class="breadcrumb-nav">
+            <a href="/trading/backtests/admin">백테스트 관리</a>
+            <span> / 새 백테스트 실행</span>
+        </div>
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <!-- 페이지 헤더 -->
+        <div class="page-header">
             <h2><i class="bi bi-play-circle me-2"></i>백테스트 실행</h2>
         </div>
 
         <!-- 알림 메시지 -->
-        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
             <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${errorMessage}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
-        <div class="row">
-            <div class="col-lg-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">백테스트 설정</h5>
-                    </div>
-                    <div class="card-body">
-                        <form method="post" action="/trading/backtests/admin/run">
-                            <div class="row g-3">
-                                <!-- 전략 ID -->
-                                <div class="col-md-6">
-                                    <label class="form-label">전략 ID <span class="text-danger">*</span></label>
-                                    <input type="text" name="strategyId" class="form-control" required
-                                           placeholder="예: MA_CROSS_5_20">
-                                    <div class="form-text">백테스트할 전략 식별자</div>
-                                </div>
+        <div class="main-grid">
+            <!-- 설정 폼 -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-gear me-2"></i>백테스트 설정</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="/trading/backtests/admin/run">
+                        <div class="row-form" style="margin-bottom: 20px;">
+                            <!-- 전략 ID -->
+                            <div>
+                                <label class="form-label">전략 ID <span class="text-danger">*</span></label>
+                                <input type="text" name="strategyId" class="form-control" required
+                                       placeholder="예: MA_CROSS_5_20">
+                                <div class="form-text">백테스트할 전략 식별자</div>
+                            </div>
 
-                                <!-- 종목 -->
-                                <div class="col-md-6">
-                                    <label class="form-label">종목 코드 <span class="text-danger">*</span></label>
-                                    <input type="text" name="symbols" class="form-control" required
-                                           placeholder="005930,000660">
-                                    <div class="form-text">쉼표로 구분하여 여러 종목 입력 가능</div>
-                                </div>
+                            <!-- 종목 -->
+                            <div>
+                                <label class="form-label">종목 코드 <span class="text-danger">*</span></label>
+                                <input type="text" name="symbols" class="form-control" required
+                                       placeholder="005930,000660">
+                                <div class="form-text">쉼표로 구분하여 여러 종목 입력 가능</div>
+                            </div>
+                        </div>
 
-                                <!-- 기간 -->
-                                <div class="col-md-6">
-                                    <label class="form-label">시작일 <span class="text-danger">*</span></label>
-                                    <input type="date" name="startDate" class="form-control" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">종료일 <span class="text-danger">*</span></label>
-                                    <input type="date" name="endDate" class="form-control" required>
-                                </div>
+                        <div class="row-form" style="margin-bottom: 20px;">
+                            <!-- 기간 -->
+                            <div>
+                                <label class="form-label">시작일 <span class="text-danger">*</span></label>
+                                <input type="date" name="startDate" class="form-control" required>
+                            </div>
+                            <div>
+                                <label class="form-label">종료일 <span class="text-danger">*</span></label>
+                                <input type="date" name="endDate" class="form-control" required>
+                            </div>
+                        </div>
 
-                                <!-- 타임프레임 -->
-                                <div class="col-md-4">
-                                    <label class="form-label">타임프레임</label>
-                                    <select name="timeframe" class="form-select">
-                                        <option value="1m">1분</option>
-                                        <option value="5m">5분</option>
-                                        <option value="15m">15분</option>
-                                        <option value="1h">1시간</option>
-                                        <option value="1d" selected>일봉</option>
-                                        <option value="1w">주봉</option>
-                                    </select>
-                                </div>
+                        <div class="row-form-3" style="margin-bottom: 20px;">
+                            <!-- 타임프레임 -->
+                            <div>
+                                <label class="form-label">타임프레임</label>
+                                <select name="timeframe" class="form-select">
+                                    <option value="1m">1분</option>
+                                    <option value="5m">5분</option>
+                                    <option value="15m">15분</option>
+                                    <option value="1h">1시간</option>
+                                    <option value="1d" selected>일봉</option>
+                                    <option value="1w">주봉</option>
+                                </select>
+                            </div>
 
-                                <!-- 초기 자본 -->
-                                <div class="col-md-4">
-                                    <label class="form-label">초기 자본</label>
-                                    <div class="input-group">
-                                        <input type="number" name="initialCapital" class="form-control"
-                                               value="10000000" min="1000000" step="1000000">
-                                        <span class="input-group-text">원</span>
-                                    </div>
-                                </div>
-
-                                <!-- 수수료 -->
-                                <div class="col-md-4">
-                                    <label class="form-label">수수료</label>
-                                    <div class="input-group">
-                                        <input type="number" name="commission" class="form-control"
-                                               value="0.0015" min="0" max="0.1" step="0.0001">
-                                        <span class="input-group-text">%</span>
-                                    </div>
-                                </div>
-
-                                <!-- 슬리피지 -->
-                                <div class="col-md-4">
-                                    <label class="form-label">슬리피지</label>
-                                    <div class="input-group">
-                                        <input type="number" name="slippage" class="form-control"
-                                               value="0.0005" min="0" max="0.1" step="0.0001">
-                                        <span class="input-group-text">%</span>
-                                    </div>
+                            <!-- 초기 자본 -->
+                            <div>
+                                <label class="form-label">초기 자본</label>
+                                <div class="input-group">
+                                    <input type="number" name="initialCapital" class="form-control"
+                                           value="10000000" min="1000000" step="1000000">
+                                    <span class="input-group-text">원</span>
                                 </div>
                             </div>
 
-                            <div class="mt-4 d-flex gap-2">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-play-fill me-1"></i>백테스트 실행
-                                </button>
-                                <a href="/trading/backtests/admin" class="btn btn-outline-secondary">
-                                    취소
-                                </a>
+                            <!-- 수수료 -->
+                            <div>
+                                <label class="form-label">수수료</label>
+                                <div class="input-group">
+                                    <input type="number" name="commission" class="form-control"
+                                           value="0.0015" min="0" max="0.1" step="0.0001">
+                                    <span class="input-group-text">%</span>
+                                </div>
                             </div>
-                        </form>
-                    </div>
+                        </div>
+
+                        <div class="row-form-3" style="margin-bottom: 30px;">
+                            <!-- 슬리피지 -->
+                            <div>
+                                <label class="form-label">슬리피지</label>
+                                <div class="input-group">
+                                    <input type="number" name="slippage" class="form-control"
+                                           value="0.0005" min="0" max="0.1" step="0.0001">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                            <div></div>
+                            <div></div>
+                        </div>
+
+                        <div style="display: flex; gap: 12px;">
+                            <button type="submit" class="btn-run">
+                                <i class="bi bi-play-fill me-1"></i>백테스트 실행
+                            </button>
+                            <a href="/trading/backtests/admin" class="btn-cancel">
+                                취소
+                            </a>
+                        </div>
+                    </form>
                 </div>
             </div>
 
             <!-- 도움말 -->
-            <div class="col-lg-4">
-                <div class="card bg-light">
-                    <div class="card-header">
-                        <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>백테스트 도움말</h6>
-                    </div>
-                    <div class="card-body">
-                        <h6>전략 ID 예시</h6>
-                        <ul class="small text-muted">
-                            <li><code>MA_CROSS_5_20</code> - 5일/20일 이동평균 교차</li>
-                            <li><code>RSI_14</code> - RSI 14일 전략</li>
-                            <li><code>BOLLINGER_20_2</code> - 볼린저 밴드</li>
-                        </ul>
+            <div class="card help-card">
+                <div class="card-header">
+                    <h6><i class="bi bi-info-circle me-2"></i>백테스트 도움말</h6>
+                </div>
+                <div class="card-body">
+                    <h6>전략 ID 예시</h6>
+                    <ul>
+                        <li><code>MA_CROSS_5_20</code> - 5일/20일 이동평균 교차</li>
+                        <li><code>RSI_14</code> - RSI 14일 전략</li>
+                        <li><code>BOLLINGER_20_2</code> - 볼린저 밴드</li>
+                    </ul>
 
-                        <h6 class="mt-3">주요 지표</h6>
-                        <ul class="small text-muted">
-                            <li><strong>Sharpe Ratio</strong>: 위험 대비 수익률 (1.0 이상 권장)</li>
-                            <li><strong>MDD</strong>: 최대 낙폭 (20% 이하 권장)</li>
-                            <li><strong>Win Rate</strong>: 승률</li>
-                        </ul>
+                    <h6 style="margin-top: 20px;">주요 지표</h6>
+                    <ul>
+                        <li><strong>Sharpe Ratio</strong>: 위험 대비 수익률 (1.0 이상 권장)</li>
+                        <li><strong>MDD</strong>: 최대 낙폭 (20% 이하 권장)</li>
+                        <li><strong>Win Rate</strong>: 승률</li>
+                    </ul>
 
-                        <h6 class="mt-3">유의사항</h6>
-                        <ul class="small text-muted">
-                            <li>과거 성과가 미래를 보장하지 않습니다</li>
-                            <li>충분한 데이터 기간을 설정하세요</li>
-                            <li>수수료와 슬리피지를 고려하세요</li>
-                        </ul>
-                    </div>
+                    <h6 style="margin-top: 20px;">유의사항</h6>
+                    <ul>
+                        <li>과거 성과가 미래를 보장하지 않습니다</li>
+                        <li>충분한 데이터 기간을 설정하세요</li>
+                        <li>수수료와 슬리피지를 고려하세요</li>
+                    </ul>
                 </div>
             </div>
         </div>
