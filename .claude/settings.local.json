@@ -1,6 +1,8 @@
 {
   "permissions": {
     "allow": [
+      "Edit",
+      "Write",
       "Bash(tree:*)",
       "Bash(mvn wrapper:wrapper:*)",
       "Bash(./mvnw spring-boot:run:*)",
@@ -99,11 +101,21 @@
       "Bash(claude plugins:*)",
       "Bash(claude plugin list:*)",
       "Bash(claude plugin --help:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "mcp__mysql-maruweb__run_select_query",
+      "mcp__mysql-maruweb__update_record",
+      "mcp__mysql-maruweb__list_tables",
+      "mcp__mysql-maruweb__read_table_schema",
+      "mcp__mysql-maruweb__read_records",
+      "mcp__playwright__browser_drag",
+      "mcp__playwright__browser_console_messages",
+      "mcp__playwright__browser_snapshot",
+      "mcp__sequential-thinking__sequentialthinking"
     ]
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "playwright"
-  ]
+  ],
+  "language": "ko"
 }

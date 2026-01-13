@@ -119,41 +119,39 @@
                 <!-- Basic Settings -->
                 <div class="config-section">
                     <h2 class="section-title">기본 설정 (Basic Settings)</h2>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>거래 계좌 (Account) *</label>
-                            <select name="accountId" class="form-select" required>
-                                <option value="">계좌 선택</option>
-                                <option th:each="account : ${accounts}"
-                                        th:value="${account['accountId']}"
-                                        th:text="${account['alias'] != null ? account['alias'] + ' (' + account['cano'] + ')' : account['cano']}"
-                                        th:selected="${strategy['accountId'] == account['accountId']}">
-                                </option>
-                            </select>
-                        </div>
+                    <div class="form-group">
+                        <label>거래 계좌 (Account) *</label>
+                        <select name="accountId" class="form-select" required>
+                            <option value="">계좌 선택</option>
+                            <option th:each="account : ${accounts}"
+                                    th:value="${account['accountId']}"
+                                    th:text="${account['alias'] != null ? account['alias'] + ' (' + account['cano'] + ')' : account['cano']}"
+                                    th:selected="${strategy['accountId'] == account['accountId']}">
+                            </option>
+                        </select>
+                    </div>
 
-                        <div class="form-group">
-                            <label>자산 유형 (Asset Type) *</label>
-                            <select name="assetType" class="form-select" required>
-                                <option value="KR_STOCK" th:selected="${strategy['assetType'] == 'KR_STOCK' or strategy['assetType'] == null}">
-                                    국내 주식 (Korean Stock)
-                                </option>
-                                <option value="US_STOCK" th:selected="${strategy['assetType'] == 'US_STOCK'}">
-                                    해외 주식 (US Stock)
-                                </option>
-                                <option value="CRYPTO" th:selected="${strategy['assetType'] == 'CRYPTO'}">
-                                    암호화폐 (Crypto)
-                                </option>
-                            </select>
-                        </div>
+                    <div class="form-group">
+                        <label>자산 유형 (Asset Type) *</label>
+                        <select name="assetType" class="form-select" required>
+                            <option value="KR_STOCK" th:selected="${strategy['assetType'] == 'KR_STOCK' or strategy['assetType'] == null}">
+                                국내 주식 (Korean Stock)
+                            </option>
+                            <option value="US_STOCK" th:selected="${strategy['assetType'] == 'US_STOCK'}">
+                                해외 주식 (US Stock)
+                            </option>
+                            <option value="CRYPTO" th:selected="${strategy['assetType'] == 'CRYPTO'}">
+                                암호화폐 (Crypto)
+                            </option>
+                        </select>
+                    </div>
 
-                        <div class="form-group">
-                            <label>종목 코드 (Symbol) *</label>
-                            <input type="text" name="symbol" class="form-input"
-                                   th:value="${strategy['symbol']}"
-                                   placeholder="예: 005930 (삼성전자)" required>
-                            <p class="info-text">국내 주식: 6자리 코드, 해외 주식: 티커 (예: AAPL)</p>
-                        </div>
+                    <div class="form-group">
+                        <label>종목 코드 (Symbol) *</label>
+                        <input type="text" name="symbol" class="form-input"
+                               th:value="${strategy['symbol']}"
+                               placeholder="예: 005930 (삼성전자)" required>
+                        <p class="info-text">국내 주식: 6자리 코드, 해외 주식: 티커 (예: AAPL)</p>
                     </div>
                 </div>
 
