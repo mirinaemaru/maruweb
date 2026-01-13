@@ -225,7 +225,7 @@
         <div class="page-header">
             <h2>
                 <i class="bi bi-bar-chart-line me-2"></i>백테스트 결과
-                <span class="strategy-badge" th:text="${backtest.strategyId}"></span>
+                <span class="strategy-badge" th:text="${backtest['strategyId']}"></span>
             </h2>
             <div class="header-buttons">
                 <button type="button" class="btn btn-header-danger" onclick="confirmDelete()">
@@ -241,7 +241,7 @@
             <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${error}"></span>
         </div>
 
-        <div th:if="${backtest != null and backtest.backtestId != null}">
+        <div th:if="${backtest != null and backtest['backtestId'] != null}">
             <!-- 첫 번째 행: 기본 정보 + 성과 지표 -->
             <div class="cards-row">
                 <!-- 기본 정보 -->
@@ -253,16 +253,16 @@
                         <table class="table table-borderless">
                             <tr>
                                 <th style="width: 40%">백테스트 ID</th>
-                                <td th:text="${backtest.backtestId}" class="font-monospace small"></td>
+                                <td th:text="${backtest['backtestId']}" class="font-monospace small"></td>
                             </tr>
                             <tr>
                                 <th>전략 ID</th>
-                                <td th:text="${backtest.strategyId}" class="fw-bold"></td>
+                                <td th:text="${backtest['strategyId']}" class="fw-bold"></td>
                             </tr>
                             <tr>
                                 <th>종목</th>
                                 <td>
-                                    <span th:each="symbol, iter : ${backtest.symbols}">
+                                    <span th:each="symbol, iter : ${backtest['symbols']}">
                                         <span class="badge bg-secondary" th:text="${symbol}"></span>
                                     </span>
                                 </td>
@@ -270,17 +270,17 @@
                             <tr>
                                 <th>기간</th>
                                 <td>
-                                    <span th:text="${backtest.startDate}"></span> ~
-                                    <span th:text="${backtest.endDate}"></span>
+                                    <span th:text="${backtest['startDate']}"></span> ~
+                                    <span th:text="${backtest['endDate']}"></span>
                                 </td>
                             </tr>
                             <tr>
                                 <th>타임프레임</th>
-                                <td th:text="${backtest.timeframe}"></td>
+                                <td th:text="${backtest['timeframe']}"></td>
                             </tr>
                             <tr>
                                 <th>초기 자본</th>
-                                <td th:text="${#numbers.formatInteger(backtest.initialCapital, 3, 'COMMA')} + '원'"></td>
+                                <td th:text="${#numbers.formatInteger(backtest['initialCapital'], 3, 'COMMA')} + '원'"></td>
                             </tr>
                         </table>
                     </div>
@@ -295,26 +295,26 @@
                         <div class="metrics-grid">
                             <div class="metric-item">
                                 <div class="metric-value"
-                                     th:classappend="${backtest.totalReturn != null and backtest.totalReturn >= 0} ? 'text-success' : 'text-danger'"
-                                     th:text="${backtest.totalReturn != null} ? ${#numbers.formatDecimal(backtest.totalReturn, 1, 2)} + '%' : '-'">
+                                     th:classappend="${backtest['totalReturn'] != null and backtest['totalReturn'] >= 0} ? 'text-success' : 'text-danger'"
+                                     th:text="${backtest['totalReturn'] != null} ? ${#numbers.formatDecimal(backtest['totalReturn'], 1, 2)} + '%' : '-'">
                                 </div>
                                 <div class="metric-label">총 수익률</div>
                             </div>
                             <div class="metric-item">
                                 <div class="metric-value text-primary"
-                                     th:text="${backtest.sharpeRatio != null} ? ${#numbers.formatDecimal(backtest.sharpeRatio, 1, 2)} : '-'">
+                                     th:text="${backtest['sharpeRatio'] != null} ? ${#numbers.formatDecimal(backtest['sharpeRatio'], 1, 2)} : '-'">
                                 </div>
                                 <div class="metric-label">Sharpe Ratio</div>
                             </div>
                             <div class="metric-item">
                                 <div class="metric-value text-danger"
-                                     th:text="${backtest.maxDrawdown != null} ? ${#numbers.formatDecimal(backtest.maxDrawdown, 1, 2)} + '%' : '-'">
+                                     th:text="${backtest['maxDrawdown'] != null} ? ${#numbers.formatDecimal(backtest['maxDrawdown'], 1, 2)} + '%' : '-'">
                                 </div>
                                 <div class="metric-label">최대 낙폭 (MDD)</div>
                             </div>
                             <div class="metric-item">
                                 <div class="metric-value"
-                                     th:text="${backtest.winRate != null} ? ${#numbers.formatDecimal(backtest.winRate, 1, 1)} + '%' : '-'">
+                                     th:text="${backtest['winRate'] != null} ? ${#numbers.formatDecimal(backtest['winRate'], 1, 1)} + '%' : '-'">
                                 </div>
                                 <div class="metric-label">승률</div>
                             </div>
@@ -334,23 +334,23 @@
                         <table class="table table-borderless">
                             <tr>
                                 <th>총 거래 수</th>
-                                <td th:text="${backtest.totalTrades}"></td>
+                                <td th:text="${backtest['totalTrades']}"></td>
                             </tr>
                             <tr>
                                 <th>승리 거래</th>
-                                <td th:text="${backtest.winningTrades}" class="text-success"></td>
+                                <td th:text="${backtest['winningTrades']}" class="text-success"></td>
                             </tr>
                             <tr>
                                 <th>패배 거래</th>
-                                <td th:text="${backtest.losingTrades}" class="text-danger"></td>
+                                <td th:text="${backtest['losingTrades']}" class="text-danger"></td>
                             </tr>
                             <tr>
                                 <th>평균 수익</th>
-                                <td th:text="${backtest.avgProfit != null} ? ${#numbers.formatDecimal(backtest.avgProfit, 1, 2)} + '%' : '-'"></td>
+                                <td th:text="${backtest['avgProfit'] != null} ? ${#numbers.formatDecimal(backtest['avgProfit'], 1, 2)} + '%' : '-'"></td>
                             </tr>
                             <tr>
                                 <th>Profit Factor</th>
-                                <td th:text="${backtest.profitFactor != null} ? ${#numbers.formatDecimal(backtest.profitFactor, 1, 2)} : '-'"></td>
+                                <td th:text="${backtest['profitFactor'] != null} ? ${#numbers.formatDecimal(backtest['profitFactor'], 1, 2)} : '-'"></td>
                             </tr>
                         </table>
                     </div>
@@ -365,19 +365,19 @@
                         <table class="table table-borderless">
                             <tr>
                                 <th>수수료</th>
-                                <td th:text="${backtest.commission != null} ? ${#numbers.formatDecimal(backtest.commission * 100, 1, 4)} + '%' : '-'"></td>
+                                <td th:text="${backtest['commission'] != null} ? ${#numbers.formatDecimal(backtest['commission'] * 100, 1, 4)} + '%' : '-'"></td>
                             </tr>
                             <tr>
                                 <th>슬리피지</th>
-                                <td th:text="${backtest.slippage != null} ? ${#numbers.formatDecimal(backtest.slippage * 100, 1, 4)} + '%' : '-'"></td>
+                                <td th:text="${backtest['slippage'] != null} ? ${#numbers.formatDecimal(backtest['slippage'] * 100, 1, 4)} + '%' : '-'"></td>
                             </tr>
                             <tr>
                                 <th>실행 시간</th>
-                                <td th:text="${backtest.durationMs != null} ? ${backtest.durationMs} + 'ms' : '-'"></td>
+                                <td th:text="${backtest['durationMs'] != null} ? ${backtest['durationMs']} + 'ms' : '-'"></td>
                             </tr>
                             <tr>
                                 <th>생성일시</th>
-                                <td th:text="${backtest.createdAt}"></td>
+                                <td th:text="${backtest['createdAt']}"></td>
                             </tr>
                         </table>
                     </div>
@@ -387,13 +387,13 @@
     </div>
 
     <!-- 삭제 확인 폼 -->
-    <form id="deleteForm" th:action="@{/trading/backtests/admin/{id}/delete(id=${backtest.backtestId})}"
+    <form id="deleteForm" th:action="@{/trading/backtests/admin/{id}/delete(id=${backtest['backtestId']})}"
           method="post" style="display: none;">
     </form>
 
     <script th:inline="javascript">
     function confirmDelete() {
-        const backtestId = [[${backtest.backtestId}]];
+        const backtestId = [[${backtest['backtestId']}]];
         if (confirm('이 백테스트를 삭제하시겠습니까?\nID: ' + backtestId)) {
             document.getElementById('deleteForm').submit();
         }
