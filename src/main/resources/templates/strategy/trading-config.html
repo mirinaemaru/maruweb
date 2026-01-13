@@ -46,6 +46,12 @@
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-primary); }
+
+        /* Basic Settings horizontal layout */
+        .form-row { display: flex; align-items: center; margin-bottom: 15px; gap: 20px; }
+        .form-row label { flex: 0 0 180px; margin-bottom: 0; font-weight: 500; color: var(--text-primary); white-space: nowrap; }
+        .form-row .form-input, .form-row .form-select { flex: 1; }
+        .form-row .info-text { flex: 0 0 auto; margin: 0; }
         .form-input, .form-select { width: 100%; padding: 12px; border: 2px solid var(--border-color);
                                     border-radius: 8px; font-size: 14px; box-sizing: border-box;
                                     background: var(--bg-tertiary); color: var(--text-primary);
@@ -119,7 +125,7 @@
                 <!-- Basic Settings -->
                 <div class="config-section">
                     <h2 class="section-title">기본 설정 (Basic Settings)</h2>
-                    <div class="form-group">
+                    <div class="form-row">
                         <label>거래 계좌 (Account) *</label>
                         <select name="accountId" class="form-select" required>
                             <option value="">계좌 선택</option>
@@ -131,7 +137,7 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-row">
                         <label>자산 유형 (Asset Type) *</label>
                         <select name="assetType" class="form-select" required>
                             <option value="KR_STOCK" th:selected="${strategy['assetType'] == 'KR_STOCK' or strategy['assetType'] == null}">
@@ -146,7 +152,7 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-row">
                         <label>종목 코드 (Symbol) *</label>
                         <input type="text" name="symbol" class="form-input"
                                th:value="${strategy['symbol']}"
