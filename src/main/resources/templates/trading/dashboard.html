@@ -243,6 +243,19 @@
                 transform: translateY(-2px);
                 box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
             }
+
+            /* Dark mode styles for quick action buttons */
+            [data-theme="dark"] .quick-action-btn {
+                background: #4a5568 !important;
+                background-image: none !important;
+                box-shadow: none;
+            }
+
+            [data-theme="dark"] .quick-action-btn:hover {
+                background: #5a6578 !important;
+                background-image: none !important;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            }
         </style>
     </th:block>
 </head>
