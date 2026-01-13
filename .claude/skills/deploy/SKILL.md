@@ -2,7 +2,6 @@
 name: deploy
 description: Deploy the application through Jenkins pipeline. Use when user asks to deploy, push to production, check deployment status, or verify app health.
 allowed-tools: Bash, Read, Grep, Glob
-model: sonnet
 ---
 
 # Deploy Skill
