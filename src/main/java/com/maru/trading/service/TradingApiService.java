@@ -9,6 +9,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -440,6 +442,7 @@ public class TradingApiService {
         String url = "/api/v1/admin/strategies/" + strategyId;
         try {
             log.debug("Calling Trading API: {}", url);
+            log.debug("Strategy data: {}", strategyData);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(strategyData, headers);
@@ -451,10 +454,47 @@ public class TradingApiService {
                     new ParameterizedTypeReference<Map<String, Object>>() {}
             );
             return response.getBody();
+        } catch (HttpServerErrorException e) {
+            log.error("Server error from Trading System API: {} - {}", e.getStatusCode(), e.getResponseBodyAsString(), e);
+            String errorDetail = extractErrorMessage(e.getResponseBodyAsString());
+            throw new RuntimeException("Trading System API 서버 오류: " + errorDetail, e);
+        } catch (HttpClientErrorException e) {
+            log.error("Client error from Trading System API: {} - {}", e.getStatusCode(), e.getResponseBodyAsString(), e);
+            String errorDetail = extractErrorMessage(e.getResponseBodyAsString());
+            throw new RuntimeException("Trading System API 요청 오류: " + errorDetail, e);
         } catch (RestClientException e) {
             log.error("Failed to update strategy in Trading System", e);
-            throw new RuntimeException("전략 수정에 실패했습니다.", e);
+            throw new RuntimeException("Trading System에 연결할 수 없습니다.", e);
         }
+    }
+
+    /**
+     * Extract error message from Trading System API error response
+     */
+    private String extractErrorMessage(String responseBody) {
+        if (responseBody == null || responseBody.isEmpty()) {
+            return "알 수 없는 오류";
+        }
+        try {
+            // Try to parse JSON error response
+            if (responseBody.contains("\"message\"")) {
+                int start = responseBody.indexOf("\"message\":\"") + 11;
+                int end = responseBody.indexOf("\"", start);
+                if (start > 10 && end > start) {
+                    return responseBody.substring(start, end);
+                }
+            }
+            if (responseBody.contains("\"detail\"")) {
+                int start = responseBody.indexOf("\"detail\":\"") + 10;
+                int end = responseBody.indexOf("\"", start);
+                if (start > 9 && end > start) {
+                    return responseBody.substring(start, end);
+                }
+            }
+        } catch (Exception e) {
+            log.debug("Failed to parse error response: {}", responseBody);
+        }
+        return responseBody.length() > 100 ? responseBody.substring(0, 100) : responseBody;
     }
 
     /**

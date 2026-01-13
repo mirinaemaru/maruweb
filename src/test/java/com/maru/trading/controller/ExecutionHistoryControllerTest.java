@@ -1,7 +1,5 @@
 package com.maru.trading.controller;
 
-import com.maru.strategy.entity.Strategy;
-import com.maru.strategy.service.StrategyService;
 import com.maru.trading.service.TradingApiService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,9 +35,6 @@ class ExecutionHistoryControllerTest {
     @MockBean
     private TradingApiService tradingApiService;
 
-    @MockBean
-    private StrategyService strategyService;
-
     private Map<String, Object> createMockHistoryResponse() {
         Map<String, Object> historyResponse = new HashMap<>();
         historyResponse.put("executions", Arrays.asList());
@@ -50,10 +45,16 @@ class ExecutionHistoryControllerTest {
         return historyResponse;
     }
 
+    private Map<String, Object> createMockStrategiesResponse() {
+        Map<String, Object> strategiesResponse = new HashMap<>();
+        strategiesResponse.put("items", Collections.emptyList());
+        return strategiesResponse;
+    }
+
     @Test
     @DisplayName("실행 히스토리 페이지 - 성공")
     void history_Success() throws Exception {
-        when(strategyService.getAllStrategies()).thenReturn(Collections.emptyList());
+        when(tradingApiService.getStrategies()).thenReturn(createMockStrategiesResponse());
         when(tradingApiService.getExecutionHistory(any(), any(), any(), any()))
                 .thenReturn(createMockHistoryResponse());
 
@@ -68,11 +69,15 @@ class ExecutionHistoryControllerTest {
     @Test
     @DisplayName("실행 히스토리 - 전략 필터")
     void history_WithStrategyFilter() throws Exception {
-        Strategy strategy = new Strategy();
-        strategy.setId(1L);
-        strategy.setTitle("테스트 전략");
+        // Mock strategy data from API
+        Map<String, Object> strategy = new HashMap<>();
+        strategy.put("strategyId", "strategy-001");
+        strategy.put("name", "테스트 전략");
+        strategy.put("status", "ACTIVE");
 
-        when(strategyService.getAllStrategies()).thenReturn(Arrays.asList(strategy));
+        Map<String, Object> strategiesResponse = new HashMap<>();
+        strategiesResponse.put("items", Arrays.asList(strategy));
+        when(tradingApiService.getStrategies()).thenReturn(strategiesResponse);
 
         Map<String, Object> historyResponse = new HashMap<>();
         Map<String, Object> execution1 = new HashMap<>();
@@ -110,7 +115,7 @@ class ExecutionHistoryControllerTest {
     @Test
     @DisplayName("실행 히스토리 - API 오류 시")
     void history_ApiError() throws Exception {
-        when(strategyService.getAllStrategies()).thenThrow(new RuntimeException("Connection refused"));
+        when(tradingApiService.getStrategies()).thenThrow(new RuntimeException("Connection refused"));
 
         mockMvc.perform(get("/trading/execution-history"))
                 .andExpect(status().isOk())

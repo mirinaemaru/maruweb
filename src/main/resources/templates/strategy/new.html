@@ -3,7 +3,7 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/main}">
 <head>
-    <title>Edit Strategy</title>
+    <title>New Strategy</title>
     <style>
         .edit-container {
             max-width: 800px;
@@ -176,22 +176,15 @@
     <div layout:fragment="content">
         <div class="edit-container">
             <div class="page-header">
-                <h1>전략 수정 (Edit Strategy)</h1>
-                <p class="subtitle" th:text="${strategy['name']}">Strategy Name</p>
+                <h1>새 전략 생성 (New Strategy)</h1>
+                <p class="subtitle">Trading System에 새 전략을 등록합니다</p>
             </div>
-
-            <!-- Success Message -->
-            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
 
             <!-- Error Message -->
             <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
             <div class="edit-form">
-                <form th:action="@{/trading/strategies/{id}/edit(id=${strategy['strategyId']})}"
-                      method="post">
-
-                    <!-- Hidden field for strategy ID -->
-                    <input type="hidden" name="strategyId" th:value="${strategy['strategyId']}">
+                <form th:action="@{/trading/strategies/new}" method="post">
 
                     <div class="form-group">
                         <label for="name">전략명 (Name) *</label>
@@ -199,7 +192,6 @@
                                id="name"
                                name="name"
                                class="form-input"
-                               th:value="${strategy['name']}"
                                placeholder="전략 이름을 입력하세요"
                                required>
                     </div>
@@ -209,58 +201,44 @@
                         <textarea id="description"
                                   name="description"
                                   class="form-textarea"
-                                  placeholder="전략에 대한 설명을 입력하세요"
-                                  th:text="${strategy['description']}"></textarea>
+                                  placeholder="전략에 대한 설명을 입력하세요"></textarea>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label for="type">전략 유형 (Type)</label>
                             <select id="type" name="type" class="form-select">
-                                <option value="MANUAL" th:selected="${strategy['type'] == 'MANUAL'}">수동 (Manual)</option>
-                                <option value="SIGNAL" th:selected="${strategy['type'] == 'SIGNAL'}">시그널 (Signal)</option>
-                                <option value="AUTO" th:selected="${strategy['type'] == 'AUTO'}">자동 (Auto)</option>
+                                <option value="MANUAL">수동 (Manual)</option>
+                                <option value="SIGNAL">시그널 (Signal)</option>
+                                <option value="AUTO">자동 (Auto)</option>
                             </select>
                         </div>
 
-                        <div class="form-group">
-                            <label for="status">상태 (Status)</label>
-                            <select id="status" name="status" class="form-select">
-                                <option value="ACTIVE" th:selected="${strategy['status'] == 'ACTIVE'}">활성 (Active)</option>
-                                <option value="INACTIVE" th:selected="${strategy['status'] == 'INACTIVE'}">비활성 (Inactive)</option>
-                                <option value="PAUSED" th:selected="${strategy['status'] == 'PAUSED'}">일시정지 (Paused)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
                         <div class="form-group">
                             <label for="symbol">종목 코드 (Symbol)</label>
                             <input type="text"
                                    id="symbol"
                                    name="symbol"
                                    class="form-input"
-                                   th:value="${strategy['symbol']}"
                                    placeholder="예: 005930">
                             <p class="form-help-text">국내 주식: 6자리 코드, 해외 주식: 티커</p>
                         </div>
+                    </div>
 
-                        <div class="form-group">
-                            <label for="accountId">계좌 ID (Account ID)</label>
-                            <select id="accountId" name="accountId" class="form-select">
-                                <option value="">선택 안함</option>
-                                <option th:each="account : ${accounts}"
-                                        th:value="${account['accountId']}"
-                                        th:text="${account['alias'] != null ? account['alias'] + ' (' + account['cano'] + ')' : account['cano']}"
-                                        th:selected="${strategy['accountId'] == account['accountId']}">
-                                </option>
-                            </select>
-                        </div>
+                    <div class="form-group">
+                        <label for="accountId">계좌 (Account)</label>
+                        <select id="accountId" name="accountId" class="form-select">
+                            <option value="">선택 안함</option>
+                            <option th:each="account : ${accounts}"
+                                    th:value="${account['accountId']}"
+                                    th:text="${account['alias'] != null ? account['alias'] + ' (' + account['cano'] + ')' : account['cano']}">
+                            </option>
+                        </select>
                     </div>
 
                     <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">저장 (Save)</button>
-                        <a th:href="@{/trading/strategies/{id}(id=${strategy['strategyId']})}" class="btn btn-secondary">취소 (Cancel)</a>
+                        <button type="submit" class="btn btn-primary">생성 (Create)</button>
+                        <a th:href="@{/trading/strategies}" class="btn btn-secondary">취소 (Cancel)</a>
                     </div>
                 </form>
             </div>

@@ -1,232 +1,101 @@
 package com.maru.strategy.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.maru.strategy.dto.TradingStrategyDto;
-import com.maru.strategy.entity.Strategy;
-import com.maru.strategy.entity.StrategyCategory;
-import com.maru.strategy.repository.StrategyRepository;
-import com.maru.strategy.service.StrategyService;
-import com.maru.strategy.service.TradingStrategyService;
 import com.maru.trading.service.TradingApiService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.validation.Valid;
-import java.time.LocalDate;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+/**
+ * Strategy Controller - External Trading System API Only
+ * 모든 전략 관리는 외부 Trading System API(포트 8099)를 통해 수행됩니다.
+ */
 @Slf4j
 @Controller
 @RequestMapping("/trading/strategies")
 @RequiredArgsConstructor
 public class StrategyController {
 
-    private final StrategyService strategyService;
-    private final TradingStrategyService tradingStrategyService;
     private final TradingApiService tradingApiService;
-    private final StrategyRepository strategyRepository;
-    private final ObjectMapper objectMapper;
 
     /**
-     * Display strategies list page with filtering
+     * 전략 목록 페이지
+     * 외부 Trading System API에서 전략 목록을 조회합니다.
      */
     @GetMapping
     public String list(
             @RequestParam(required = false) String status,
-            @RequestParam(required = false) String priority,
-            @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startFrom,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startTo,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetFrom,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetTo,
             Model model) {
 
-        List<Strategy> strategies;
+        List<?> strategies = Collections.emptyList();
 
-        // Apply filters
-        if (keyword != null || status != null || priority != null || categoryId != null) {
-            strategies = strategyService.searchStrategies(status, priority, categoryId, keyword);
-        } else if (startFrom != null && startTo != null) {
-            strategies = strategyService.getStrategiesByStartDateRange(startFrom, startTo);
-        } else if (targetFrom != null && targetTo != null) {
-            strategies = strategyService.getStrategiesByTargetDateRange(targetFrom, targetTo);
-        } else {
-            strategies = strategyService.getAllStrategies();
+        try {
+            Map<String, Object> strategiesData = tradingApiService.getStrategies();
+            strategies = (List<?>) strategiesData.get("items");
+
+            if (strategies == null) {
+                strategies = Collections.emptyList();
+            }
+
+            // 상태 필터 적용
+            if (status != null && !status.isEmpty()) {
+                final String filterStatus = status;
+                strategies = strategies.stream()
+                        .filter(s -> {
+                            if (s instanceof Map) {
+                                Object strategyStatus = ((Map<?, ?>) s).get("status");
+                                return filterStatus.equals(strategyStatus);
+                            }
+                            return false;
+                        })
+                        .collect(Collectors.toList());
+            }
+
+            // 키워드 필터 적용
+            if (keyword != null && !keyword.isEmpty()) {
+                final String filterKeyword = keyword.toLowerCase();
+                strategies = strategies.stream()
+                        .filter(s -> {
+                            if (s instanceof Map) {
+                                Map<?, ?> strategyMap = (Map<?, ?>) s;
+                                String name = (String) strategyMap.get("name");
+                                String description = (String) strategyMap.get("description");
+                                return (name != null && name.toLowerCase().contains(filterKeyword)) ||
+                                       (description != null && description.toLowerCase().contains(filterKeyword));
+                            }
+                            return false;
+                        })
+                        .collect(Collectors.toList());
+            }
+
+        } catch (Exception e) {
+            log.error("Failed to load strategies from Trading System API", e);
+            model.addAttribute("error", "Trading System에서 전략 목록을 가져올 수 없습니다: " + e.getMessage());
         }
 
-        List<StrategyCategory> categories = strategyService.getAllCategories();
-
         model.addAttribute("strategies", strategies);
-        model.addAttribute("categories", categories);
-        model.addAttribute("newStrategy", new Strategy());
-        model.addAttribute("newCategory", new StrategyCategory());
-
-        // Filter parameters
         model.addAttribute("status", status);
-        model.addAttribute("priority", priority);
-        model.addAttribute("categoryId", categoryId);
         model.addAttribute("keyword", keyword);
-        model.addAttribute("startFrom", startFrom);
-        model.addAttribute("startTo", startTo);
-        model.addAttribute("targetFrom", targetFrom);
-        model.addAttribute("targetTo", targetTo);
 
         return "strategy/list";
     }
 
     /**
-     * Display strategy edit form
+     * 새 전략 생성 폼
      */
-    @GetMapping("/{id}/edit")
-    public String edit(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
-        Strategy strategy = strategyService.getStrategyById(id)
-                .orElse(null);
-        if (strategy == null) {
-            redirectAttributes.addFlashAttribute("error", "Strategy not found");
-            return "redirect:/trading/strategies";
-        }
-
-        List<StrategyCategory> categories = strategyService.getAllCategories();
-
-        model.addAttribute("strategy", strategy);
-        model.addAttribute("categories", categories);
-        return "strategy/edit";
-    }
-
-    // ========== Category CRUD ==========
-
-    @PostMapping("/categories")
-    public String createCategory(
-            @Valid @ModelAttribute("newCategory") StrategyCategory category,
-            BindingResult result,
-            RedirectAttributes redirectAttributes) {
-
-        if (result.hasErrors()) {
-            redirectAttributes.addFlashAttribute("error", "Category name is required");
-            return "redirect:/trading/strategies";
-        }
-
-        strategyService.createCategory(category);
-        redirectAttributes.addFlashAttribute("success", "Category created successfully");
-        return "redirect:/trading/strategies";
-    }
-
-    @PostMapping("/categories/{id}")
-    public String updateCategory(
-            @PathVariable Long id,
-            @ModelAttribute StrategyCategory category,
-            RedirectAttributes redirectAttributes) {
-
+    @GetMapping("/new")
+    public String newStrategyForm(Model model) {
         try {
-            strategyService.updateCategory(id, category);
-            redirectAttributes.addFlashAttribute("success", "Category updated successfully");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Failed to update category: " + e.getMessage());
-        }
-        return "redirect:/trading/strategies";
-    }
-
-    @PostMapping("/categories/{id}/delete")
-    public String deleteCategory(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        try {
-            strategyService.deleteCategory(id);
-            redirectAttributes.addFlashAttribute("success", "Category deleted successfully");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Failed to delete category: " + e.getMessage());
-        }
-        return "redirect:/trading/strategies";
-    }
-
-    // ========== Strategy CRUD ==========
-
-    @PostMapping
-    public String createStrategy(
-            @Valid @ModelAttribute("newStrategy") Strategy strategy,
-            @RequestParam(required = false) Long categoryId,
-            BindingResult result,
-            RedirectAttributes redirectAttributes) {
-
-        if (result.hasErrors()) {
-            redirectAttributes.addFlashAttribute("error", "Title is required");
-            return "redirect:/trading/strategies";
-        }
-
-        if (categoryId != null) {
-            StrategyCategory category = strategyService.getCategoryById(categoryId)
-                    .orElse(null);
-            if (category == null) {
-                redirectAttributes.addFlashAttribute("error", "Category not found");
-                return "redirect:/trading/strategies";
-            }
-            strategy.setCategory(category);
-        }
-
-        strategyService.createStrategy(strategy);
-        redirectAttributes.addFlashAttribute("success", "Strategy created successfully");
-        return "redirect:/trading/strategies";
-    }
-
-    @PostMapping("/{id}")
-    public String updateStrategy(
-            @PathVariable Long id,
-            @ModelAttribute Strategy strategy,
-            @RequestParam(required = false) Long categoryId,
-            RedirectAttributes redirectAttributes) {
-
-        try {
-            if (categoryId != null && categoryId > 0) {
-                StrategyCategory category = strategyService.getCategoryById(categoryId)
-                        .orElseThrow(() -> new RuntimeException("Category not found"));
-                strategy.setCategory(category);
-            } else {
-                strategy.setCategory(null);
-            }
-
-            strategyService.updateStrategy(id, strategy);
-            redirectAttributes.addFlashAttribute("success", "Strategy updated successfully");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Failed to update strategy: " + e.getMessage());
-        }
-        return "redirect:/trading/strategies";
-    }
-
-    @PostMapping("/{id}/delete")
-    public String deleteStrategy(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        try {
-            strategyService.deleteStrategy(id);
-            redirectAttributes.addFlashAttribute("success", "Strategy deleted successfully");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Failed to delete strategy: " + e.getMessage());
-        }
-        return "redirect:/trading/strategies";
-    }
-
-    // ========== Auto-Trading Endpoints ==========
-
-    /**
-     * Show auto-trading configuration page
-     */
-    @GetMapping("/{id}/trading")
-    public String configureTradingStrategy(@PathVariable Long id, Model model,
-                                          RedirectAttributes redirectAttributes) {
-        Strategy strategy = strategyService.getStrategyById(id)
-                .orElse(null);
-        if (strategy == null) {
-            redirectAttributes.addFlashAttribute("error", "Strategy not found");
-            return "redirect:/trading/strategies";
-        }
-
-        // Get accounts for selection
-        try {
+            // 계좌 목록 조회 (전략 생성시 계좌 선택용)
             Map<String, Object> accountsData = tradingApiService.getAccounts();
             model.addAttribute("accounts", accountsData.get("items"));
         } catch (Exception e) {
@@ -234,184 +103,296 @@ public class StrategyController {
             model.addAttribute("accounts", Collections.emptyList());
         }
 
-        model.addAttribute("strategy", strategy);
-        return "strategy/trading-config";
+        return "strategy/new";
     }
 
     /**
-     * Update auto-trading configuration
+     * 새 전략 생성 처리
+     */
+    @PostMapping("/new")
+    public String createStrategy(
+            @RequestParam String name,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String symbol,
+            @RequestParam(required = false) String accountId,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            log.info("Creating new strategy via API: name={}", name);
+
+            Map<String, Object> strategyData = new HashMap<>();
+            strategyData.put("name", name);
+            if (description != null && !description.isEmpty()) {
+                strategyData.put("description", description);
+            }
+            if (type != null && !type.isEmpty()) {
+                strategyData.put("type", type);
+            }
+            if (symbol != null && !symbol.isEmpty()) {
+                strategyData.put("symbol", symbol);
+            }
+            if (accountId != null && !accountId.isEmpty()) {
+                strategyData.put("accountId", accountId);
+            }
+
+            Map<String, Object> result = tradingApiService.createStrategy(strategyData);
+
+            if (result != null && result.containsKey("strategyId")) {
+                redirectAttributes.addFlashAttribute("success", "전략이 생성되었습니다.");
+                return "redirect:/trading/strategies/" + result.get("strategyId");
+            } else {
+                redirectAttributes.addFlashAttribute("success", "전략이 생성되었습니다.");
+                return "redirect:/trading/strategies";
+            }
+
+        } catch (Exception e) {
+            log.error("Failed to create strategy via API", e);
+            redirectAttributes.addFlashAttribute("error", "전략 생성에 실패했습니다: " + e.getMessage());
+            return "redirect:/trading/strategies/new";
+        }
+    }
+
+    /**
+     * 전략 상세 보기
+     */
+    @GetMapping("/{id}")
+    public String viewStrategy(@PathVariable String id, Model model,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            log.info("Viewing strategy: {}", id);
+            Map<String, Object> strategy = tradingApiService.getStrategy(id);
+
+            if (strategy == null || strategy.containsKey("error")) {
+                redirectAttributes.addFlashAttribute("error", "전략을 찾을 수 없습니다.");
+                return "redirect:/trading/strategies";
+            }
+
+            model.addAttribute("strategy", strategy);
+
+            // 최근 주문 내역 조회
+            String accountId = (String) strategy.get("accountId");
+            if (accountId != null && !accountId.isEmpty()) {
+                try {
+                    Map<String, Object> orders = tradingApiService.getOrders(accountId);
+                    model.addAttribute("recentOrders", orders.get("items"));
+                } catch (Exception e) {
+                    log.warn("Failed to load orders for account: {}", accountId, e);
+                    model.addAttribute("recentOrders", Collections.emptyList());
+                }
+            } else {
+                model.addAttribute("recentOrders", Collections.emptyList());
+            }
+
+            return "strategy/view";
+
+        } catch (Exception e) {
+            log.error("Failed to view strategy", e);
+            redirectAttributes.addFlashAttribute("error", "전략 조회에 실패했습니다: " + e.getMessage());
+            return "redirect:/trading/strategies";
+        }
+    }
+
+    /**
+     * 전략 수정 폼
+     */
+    @GetMapping("/{id}/edit")
+    public String editStrategyForm(@PathVariable String id, Model model,
+                                   RedirectAttributes redirectAttributes) {
+        try {
+            log.info("Loading edit form for strategy: {}", id);
+            Map<String, Object> strategy = tradingApiService.getStrategy(id);
+
+            if (strategy == null || strategy.containsKey("error")) {
+                redirectAttributes.addFlashAttribute("error", "전략을 찾을 수 없습니다.");
+                return "redirect:/trading/strategies";
+            }
+
+            model.addAttribute("strategy", strategy);
+
+            // 계좌 목록 조회
+            try {
+                Map<String, Object> accountsData = tradingApiService.getAccounts();
+                model.addAttribute("accounts", accountsData.get("items"));
+            } catch (Exception e) {
+                log.warn("Failed to load accounts", e);
+                model.addAttribute("accounts", Collections.emptyList());
+            }
+
+            return "strategy/edit";
+
+        } catch (Exception e) {
+            log.error("Failed to load strategy for editing", e);
+            redirectAttributes.addFlashAttribute("error", "전략 조회에 실패했습니다: " + e.getMessage());
+            return "redirect:/trading/strategies";
+        }
+    }
+
+    /**
+     * 전략 수정 처리
+     */
+    @PostMapping("/{id}/edit")
+    public String updateStrategy(@PathVariable String id,
+                                 @RequestParam String name,
+                                 @RequestParam(required = false) String description,
+                                 @RequestParam(required = false) String type,
+                                 @RequestParam(required = false) String status,
+                                 @RequestParam(required = false) String symbol,
+                                 @RequestParam(required = false) String accountId,
+                                 RedirectAttributes redirectAttributes) {
+        try {
+            log.info("Updating strategy: {}", id);
+
+            Map<String, Object> strategyData = new HashMap<>();
+            strategyData.put("name", name);
+            if (description != null) strategyData.put("description", description);
+            if (type != null) strategyData.put("type", type);
+            if (status != null) strategyData.put("status", status);
+            if (symbol != null) strategyData.put("symbol", symbol);
+            if (accountId != null && !accountId.isEmpty()) strategyData.put("accountId", accountId);
+
+            tradingApiService.updateStrategy(id, strategyData);
+
+            redirectAttributes.addFlashAttribute("success", "전략이 수정되었습니다.");
+            return "redirect:/trading/strategies/" + id;
+
+        } catch (Exception e) {
+            log.error("Failed to update strategy", e);
+            redirectAttributes.addFlashAttribute("error", "전략 수정에 실패했습니다: " + e.getMessage());
+            return "redirect:/trading/strategies/" + id + "/edit";
+        }
+    }
+
+    /**
+     * 자동매매 설정 폼
+     */
+    @GetMapping("/{id}/trading")
+    public String tradingConfigForm(@PathVariable String id, Model model,
+                                    RedirectAttributes redirectAttributes) {
+        try {
+            log.info("Loading trading config for strategy: {}", id);
+            Map<String, Object> strategy = tradingApiService.getStrategy(id);
+
+            if (strategy == null || strategy.containsKey("error")) {
+                redirectAttributes.addFlashAttribute("error", "전략을 찾을 수 없습니다.");
+                return "redirect:/trading/strategies";
+            }
+
+            model.addAttribute("strategy", strategy);
+
+            // 계좌 목록 조회
+            try {
+                Map<String, Object> accountsData = tradingApiService.getAccounts();
+                model.addAttribute("accounts", accountsData.get("items"));
+            } catch (Exception e) {
+                log.warn("Failed to load accounts", e);
+                model.addAttribute("accounts", Collections.emptyList());
+            }
+
+            return "strategy/trading-config";
+
+        } catch (Exception e) {
+            log.error("Failed to load trading config", e);
+            redirectAttributes.addFlashAttribute("error", "전략 조회에 실패했습니다: " + e.getMessage());
+            return "redirect:/trading/strategies";
+        }
+    }
+
+    /**
+     * 자동매매 설정 저장
      */
     @PostMapping("/{id}/trading")
-    public String updateTradingConfig(@PathVariable Long id,
-                                     @RequestParam String targetAccountId,
-                                     @RequestParam(required = false) String assetType,
-                                     @RequestParam(required = false) String symbol,
-                                     @RequestParam(required = false) String entryConditions,
-                                     @RequestParam(required = false) String exitConditions,
-                                     @RequestParam(required = false) String stopLossType,
-                                     @RequestParam(required = false) Double stopLossValue,
-                                     @RequestParam(required = false) String takeProfitType,
-                                     @RequestParam(required = false) Double takeProfitValue,
-                                     @RequestParam(required = false) String positionSizeType,
-                                     @RequestParam(required = false) Double positionSizeValue,
-                                     @RequestParam(required = false) Integer maxPositions,
-                                     RedirectAttributes redirectAttributes) {
+    public String updateTradingConfig(@PathVariable String id,
+                                      @RequestParam(required = false) String accountId,
+                                      @RequestParam(required = false) String assetType,
+                                      @RequestParam(required = false) String symbol,
+                                      @RequestParam(required = false) String entryConditions,
+                                      @RequestParam(required = false) String exitConditions,
+                                      @RequestParam(required = false) String stopLossType,
+                                      @RequestParam(required = false) Double stopLossValue,
+                                      @RequestParam(required = false) String takeProfitType,
+                                      @RequestParam(required = false) Double takeProfitValue,
+                                      @RequestParam(required = false) String positionSizeType,
+                                      @RequestParam(required = false) Double positionSizeValue,
+                                      @RequestParam(required = false) Integer maxPositions,
+                                      RedirectAttributes redirectAttributes) {
         try {
-            // Update strategy with trading configuration
-            Strategy strategy = strategyService.getStrategyById(id)
-                    .orElseThrow(() -> new RuntimeException("Strategy not found"));
+            log.info("Updating trading config for strategy: {}", id);
 
-            strategy.setStrategyType("AUTO_TRADING");
-            strategy.setTargetAccountId(targetAccountId);
-            strategy.setAssetType(assetType != null ? assetType : "KR_STOCK");
-            strategy.setSymbol(symbol);
+            Map<String, Object> configData = new HashMap<>();
+            if (accountId != null && !accountId.isEmpty()) configData.put("accountId", accountId);
+            if (assetType != null) configData.put("assetType", assetType);
+            if (symbol != null) configData.put("symbol", symbol);
+            if (entryConditions != null && !entryConditions.isEmpty()) configData.put("entryConditions", entryConditions);
+            if (exitConditions != null && !exitConditions.isEmpty()) configData.put("exitConditions", exitConditions);
+            if (stopLossType != null) configData.put("stopLossType", stopLossType);
+            if (stopLossValue != null) configData.put("stopLossValue", stopLossValue);
+            if (takeProfitType != null) configData.put("takeProfitType", takeProfitType);
+            if (takeProfitValue != null) configData.put("takeProfitValue", takeProfitValue);
+            if (positionSizeType != null) configData.put("positionSizeType", positionSizeType);
+            if (positionSizeValue != null) configData.put("positionSizeValue", positionSizeValue);
+            if (maxPositions != null) configData.put("maxPositions", maxPositions);
 
-            // Set conditions (JSON strings from frontend)
-            strategy.setEntryConditions(entryConditions);
-            strategy.setExitConditions(exitConditions);
+            tradingApiService.updateStrategy(id, configData);
 
-            // Risk management
-            strategy.setStopLossType(stopLossType != null ? stopLossType : "NONE");
-            strategy.setStopLossValue(stopLossValue);
-            strategy.setTakeProfitType(takeProfitType != null ? takeProfitType : "NONE");
-            strategy.setTakeProfitValue(takeProfitValue);
-
-            // Position sizing
-            strategy.setPositionSizeType(positionSizeType != null ? positionSizeType : "FIXED_AMOUNT");
-            strategy.setPositionSizeValue(positionSizeValue);
-            strategy.setMaxPositions(maxPositions != null ? maxPositions : 1);
-
-            strategyRepository.save(strategy);
-
-            redirectAttributes.addFlashAttribute("success", "Trading configuration updated");
-            return "redirect:/trading/strategies/" + id + "/trading";
+            redirectAttributes.addFlashAttribute("success", "매매 설정이 저장되었습니다.");
+            return "redirect:/trading/strategies/" + id;
 
         } catch (Exception e) {
             log.error("Failed to update trading config", e);
-            redirectAttributes.addFlashAttribute("error", "Failed to update: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "매매 설정 저장에 실패했습니다: " + e.getMessage());
             return "redirect:/trading/strategies/" + id + "/trading";
         }
     }
 
     /**
-     * Activate auto-trading
+     * 전략 활성화
      */
     @PostMapping("/{id}/activate")
-    public String activateTrading(@PathVariable Long id,
-                                 RedirectAttributes redirectAttributes) {
-        try {
-            tradingStrategyService.activateTrading(id);
-            redirectAttributes.addFlashAttribute("success", "Auto-trading activated");
-        } catch (Exception e) {
-            log.error("Failed to activate trading", e);
-            redirectAttributes.addFlashAttribute("error", "Activation failed: " + e.getMessage());
-        }
-        return "redirect:/trading/strategies";
-    }
-
-    /**
-     * Deactivate auto-trading
-     */
-    @PostMapping("/{id}/deactivate")
-    public String deactivateTrading(@PathVariable Long id,
+    public String activateStrategy(@PathVariable String id,
                                    RedirectAttributes redirectAttributes) {
         try {
-            tradingStrategyService.deactivateTrading(id);
-            redirectAttributes.addFlashAttribute("success", "Auto-trading deactivated");
+            log.info("Activating strategy: {}", id);
+            tradingApiService.updateStrategyStatus(id, "ACTIVE");
+            redirectAttributes.addFlashAttribute("success", "전략이 활성화되었습니다.");
         } catch (Exception e) {
-            log.error("Failed to deactivate trading", e);
-            redirectAttributes.addFlashAttribute("error", "Deactivation failed: " + e.getMessage());
+            log.error("Failed to activate strategy", e);
+            redirectAttributes.addFlashAttribute("error", "전략 활성화에 실패했습니다: " + e.getMessage());
         }
         return "redirect:/trading/strategies";
     }
 
     /**
-     * Sync strategy with Trading System
+     * 전략 비활성화
      */
-    @PostMapping("/{id}/sync")
-    public String syncStrategy(@PathVariable Long id,
-                              RedirectAttributes redirectAttributes) {
+    @PostMapping("/{id}/deactivate")
+    public String deactivateStrategy(@PathVariable String id,
+                                     RedirectAttributes redirectAttributes) {
         try {
-            tradingStrategyService.syncToTradingSystem(id);
-            redirectAttributes.addFlashAttribute("success", "Strategy synced successfully");
+            log.info("Deactivating strategy: {}", id);
+            tradingApiService.updateStrategyStatus(id, "INACTIVE");
+            redirectAttributes.addFlashAttribute("success", "전략이 비활성화되었습니다.");
         } catch (Exception e) {
-            log.error("Failed to sync strategy", e);
-            redirectAttributes.addFlashAttribute("error", "Sync failed: " + e.getMessage());
+            log.error("Failed to deactivate strategy", e);
+            redirectAttributes.addFlashAttribute("error", "전략 비활성화에 실패했습니다: " + e.getMessage());
         }
         return "redirect:/trading/strategies";
     }
 
     /**
-     * View strategy monitoring/status
+     * 전략 삭제
      */
-    @GetMapping("/{id}/monitor")
-    public String monitorStrategy(@PathVariable Long id, Model model,
+    @PostMapping("/{id}/delete")
+    public String deleteStrategy(@PathVariable String id,
                                  RedirectAttributes redirectAttributes) {
-        Strategy strategy = strategyService.getStrategyById(id)
-                .orElse(null);
-        if (strategy == null) {
-            redirectAttributes.addFlashAttribute("error", "Strategy not found");
-            return "redirect:/trading/strategies";
-        }
-
-        model.addAttribute("strategy", strategy);
-
-        // Get execution status from Trading System
-        if (strategy.getExternalStrategyId() != null) {
-            try {
-                Map<String, Object> executionStatus =
-                        tradingStrategyService.getStrategyExecutionStatus(id);
-                model.addAttribute("executionStatus", executionStatus);
-
-                // Get recent trades
-                if (strategy.getTargetAccountId() != null) {
-                    Map<String, Object> orders =
-                            tradingApiService.getOrders(strategy.getTargetAccountId());
-                    model.addAttribute("recentOrders", orders.get("items"));
-                }
-            } catch (Exception e) {
-                log.error("Failed to get execution status", e);
-                model.addAttribute("statusError", "Unable to fetch execution status");
-            }
-        }
-
-        return "strategy/monitor";
-    }
-
-    /**
-     * 전략 수동 실행
-     */
-    @PostMapping("/{id}/execute")
-    public String executeStrategy(@PathVariable Long id,
-                                  @RequestParam String symbol,
-                                  @RequestParam String accountId,
-                                  RedirectAttributes redirectAttributes) {
         try {
-            log.info("Executing strategy manually: id={}, symbol={}, accountId={}", id, symbol, accountId);
-
-            Strategy strategy = strategyService.getStrategyById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Strategy not found: " + id));
-
-            // externalStrategyId가 있는지 확인
-            if (strategy.getExternalStrategyId() == null || strategy.getExternalStrategyId().isEmpty()) {
-                redirectAttributes.addFlashAttribute("error", "전략이 Trading System에 동기화되지 않았습니다. 먼저 동기화하세요.");
-                return "redirect:/trading/strategies/" + id + "/monitor";
-            }
-
-            // Trading System API 호출
-            Map<String, Object> result = tradingStrategyService.executeStrategy(
-                    strategy.getExternalStrategyId(),
-                    symbol,
-                    accountId
-            );
-
-            redirectAttributes.addFlashAttribute("message", "전략이 성공적으로 실행되었습니다.");
-            return "redirect:/trading/strategies/" + id + "/monitor";
-
+            log.info("Deleting strategy: {}", id);
+            tradingApiService.deleteStrategy(id);
+            redirectAttributes.addFlashAttribute("success", "전략이 삭제되었습니다.");
         } catch (Exception e) {
-            log.error("Failed to execute strategy", e);
-            redirectAttributes.addFlashAttribute("error", "전략 실행에 실패했습니다: " + e.getMessage());
-            return "redirect:/trading/strategies/" + id + "/monitor";
+            log.error("Failed to delete strategy", e);
+            redirectAttributes.addFlashAttribute("error", "전략 삭제에 실패했습니다: " + e.getMessage());
         }
+        return "redirect:/trading/strategies";
     }
 }

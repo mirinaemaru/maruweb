@@ -498,24 +498,9 @@
                 <form th:action="@{/trading/strategies}" method="get" class="filter-form">
                     <select name="status" class="filter-select">
                         <option value="">All Status</option>
-                        <option value="PLANNING" th:selected="${status == 'PLANNING'}">계획중 (Planning)</option>
-                        <option value="EXECUTING" th:selected="${status == 'EXECUTING'}">실행중 (Executing)</option>
-                        <option value="COMPLETED" th:selected="${status == 'COMPLETED'}">완료 (Completed)</option>
-                    </select>
-
-                    <select name="priority" class="filter-select">
-                        <option value="">All Priority</option>
-                        <option value="HIGH" th:selected="${priority == 'HIGH'}">높음 (High)</option>
-                        <option value="MEDIUM" th:selected="${priority == 'MEDIUM'}">중간 (Medium)</option>
-                        <option value="LOW" th:selected="${priority == 'LOW'}">낮음 (Low)</option>
-                    </select>
-
-                    <select name="categoryId" class="filter-select">
-                        <option value="">All Categories</option>
-                        <option th:each="cat : ${categories}"
-                                th:value="${cat.id}"
-                                th:text="${cat.name}"
-                                th:selected="${categoryId == cat.id}">Category</option>
+                        <option value="ACTIVE" th:selected="${status == 'ACTIVE'}">활성 (Active)</option>
+                        <option value="INACTIVE" th:selected="${status == 'INACTIVE'}">비활성 (Inactive)</option>
+                        <option value="PAUSED" th:selected="${status == 'PAUSED'}">일시정지 (Paused)</option>
                     </select>
 
                     <input type="text"
@@ -529,189 +514,91 @@
                 </form>
             </div>
 
-            <!-- Add Strategy Form -->
-            <div class="add-section">
-                <h2>새 전략 추가</h2>
-                <form th:action="@{/trading/strategies}" method="post" th:object="${newStrategy}">
-                    <div class="form-row">
-                        <input type="text"
-                               th:field="*{title}"
-                               placeholder="전략 제목 *"
-                               class="form-input"
-                               required>
-
-                        <select name="categoryId" class="form-select">
-                            <option value="">카테고리 선택</option>
-                            <option th:each="cat : ${categories}"
-                                    th:value="${cat.id}"
-                                    th:text="${cat.name}">Category</option>
-                        </select>
-                    </div>
-
-                    <div class="form-row">
-                        <textarea th:field="*{description}"
-                                  placeholder="전략 설명 (optional)"
-                                  class="form-textarea"
-                                  rows="3"></textarea>
-                    </div>
-
-                    <div class="form-row">
-                        <select th:field="*{status}" class="form-select">
-                            <option value="PLANNING">계획중</option>
-                            <option value="EXECUTING">실행중</option>
-                            <option value="COMPLETED">완료</option>
-                        </select>
-
-                        <select th:field="*{priority}" class="form-select">
-                            <option value="HIGH">높음</option>
-                            <option value="MEDIUM" selected>중간</option>
-                            <option value="LOW">낮음</option>
-                        </select>
-
-                        <select th:field="*{strategyType}" class="form-select">
-                            <option value="GENERAL" selected>일반 전략</option>
-                            <option value="AUTO_TRADING">자동매매 전략</option>
-                        </select>
-                    </div>
-
-                    <div class="form-row">
-                        <label>시작일:
-                            <input type="date" th:field="*{startDate}" class="form-date">
-                        </label>
-                        <label>종료일:
-                            <input type="date" th:field="*{endDate}" class="form-date">
-                        </label>
-                        <label>목표일:
-                            <input type="date" th:field="*{targetDate}" class="form-date">
-                        </label>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">Add Strategy</button>
-                </form>
+            <!-- Add New Strategy Button -->
+            <div class="add-section" style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin: 0;">Trading System 전략 목록</h2>
+                <a th:href="@{/trading/strategies/new}" class="btn btn-primary">새 전략 생성</a>
             </div>
 
-            <!-- Category Management -->
-            <div class="category-section">
-                <h2>카테고리 관리</h2>
-                <form th:action="@{/trading/strategies/categories}" method="post" th:object="${newCategory}" style="display: flex; gap: 10px; margin-bottom: 10px;">
-                    <input type="text"
-                           th:field="*{name}"
-                           placeholder="New category name"
-                           class="form-input"
-                           style="flex: 1;">
-                    <button type="submit" class="btn btn-primary">Add Category</button>
-                </form>
-
-                <div class="category-list">
-                    <div th:each="cat : ${categories}" class="category-item">
-                        <span th:text="${cat.name}">Category Name</span>
-                        <form th:action="@{/trading/strategies/categories/{id}/delete(id=${cat.id})}"
-                              method="post" style="display:inline; margin: 0;">
-                            <button type="submit" class="btn btn-delete" style="padding: 4px 8px; font-size: 12px;"
-                                    onclick="return confirm('Delete category?')">Delete</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Strategies List -->
+            <!-- Strategies List (from Trading System API) -->
             <div class="strategy-list">
                 <div th:if="${#lists.isEmpty(strategies)}" class="empty-state">
-                    <p>No strategies found. Add one to get started!</p>
+                    <p>No strategies found in Trading System.</p>
                 </div>
 
                 <div th:each="strategy : ${strategies}" class="strategy-item">
                     <div class="strategy-header">
                         <h3>
-                            <span th:text="${strategy.title}">Strategy Title</span>
+                            <span th:text="${strategy['name']}">Strategy Name</span>
                             <small style="color: #999; font-size: 14px; margin-left: 10px;">
-                                (Type: <span th:text="${strategy.strategyType}">-</span>)
+                                (ID: <span th:text="${strategy['strategyId']}">-</span>)
                             </small>
                         </h3>
                         <div class="strategy-badges">
-                            <span class="badge badge-status"
-                                  th:classappend="${strategy.status == 'PLANNING'} ? 'badge-planning' :
-                                                  (${strategy.status == 'EXECUTING'} ? 'badge-executing' : 'badge-completed')"
-                                  th:text="${strategy.status == 'PLANNING'} ? '계획중' :
-                                           (${strategy.status == 'EXECUTING'} ? '실행중' : '완료')">Status</span>
-                            <span class="badge badge-priority"
-                                  th:classappend="${strategy.priority == 'HIGH'} ? 'badge-high' :
-                                                  (${strategy.priority == 'MEDIUM'} ? 'badge-medium' : 'badge-low')"
-                                  th:text="${strategy.priority == 'HIGH'} ? '높음' :
-                                           (${strategy.priority == 'MEDIUM'} ? '중간' : '낮음')">Priority</span>
-                            <span th:if="${strategy.category}"
+                            <span class="badge"
+                                  th:classappend="${strategy['status'] == 'ACTIVE'} ? 'badge-trading-active' :
+                                                  (${strategy['status'] == 'PAUSED'} ? 'badge-warning' : 'badge-trading-inactive')"
+                                  th:text="${strategy['status'] == 'ACTIVE'} ? '활성' :
+                                           (${strategy['status'] == 'PAUSED'} ? '일시정지' : '비활성')">Status</span>
+                            <span th:if="${strategy['type'] != null}"
                                   class="badge badge-category"
-                                  th:text="${strategy.category.name}">Category</span>
-                            <!-- Auto-trading status badge -->
-                            <span th:if="${strategy.strategyType == 'AUTO_TRADING'}"
-                                  class="badge"
-                                  th:classappend="${strategy.tradingStatus == 'ACTIVE'} ? 'badge-trading-active' : 'badge-trading-inactive'"
-                                  th:text="${strategy.tradingStatus == 'ACTIVE'} ? '자동매매 활성' : '자동매매 비활성'">Trading Status</span>
-                            <!-- Sync status badge -->
-                            <span th:if="${strategy.strategyType == 'AUTO_TRADING' && strategy.syncStatus != null}"
-                                  class="badge"
-                                  th:classappend="${strategy.syncStatus == 'SYNCED'} ? 'badge-success' :
-                                                 (${strategy.syncStatus == 'ERROR'} ? 'badge-danger' : 'badge-warning')"
-                                  th:text="${strategy.syncStatus}">Sync Status</span>
+                                  th:text="${strategy['type']}">Type</span>
+                            <span th:if="${strategy['symbol'] != null}"
+                                  class="badge badge-planning"
+                                  th:text="${strategy['symbol']}">Symbol</span>
                         </div>
                     </div>
 
-                    <p th:if="${strategy.description}"
+                    <p th:if="${strategy['description'] != null}"
                        class="strategy-description"
-                       th:text="${strategy.description}">Description</p>
+                       th:text="${strategy['description']}">Description</p>
 
                     <div class="strategy-dates">
-                        <span th:if="${strategy.startDate}">
-                            시작: <span th:text="${#temporals.format(strategy.startDate, 'yyyy-MM-dd')}"></span>
+                        <span th:if="${strategy['accountId'] != null}">
+                            계좌: <span th:text="${strategy['accountId']}"></span>
                         </span>
-                        <span th:if="${strategy.endDate}">
-                            종료: <span th:text="${#temporals.format(strategy.endDate, 'yyyy-MM-dd')}"></span>
+                        <span th:if="${strategy['createdAt'] != null}">
+                            생성일: <span th:text="${strategy['createdAt']}"></span>
                         </span>
-                        <span th:if="${strategy.targetDate}">
-                            목표: <span th:text="${#temporals.format(strategy.targetDate, 'yyyy-MM-dd')}"></span>
+                        <span th:if="${strategy['updatedAt'] != null}">
+                            수정일: <span th:text="${strategy['updatedAt']}"></span>
                         </span>
                     </div>
 
                     <div class="strategy-actions">
-                        <a th:href="@{/trading/strategies/{id}/edit(id=${strategy.id})}"
-                           class="btn btn-edit">Edit</a>
+                        <!-- View details from Trading System API -->
+                        <a th:href="@{/trading/strategies/{id}(id=${strategy['strategyId']})}"
+                           class="btn btn-edit">상세보기</a>
 
-                        <!-- Auto-trading controls -->
-                        <div th:if="${strategy.strategyType == 'AUTO_TRADING'}" style="display:inline;">
-                            <a th:href="@{/trading/strategies/{id}/trading(id=${strategy.id})}"
-                               class="btn btn-primary">Configure Trading</a>
+                        <!-- Activate/Deactivate -->
+                        <form th:if="${strategy['status'] != 'ACTIVE'}"
+                              th:action="@{/trading/strategies/{id}/activate(id=${strategy['strategyId']})}"
+                              method="post" style="display:inline; margin: 0;">
+                            <button type="submit" class="btn btn-primary"
+                                    onclick="return confirm('이 전략을 활성화하시겠습니까?')">
+                                활성화
+                            </button>
+                        </form>
 
-                            <form th:if="${strategy.tradingStatus != 'ACTIVE'}"
-                                  th:action="@{/trading/strategies/{id}/activate(id=${strategy.id})}"
-                                  method="post" style="display:inline; margin: 0;">
-                                <button type="submit" class="btn btn-primary"
-                                        onclick="return confirm('Activate auto-trading for this strategy?')">
-                                    Activate
-                                </button>
-                            </form>
+                        <form th:if="${strategy['status'] == 'ACTIVE'}"
+                              th:action="@{/trading/strategies/{id}/deactivate(id=${strategy['strategyId']})}"
+                              method="post" style="display:inline; margin: 0;">
+                            <button type="submit" class="btn btn-secondary"
+                                    onclick="return confirm('이 전략을 비활성화하시겠습니까?')">
+                                비활성화
+                            </button>
+                        </form>
 
-                            <form th:if="${strategy.tradingStatus == 'ACTIVE'}"
-                                  th:action="@{/trading/strategies/{id}/deactivate(id=${strategy.id})}"
-                                  method="post" style="display:inline; margin: 0;">
-                                <button type="submit" class="btn btn-secondary"
-                                        onclick="return confirm('Deactivate auto-trading?')">
-                                    Deactivate
-                                </button>
-                            </form>
-
-                            <a th:href="@{/trading/strategies/{id}/monitor(id=${strategy.id})}"
-                               class="btn btn-edit">Monitor</a>
-                        </div>
-
-                        <form th:action="@{/trading/strategies/{id}/delete(id=${strategy.id})}"
+                        <!-- Delete from Trading System -->
+                        <form th:action="@{/trading/strategies/{id}/delete(id=${strategy['strategyId']})}"
                               method="post" style="display:inline; margin: 0;">
                             <button type="submit" class="btn btn-delete"
-                                    onclick="return confirm('Delete strategy?')">Delete</button>
+                                    onclick="return confirm('이 전략을 Trading System에서 삭제하시겠습니까?')">삭제</button>
                         </form>
                     </div>
 
-                    <small class="strategy-meta">
-                        Created: <span th:text="${#temporals.format(strategy.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+                    <small class="strategy-meta" th:if="${strategy['createdAt'] != null}">
+                        Created: <span th:text="${strategy['createdAt']}"></span>
                     </small>
                 </div>
             </div>

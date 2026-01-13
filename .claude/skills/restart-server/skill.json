@@ -1,7 +1,0 @@
-{
-  "name": "restart-server",
-  "description": "Restart the local development server with environment variables. Use when user asks to restart server or after code changes.",
-  "version": "1.0.0",
-  "tags": ["server", "development", "restart"],
-  "userInvocable": true
-}

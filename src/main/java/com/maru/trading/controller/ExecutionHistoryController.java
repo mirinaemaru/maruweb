@@ -1,6 +1,5 @@
 package com.maru.trading.controller;
 
-import com.maru.strategy.service.StrategyService;
 import com.maru.trading.service.TradingApiService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,11 +10,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 /**
  * 전략 실행 히스토리 컨트롤러
+ * 외부 Trading System API만 사용합니다.
  */
 @Slf4j
 @Controller
@@ -24,7 +25,6 @@ import java.util.Map;
 public class ExecutionHistoryController {
 
     private final TradingApiService tradingApiService;
-    private final StrategyService strategyService;
 
     /**
      * 실행 히스토리 페이지
@@ -55,9 +55,15 @@ public class ExecutionHistoryController {
             log.info("Loading execution history page: strategyId={}, startDate={}, endDate={}, status={}",
                     strategyId, startDate, endDate, status);
 
-            // 전략 목록 조회 (필터용)
-            List<com.maru.strategy.entity.Strategy> strategies = strategyService.getAllStrategies();
-            model.addAttribute("strategies", strategies);
+            // 전략 목록 조회 (필터용) - Trading System API에서 조회
+            try {
+                Map<String, Object> strategiesData = tradingApiService.getStrategies();
+                List<?> strategies = (List<?>) strategiesData.get("items");
+                model.addAttribute("strategies", strategies != null ? strategies : Collections.emptyList());
+            } catch (Exception e) {
+                log.warn("Failed to load strategies for filter", e);
+                model.addAttribute("strategies", Collections.emptyList());
+            }
 
             // 실행 히스토리 조회 - 타임아웃 발생 가능
             try {
@@ -74,7 +80,7 @@ public class ExecutionHistoryController {
                 log.warn("Failed to load execution history from Trading System API (timeout or unavailable): {}",
                         apiException.getMessage());
                 // API 타임아웃 시 빈 결과와 경고 메시지 표시
-                model.addAttribute("executions", new java.util.ArrayList<>());
+                model.addAttribute("executions", Collections.emptyList());
                 model.addAttribute("totalExecutions", 0);
                 model.addAttribute("successfulExecutions", 0);
                 model.addAttribute("failedExecutions", 0);
@@ -89,7 +95,7 @@ public class ExecutionHistoryController {
             model.addAttribute("error", "실행 히스토리 페이지를 불러오는데 실패했습니다: " + e.getMessage());
 
             // 기본값 설정
-            model.addAttribute("executions", new java.util.ArrayList<>());
+            model.addAttribute("executions", Collections.emptyList());
             model.addAttribute("totalExecutions", 0);
             model.addAttribute("successfulExecutions", 0);
             model.addAttribute("failedExecutions", 0);
