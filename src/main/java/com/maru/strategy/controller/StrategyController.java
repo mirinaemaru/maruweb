@@ -245,10 +245,10 @@ public class StrategyController {
 
             Map<String, Object> strategyData = new HashMap<>();
             strategyData.put("name", name);
-            if (description != null) strategyData.put("description", description);
-            if (type != null) strategyData.put("type", type);
-            if (status != null) strategyData.put("status", status);
-            if (symbol != null) strategyData.put("symbol", symbol);
+            if (description != null && !description.isEmpty()) strategyData.put("description", description);
+            if (type != null && !type.isEmpty()) strategyData.put("type", type);
+            if (status != null && !status.isEmpty()) strategyData.put("status", status);
+            if (symbol != null && !symbol.isEmpty()) strategyData.put("symbol", symbol);
             if (accountId != null && !accountId.isEmpty()) strategyData.put("accountId", accountId);
 
             tradingApiService.updateStrategy(id, strategyData);
