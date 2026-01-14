@@ -102,6 +102,7 @@
     grid-template-columns: 1fr auto auto;
     gap: 10px;
     margin-bottom: 12px;
+    align-items: start;
 }
 
 .quick-add-row-1 .form-control {
@@ -110,8 +111,20 @@
     border: 1px solid var(--border-color);
 }
 
+.quick-add-row-1 textarea.form-control {
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+    line-height: 1.5;
+}
+
 .quick-add-row-1 .priority-select {
     width: 120px;
+    height: fit-content;
+}
+
+.quick-add-row-1 .btn {
+    height: fit-content;
 }
 
 /* Row 2: File Upload (Single Row) */

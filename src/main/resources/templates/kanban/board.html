@@ -71,15 +71,15 @@
                 <input type="hidden" name="projectId" th:value="${selectedProject.id}">
                 <!-- Row 1: Title, Priority, Add Button -->
                 <div class="quick-add-row-1">
-                    <input type="text" name="title" class="form-control"
-                           placeholder="새 태스크 제목..." required>
+                    <textarea name="title" class="form-control" rows="3"
+                              placeholder="새 태스크 제목..." required></textarea>
                     <select name="priority" class="form-control priority-select">
                         <option value="LOW">낮음</option>
                         <option value="MEDIUM" selected>보통</option>
                         <option value="HIGH">높음</option>
                     </select>
                     <button type="submit" class="btn btn-success">
-                        <i class="fas fa-plus"></i> 추가
+                        <i class="fas fa-plus"></i> 등록
                     </button>
                 </div>
                 <!-- Row 2: File Upload (Single Row) -->
