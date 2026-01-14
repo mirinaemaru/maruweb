@@ -102,7 +102,7 @@
     grid-template-columns: 1fr auto auto;
     gap: 10px;
     margin-bottom: 12px;
-    align-items: start;
+    align-items: center;
 }
 
 .quick-add-row-1 .form-control {
@@ -111,24 +111,38 @@
     border: 1px solid var(--border-color);
 }
 
-.quick-add-row-1 textarea.form-control {
+.quick-add-row-1 .title-input {
+    height: 42px;
+    font-size: 1em;
+}
+
+.quick-add-row-1 .priority-select {
+    width: 120px;
+    height: 42px;
+}
+
+.quick-add-row-1 .btn {
+    height: 42px;
+}
+
+/* Row 2: Description */
+.quick-add-row-2 {
+    margin-bottom: 12px;
+}
+
+.quick-add-row-2 .description-input {
+    width: 100%;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
     resize: vertical;
     min-height: 80px;
     font-family: inherit;
     line-height: 1.5;
 }
 
-.quick-add-row-1 .priority-select {
-    width: 120px;
-    height: fit-content;
-}
-
-.quick-add-row-1 .btn {
-    height: fit-content;
-}
-
-/* Row 2: File Upload (Single Row) */
-.quick-add-row-2 {
+/* Row 3: File Upload (Single Row) */
+.quick-add-row-3 {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -149,7 +163,7 @@
     margin-right: 5px;
 }
 
-.quick-add-row-2 .file-input {
+.quick-add-row-3 .file-input {
     background: var(--bg-tertiary);
     color: var(--text-primary);
     border: 1px solid var(--border-color);
@@ -852,7 +866,12 @@
         width: 100%;
     }
 
-    .quick-add-row-2 .file-input {
+    .quick-add-row-3 {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .quick-add-row-3 .file-input {
         width: 100%;
     }
 }
@@ -1260,5 +1279,96 @@
 
 [data-theme="dark"] .drag-feedback.error {
     background: #dc3545;
+}
+
+/* ===== Inline Edit Styles ===== */
+
+.editable-wrapper {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.editable-wrapper .editable-content {
+    flex: 1;
+    margin: 0;
+}
+
+.editable-wrapper .edit-input {
+    flex: 1;
+    width: 100%;
+    padding: 8px;
+    border: 2px solid var(--primary-color);
+    border-radius: 4px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: inherit;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 60px;
+}
+
+.task-title-wrapper .edit-input {
+    min-height: 40px;
+    font-weight: 600;
+}
+
+.task-desc-wrapper .edit-input {
+    min-height: 80px;
+}
+
+.btn-inline-edit {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.2s ease;
+}
+
+.editable-wrapper:hover .btn-inline-edit,
+.btn-inline-edit:focus {
+    opacity: 1;
+}
+
+.btn-inline-edit:hover {
+    background: var(--bg-tertiary);
+    color: var(--primary-color);
+    border-color: var(--border-color);
+}
+
+.btn-inline-edit:disabled {
+    cursor: wait;
+    opacity: 0.6;
+}
+
+/* Empty description placeholder */
+.empty-desc {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Dark mode inline edit */
+[data-theme="dark"] .editable-wrapper .edit-input {
+    background: var(--bg-tertiary);
+    border-color: var(--primary-color);
+}
+
+[data-theme="dark"] .btn-inline-edit {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .btn-inline-edit:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
 }
 

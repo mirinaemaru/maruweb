@@ -385,4 +385,31 @@ public class KanbanController {
             return ResponseEntity.badRequest().body(response);
         }
     }
+
+    /**
+     * Update task content via AJAX (for inline editing)
+     */
+    @PostMapping("/api/tasks/{id}/content")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateTaskContentApi(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> payload) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            String title = payload.get("title");
+            String description = payload.get("description");
+
+            var task = taskService.updateTaskContent(id, title, description);
+            response.put("success", true);
+            response.put("message", "Task content updated successfully");
+            response.put("title", task.getTitle());
+            response.put("description", task.getDescription());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Failed to update task content via API: id={}", id, e);
+            response.put("success", false);
+            response.put("message", "Failed to update content: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
 }

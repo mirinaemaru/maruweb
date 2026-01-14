@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+    Symbol Search Component Fragment
+    종목 검색 공통 컴포넌트 프래그먼트
+
+    Usage:
+    1. Include CSS in <head>:
+       <link rel="stylesheet" th:href="@{/css/symbol-search.css}">
+
+    2. Include modal fragment in page body:
+       <div th:replace="~{fragments/symbol-search :: modal}"></div>
+
+    3. Include JS before </body>:
+       <script th:src="@{/js/symbol-search.js}"></script>
+
+    4. Add search button next to your input field:
+       <div class="symbol-search-wrapper">
+           <input type="text" id="mySymbolInput" name="symbol">
+           <button type="button" class="symbol-search-btn" onclick="SymbolSearch.open('mySymbolInput')">🔍</button>
+       </div>
+
+    5. Options for SymbolSearch.open():
+       - multiSelect: true/false (default: true)
+       - defaultMarket: 'KOSPI'/'KOSDAQ'/'' (default: 'KOSPI')
+       - apiUrl: '/trading/instruments/api/search' (default)
+       - onConfirm: function(symbols) { ... }
+
+    Example:
+    SymbolSearch.open('symbolInput', {
+        multiSelect: true,
+        defaultMarket: 'KOSPI',
+        onConfirm: function(symbols) {
+            console.log('Selected:', symbols);
+        }
+    });
+-->
+
+<!-- Symbol Search Modal Fragment -->
+<div th:fragment="modal" id="symbolSearchModal" class="symbol-search-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>🔍 종목 검색</h3>
+            <button type="button" class="modal-close" onclick="SymbolSearch.close()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <!-- Search Controls -->
+            <div class="symbol-search-controls">
+                <select id="symbolSearchMarket">
+                    <option value="">전체 시장</option>
+                    <option value="KOSPI" selected>KOSPI</option>
+                    <option value="KOSDAQ">KOSDAQ</option>
+                </select>
+                <input type="text" id="symbolSearchKeyword" placeholder="종목명 또는 코드 검색..."
+                       onkeydown="if(event.key==='Enter'){event.preventDefault();SymbolSearch.search();}">
+                <button type="button" class="search-btn" onclick="SymbolSearch.search()">
+                    🔍 검색
+                </button>
+            </div>
+
+            <!-- Selected Symbols Display -->
+            <div>
+                <label style="font-weight: 600; color: var(--text-primary); margin-bottom: 8px; display: block;">
+                    선택된 종목
+                </label>
+                <div id="symbolSearchSelected" class="symbol-search-selected">
+                    <span class="symbol-search-no-selection">선택된 종목이 없습니다</span>
+                </div>
+            </div>
+
+            <!-- Instrument List -->
+            <div id="symbolSearchList" class="symbol-search-list">
+                <div class="symbol-search-empty">
+                    ℹ️
+                    <p>검색어를 입력하고 검색 버튼을 클릭하세요</p>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="SymbolSearch.close()">취소</button>
+            <button type="button" class="btn btn-primary" onclick="SymbolSearch.confirm()">
+                ✓ 확인
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Input with search button fragment -->
+<th:block th:fragment="input(inputId, inputName, inputValue, placeholder, required)">
+    <div class="symbol-search-wrapper">
+        <input type="text"
+               th:id="${inputId}"
+               th:name="${inputName}"
+               th:value="${inputValue}"
+               th:placeholder="${placeholder} ?: '종목 코드를 입력하세요'"
+               th:required="${required} ?: false"
+               class="form-input">
+        <button type="button" class="symbol-search-btn"
+                th:onclick="'SymbolSearch.open(\'' + ${inputId} + '\')'"
+                title="종목 검색">
+            🔍
+        </button>
+    </div>
+</th:block>
+
+</html>

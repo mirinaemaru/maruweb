@@ -71,19 +71,24 @@
                 <input type="hidden" name="projectId" th:value="${selectedProject.id}">
                 <!-- Row 1: Title, Priority, Add Button -->
                 <div class="quick-add-row-1">
-                    <textarea name="title" class="form-control" rows="3"
-                              placeholder="새 태스크 내용..." required></textarea>
-                    <select name="priority" class="form-control priority-select">
+                    <input type="text" name="title" class="form-control title-input"
+                           placeholder="새 태스크 제목..." required tabindex="1">
+                    <select name="priority" class="form-control priority-select" tabindex="3">
                         <option value="LOW">낮음</option>
                         <option value="MEDIUM" selected>보통</option>
                         <option value="HIGH">높음</option>
                     </select>
-                    <button type="submit" class="btn btn-success">
+                    <button type="submit" class="btn btn-success" tabindex="4">
                         <i class="fas fa-plus"></i> 등록
                     </button>
                 </div>
-                <!-- Row 2: File Upload (Single Row) -->
+                <!-- Row 2: Description -->
                 <div class="quick-add-row-2">
+                    <textarea name="description" class="form-control description-input" rows="3"
+                              placeholder="새 태스크 내용..." tabindex="2"></textarea>
+                </div>
+                <!-- Row 3: File Upload (Single Row) -->
+                <div class="quick-add-row-3">
                     <label class="file-upload-label" for="quick-file-upload">
                         <i class="fas fa-paperclip"></i> 파일 첨부 (선택사항)
                     </label>
@@ -140,13 +145,24 @@
                             </div>
                         </div>
 
-                        <h4 class="task-title" th:text="${task.title}">Task Title</h4>
+                        <!-- Inline Editable Title (REGISTERED only) -->
+                        <div class="task-title-wrapper editable-wrapper" th:data-task-id="${task.id}">
+                            <h4 class="task-title editable-content" th:text="${task.title}">Task Title</h4>
+                            <textarea class="task-title-edit edit-input" style="display: none;" th:text="${task.title}"></textarea>
+                            <button type="button" class="btn-inline-edit" onclick="toggleInlineEdit(this)" title="수정">
+                                <i class="fas fa-pencil-alt"></i>
+                            </button>
+                        </div>
 
-                        <p th:if="${task.description}"
-                           class="task-description"
-                           th:text="${task.description}">
-                            Description
-                        </p>
+                        <!-- Inline Editable Description (REGISTERED only) -->
+                        <div class="task-desc-wrapper editable-wrapper" th:data-task-id="${task.id}">
+                            <p th:if="${task.description}" class="task-description editable-content" th:text="${task.description}">Description</p>
+                            <p th:unless="${task.description}" class="task-description editable-content empty-desc">설명 없음</p>
+                            <textarea class="task-desc-edit edit-input" style="display: none;" th:text="${task.description}" placeholder="설명을 입력하세요..."></textarea>
+                            <button type="button" class="btn-inline-edit" onclick="toggleInlineEdit(this)" title="수정">
+                                <i class="fas fa-pencil-alt"></i>
+                            </button>
+                        </div>
 
                         <!-- File Attachment -->
                         <div th:if="${task.hasFile()}" class="task-file">
@@ -297,13 +313,24 @@
                                 </div>
                             </div>
 
-                            <h4 class="task-title" th:text="${task.title}">Task Title</h4>
+                            <!-- Inline Editable Title (WAITING_RESPONSE) -->
+                            <div class="task-title-wrapper editable-wrapper" th:data-task-id="${task.id}">
+                                <h4 class="task-title editable-content" th:text="${task.title}">Task Title</h4>
+                                <textarea class="task-title-edit edit-input" style="display: none;" th:text="${task.title}"></textarea>
+                                <button type="button" class="btn-inline-edit" onclick="toggleInlineEdit(this)" title="수정">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </button>
+                            </div>
 
-                            <p th:if="${task.description}"
-                               class="task-description"
-                               th:text="${task.description}">
-                                Description
-                            </p>
+                            <!-- Inline Editable Description (WAITING_RESPONSE) -->
+                            <div class="task-desc-wrapper editable-wrapper" th:data-task-id="${task.id}">
+                                <p th:if="${task.description}" class="task-description editable-content" th:text="${task.description}">Description</p>
+                                <p th:unless="${task.description}" class="task-description editable-content empty-desc">설명 없음</p>
+                                <textarea class="task-desc-edit edit-input" style="display: none;" th:text="${task.description}" placeholder="설명을 입력하세요..."></textarea>
+                                <button type="button" class="btn-inline-edit" onclick="toggleInlineEdit(this)" title="수정">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </button>
+                            </div>
 
                             <!-- File Attachment -->
                             <div th:if="${task.hasFile()}" class="task-file">
@@ -1014,6 +1041,127 @@
                 toast.classList.remove('show');
                 setTimeout(() => toast.remove(), 300);
             }, 2000);
+        }
+
+        // ===== Inline Edit Functions =====
+
+        function toggleInlineEdit(button) {
+            const wrapper = button.closest('.editable-wrapper');
+            const content = wrapper.querySelector('.editable-content');
+            const input = wrapper.querySelector('.edit-input');
+            const isTitle = wrapper.classList.contains('task-title-wrapper');
+
+            if (input.style.display === 'none') {
+                // Switch to edit mode
+                content.style.display = 'none';
+                input.style.display = 'block';
+                input.value = content.classList.contains('empty-desc') ? '' : content.textContent.trim();
+                input.focus();
+                button.innerHTML = '<i class="fas fa-save"></i>';
+                button.title = '저장';
+
+                // Add event listeners
+                input.onkeydown = function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey && isTitle) {
+                        e.preventDefault();
+                        saveInlineEdit(wrapper, isTitle);
+                    } else if (e.key === 'Escape') {
+                        cancelInlineEdit(wrapper, isTitle);
+                    }
+                };
+
+                // Save on blur (with delay to allow button click)
+                input.onblur = function(e) {
+                    setTimeout(() => {
+                        if (document.activeElement !== button && input.style.display !== 'none') {
+                            saveInlineEdit(wrapper, isTitle);
+                        }
+                    }, 200);
+                };
+            } else {
+                // Save changes
+                saveInlineEdit(wrapper, isTitle);
+            }
+        }
+
+        function saveInlineEdit(wrapper, isTitle) {
+            const taskId = wrapper.dataset.taskId;
+            const content = wrapper.querySelector('.editable-content');
+            const input = wrapper.querySelector('.edit-input');
+            const button = wrapper.querySelector('.btn-inline-edit');
+            const newValue = input.value.trim();
+
+            // Validate title cannot be empty
+            if (isTitle && !newValue) {
+                showDragFeedback('error', '제목을 입력해주세요');
+                input.focus();
+                return;
+            }
+
+            // Prepare payload
+            const payload = {};
+            if (isTitle) {
+                payload.title = newValue;
+            } else {
+                payload.description = newValue;
+            }
+
+            // Show saving state
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            // API call
+            fetch('/kanban/api/tasks/' + taskId + '/content', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update display
+                    if (isTitle) {
+                        content.textContent = data.title;
+                    } else {
+                        if (data.description) {
+                            content.textContent = data.description;
+                            content.classList.remove('empty-desc');
+                        } else {
+                            content.textContent = '설명 없음';
+                            content.classList.add('empty-desc');
+                        }
+                    }
+                    showDragFeedback('success', '저장되었습니다');
+                } else {
+                    showDragFeedback('error', data.message || '저장에 실패했습니다');
+                }
+            })
+            .catch(error => {
+                console.error('Error saving task content:', error);
+                showDragFeedback('error', '서버 오류가 발생했습니다');
+            })
+            .finally(() => {
+                // Switch back to view mode
+                content.style.display = '';
+                input.style.display = 'none';
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+                button.title = '수정';
+            });
+        }
+
+        function cancelInlineEdit(wrapper, isTitle) {
+            const content = wrapper.querySelector('.editable-content');
+            const input = wrapper.querySelector('.edit-input');
+            const button = wrapper.querySelector('.btn-inline-edit');
+
+            // Switch back to view mode without saving
+            content.style.display = '';
+            input.style.display = 'none';
+            button.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+            button.title = '수정';
         }
     </script>
 </div>

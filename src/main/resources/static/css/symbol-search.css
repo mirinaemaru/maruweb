@@ -1,0 +1,334 @@
+/**
+ * Symbol Search Component Styles
+ * 종목 검색 공통 컴포넌트 스타일
+ *
+ * Usage:
+ * 1. Include this CSS: <link rel="stylesheet" th:href="@{/css/symbol-search.css}">
+ * 2. Include the JS: <script th:src="@{/js/symbol-search.js}"></script>
+ * 3. Include the modal fragment: <div th:replace="~{fragments/symbol-search :: modal}"></div>
+ * 4. Add search button next to input: <button type="button" class="symbol-search-btn" onclick="SymbolSearch.open('targetInputId')">🔍</button>
+ */
+
+/* Symbol search button */
+.symbol-search-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.symbol-search-wrapper .form-input,
+.symbol-search-wrapper input[type="text"] {
+    flex: 1;
+}
+
+.symbol-search-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.symbol-search-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+[data-theme="dark"] .symbol-search-btn {
+    background: #6c757d;
+}
+
+[data-theme="dark"] .symbol-search-btn:hover {
+    background: #5a6268;
+}
+
+/* Modal overlay */
+.symbol-search-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.symbol-search-modal.active {
+    display: flex;
+}
+
+/* Modal content */
+.symbol-search-modal .modal-content {
+    background: var(--bg-secondary, #ffffff);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 700px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color, #e0e0e0);
+}
+
+.symbol-search-modal .modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color, #e0e0e0);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.symbol-search-modal .modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: var(--text-primary, #333333);
+}
+
+.symbol-search-modal .modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--text-muted, #999999);
+    padding: 0;
+    line-height: 1;
+}
+
+.symbol-search-modal .modal-close:hover {
+    color: var(--text-primary, #333333);
+}
+
+.symbol-search-modal .modal-body {
+    padding: 20px 24px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.symbol-search-modal .modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border-color, #e0e0e0);
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Search controls */
+.symbol-search-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.symbol-search-controls select,
+.symbol-search-controls input {
+    padding: 10px 14px;
+    border: 2px solid var(--border-color, #e0e0e0);
+    border-radius: 8px;
+    font-size: 14px;
+    background: var(--bg-tertiary, #f5f5f5);
+    color: var(--text-primary, #333333);
+}
+
+.symbol-search-controls input {
+    flex: 1;
+}
+
+.symbol-search-controls select {
+    width: 140px;
+}
+
+.symbol-search-controls .search-btn {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+[data-theme="dark"] .symbol-search-controls .search-btn {
+    background: #6c757d;
+}
+
+/* Instrument list */
+.symbol-search-list {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color, #e0e0e0);
+    border-radius: 8px;
+}
+
+.symbol-search-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color, #e0e0e0);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.symbol-search-item:last-child {
+    border-bottom: none;
+}
+
+.symbol-search-item:hover {
+    background: var(--bg-tertiary, #f5f5f5);
+}
+
+.symbol-search-item.selected {
+    background: rgba(102, 126, 234, 0.15);
+}
+
+.symbol-search-item input[type="checkbox"] {
+    margin-right: 12px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.symbol-search-item .info {
+    flex: 1;
+}
+
+.symbol-search-item .name {
+    font-weight: 600;
+    color: var(--text-primary, #333333);
+    font-size: 14px;
+}
+
+.symbol-search-item .code {
+    color: var(--text-muted, #999999);
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.symbol-search-item .market {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    background: var(--bg-tertiary, #f5f5f5);
+    color: var(--text-secondary, #666666);
+}
+
+/* Selected symbols display */
+.symbol-search-selected {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 36px;
+    padding: 8px;
+    background: var(--bg-tertiary, #f5f5f5);
+    border-radius: 8px;
+    border: 1px solid var(--border-color, #e0e0e0);
+    margin-bottom: 16px;
+}
+
+.symbol-search-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+[data-theme="dark"] .symbol-search-tag {
+    background: #4a5568;
+}
+
+.symbol-search-tag .remove {
+    cursor: pointer;
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+.symbol-search-tag .remove:hover {
+    opacity: 1;
+}
+
+.symbol-search-no-selection {
+    color: var(--text-muted, #999999);
+    font-size: 13px;
+    padding: 4px;
+}
+
+/* Loading & empty states */
+.symbol-search-loading,
+.symbol-search-empty {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-muted, #999999);
+}
+
+.symbol-search-loading::before {
+    content: '';
+    display: block;
+    width: 30px;
+    height: 30px;
+    margin: 0 auto 12px;
+    border: 3px solid var(--border-color, #e0e0e0);
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: symbolSearchSpin 1s linear infinite;
+}
+
+@keyframes symbolSearchSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Modal buttons */
+.symbol-search-modal .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.symbol-search-modal .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.symbol-search-modal .btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+[data-theme="dark"] .symbol-search-modal .btn-primary,
+[data-theme="dark"] .symbol-search-modal .btn-secondary {
+    background: #4a5568;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .symbol-search-controls {
+        flex-direction: column;
+    }
+
+    .symbol-search-controls select {
+        width: 100%;
+    }
+}

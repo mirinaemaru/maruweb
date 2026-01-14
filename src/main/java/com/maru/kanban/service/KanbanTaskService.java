@@ -279,4 +279,29 @@ public class KanbanTaskService {
         taskRepository.save(task);
         log.info("Updated task display order: id={}, newOrder={}", taskId, newOrder);
     }
+
+    /**
+     * Update task title and description (inline edit)
+     *
+     * @param taskId Task ID
+     * @param title New title (optional, null to keep unchanged)
+     * @param description New description (optional, null to keep unchanged)
+     * @return Updated task
+     */
+    @Transactional
+    public KanbanTask updateTaskContent(Long taskId, String title, String description) {
+        KanbanTask task = taskRepository.findByIdAndDeleted(taskId, "N")
+                .orElseThrow(() -> new RuntimeException("Task not found: " + taskId));
+
+        if (title != null && !title.trim().isEmpty()) {
+            task.setTitle(title.trim());
+        }
+        if (description != null) {
+            task.setDescription(description.trim().isEmpty() ? null : description.trim());
+        }
+
+        KanbanTask saved = taskRepository.save(task);
+        log.info("Updated task content: id={}, title={}", taskId, saved.getTitle());
+        return saved;
+    }
 }

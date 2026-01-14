@@ -116,4 +116,16 @@ public class InstrumentController {
         log.info("Toggling halted status: symbol={}, halted={}", symbol, halted);
         return tradingApiService.updateInstrumentStatus(symbol, null, null, halted);
     }
+
+    /**
+     * 종목 검색 API (JSON 응답) - 매매설정 화면에서 종목 검색 팝업용
+     */
+    @GetMapping("/api/search")
+    @ResponseBody
+    public Map<String, Object> searchInstrumentsApi(
+            @RequestParam(required = false) String market,
+            @RequestParam(required = false) String search) {
+        log.info("API Search instruments: market={}, search={}", market, search);
+        return tradingApiService.getInstruments(market, "LISTED", true, search);
+    }
 }

@@ -4,6 +4,8 @@
       layout:decorate="~{layout/main}">
 <head>
     <title>Trading Configuration</title>
+    <!-- Symbol Search Component -->
+    <link rel="stylesheet" th:href="@{/css/symbol-search.css}">
     <style>
         .config-container { max-width: 1000px; margin: 0 auto; padding: 20px; }
 
@@ -154,9 +156,14 @@
 
                     <div class="form-row">
                         <label>종목 코드 (Symbol) *</label>
-                        <input type="text" name="symbol" class="form-input"
-                               th:value="${strategy['symbol']}"
-                               placeholder="예: 005930 (삼성전자)" required>
+                        <div class="symbol-search-wrapper">
+                            <input type="text" name="symbol" id="symbolInput" class="form-input"
+                                   th:value="${strategy['symbol']}"
+                                   placeholder="예: 005930 (삼성전자)" required>
+                            <button type="button" class="symbol-search-btn" onclick="SymbolSearch.open('symbolInput')" title="종목 검색">
+                                🔍
+                            </button>
+                        </div>
                         <p class="info-text">국내 주식: 6자리 코드, 해외 주식: 티커 (예: AAPL)</p>
                     </div>
                 </div>
@@ -284,6 +291,12 @@
                 </div>
             </form>
         </div>
+
+        <!-- Symbol Search Modal (Common Component) -->
+        <div th:replace="~{fragments/symbol-search :: modal}"></div>
+
+        <!-- Symbol Search Component Script -->
+        <script th:src="@{/js/symbol-search.js}"></script>
     </div>
 </body>
 </html>
