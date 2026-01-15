@@ -36,7 +36,14 @@
 
     <!-- Application specific loggers -->
     <logger name="kr.co.maruweb" level="DEBUG"/>
+    <logger name="com.maru" level="DEBUG"/>
     <logger name="org.springframework" level="INFO"/>
+
+    <!-- Hibernate SQL logging disabled (using p6spy instead) -->
     <logger name="org.hibernate" level="WARN"/>
-    <logger name="org.hibernate.SQL" level="DEBUG"/>
+    <logger name="org.hibernate.SQL" level="OFF"/>
+    <logger name="org.hibernate.type.descriptor.sql" level="OFF"/>
+
+    <!-- P6Spy SQL logging with actual parameter values -->
+    <logger name="p6spy" level="INFO"/>
 </configuration>
