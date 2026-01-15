@@ -355,14 +355,14 @@ select.form-input option:disabled {
 /* Shortcut item의 Edit, Delete 버튼은 투명 배경 */
 [data-theme="dark"] .shortcut-actions .btn-edit,
 [data-theme="dark"] .shortcut-actions .btn-delete {
-    background: transparent;
-    border: 1px solid var(--border-color);
+    background: transparent !important;
+    border: 1px solid var(--border-color) !important;
 }
 
 [data-theme="dark"] .shortcut-actions .btn-edit:hover,
 [data-theme="dark"] .shortcut-actions .btn-delete:hover {
-    background: var(--bg-tertiary);
-    border-color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: var(--text-secondary) !important;
 }
 
 /* Active 탭 배경을 투명하게 */
