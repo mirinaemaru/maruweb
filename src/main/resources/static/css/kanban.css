@@ -940,6 +940,59 @@
     align-self: flex-end;
 }
 
+/* Comments List in Task Card */
+.task-comments .comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.task-comments .comment-item {
+    padding: 8px 10px;
+    background: var(--bg-primary);
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.task-comments .comment-item .comment-text {
+    font-size: 0.85em;
+    color: var(--text-primary);
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.task-comments .comment-item .comment-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid var(--border-color);
+}
+
+.task-comments .comment-item .comment-date {
+    font-size: 0.75em;
+    color: var(--text-muted);
+}
+
+.btn-icon-tiny {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 2px 4px;
+    font-size: 0.75em;
+    transition: color 0.2s;
+}
+
+.btn-icon-tiny:hover {
+    color: var(--danger-color, #e74c3c);
+}
+
 /* Comments Section (task-form.html) */
 .comments-section {
     margin-top: 30px;

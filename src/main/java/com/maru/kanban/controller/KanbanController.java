@@ -64,6 +64,16 @@ public class KanbanController {
                     ));
             model.addAttribute("tasksByStatus", tasksByStatus);
             model.addAttribute("statuses", TaskStatus.values());
+
+            // Get comments for WAITING_RESPONSE tasks (Map<taskId, List<Comment>>)
+            Map<Long, List<com.maru.kanban.entity.KanbanTaskComment>> commentsByTaskId = new HashMap<>();
+            List<KanbanTask> waitingTasks = tasksByStatus.get("WAITING_RESPONSE");
+            if (waitingTasks != null) {
+                for (KanbanTask task : waitingTasks) {
+                    commentsByTaskId.put(task.getId(), commentService.getCommentsByTaskId(task.getId()));
+                }
+            }
+            model.addAttribute("commentsByTaskId", commentsByTaskId);
         }
 
         model.addAttribute("newTask", new KanbanTask());

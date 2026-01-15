@@ -208,6 +208,25 @@
                                 <i class="fas fa-comments"></i>
                                 <span>사용자 의견</span>
                             </div>
+                            <!-- Existing Comments List -->
+                            <div th:if="${commentsByTaskId != null && commentsByTaskId.get(task.id) != null && !commentsByTaskId.get(task.id).isEmpty()}" class="comments-list">
+                                <div th:each="comment : ${commentsByTaskId.get(task.id)}" class="comment-item">
+                                    <div class="comment-text" th:text="${comment.commentText}">Comment text</div>
+                                    <div class="comment-meta">
+                                        <span class="comment-date" th:text="${#temporals.format(comment.createdAt, 'MM-dd HH:mm')}">01-15 10:30</span>
+                                        <form th:action="@{/kanban/comments/{id}/delete(id=${comment.id})}"
+                                              method="post"
+                                              style="display: inline;"
+                                              onsubmit="return confirm('댓글을 삭제하시겠습니까?')">
+                                            <input type="hidden" name="projectId" th:value="${selectedProject.id}">
+                                            <button type="submit" class="btn-icon-tiny" title="삭제">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Comment Input Form -->
                             <form th:action="@{/kanban/tasks/{id}/comments(id=${task.id})}"
                                   method="post"
                                   class="comment-form">
@@ -364,6 +383,25 @@
                                     <i class="fas fa-comments"></i>
                                     <span>사용자 의견</span>
                                 </div>
+                                <!-- Existing Comments List -->
+                                <div th:if="${commentsByTaskId != null && commentsByTaskId.get(task.id) != null && !commentsByTaskId.get(task.id).isEmpty()}" class="comments-list">
+                                    <div th:each="comment : ${commentsByTaskId.get(task.id)}" class="comment-item">
+                                        <div class="comment-text" th:text="${comment.commentText}">Comment text</div>
+                                        <div class="comment-meta">
+                                            <span class="comment-date" th:text="${#temporals.format(comment.createdAt, 'MM-dd HH:mm')}">01-15 10:30</span>
+                                            <form th:action="@{/kanban/comments/{id}/delete(id=${comment.id})}"
+                                                  method="post"
+                                                  style="display: inline;"
+                                                  onsubmit="return confirm('댓글을 삭제하시겠습니까?')">
+                                                <input type="hidden" name="projectId" th:value="${selectedProject.id}">
+                                                <button type="submit" class="btn-icon-tiny" title="삭제">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Comment Input Form -->
                                 <form th:action="@{/kanban/tasks/{id}/comments(id=${task.id})}"
                                       method="post"
                                       class="comment-form">
