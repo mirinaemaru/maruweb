@@ -165,12 +165,63 @@
         [data-theme="dark"] .alert-error { background: linear-gradient(135deg, #3d1f22 0%, #3d2426 100%);
                                           border: 1px solid rgba(220, 53, 69, 0.3); color: #f5a5ae; }
 
+        .params-section {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .param-group {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         @media (max-width: 768px) {
             .form-row {
                 grid-template-columns: 1fr;
             }
         }
     </style>
+    <script>
+        function updateParamsFields() {
+            const type = document.getElementById('type').value;
+
+            // 모든 파라미터 그룹 숨기기
+            document.querySelectorAll('.param-group').forEach(group => {
+                group.style.display = 'none';
+            });
+
+            // 선택된 유형에 따라 파라미터 그룹 표시
+            switch (type) {
+                case 'MA_CROSSOVER':
+                    document.getElementById('ma-params').style.display = 'block';
+                    break;
+                case 'RSI':
+                    document.getElementById('rsi-params').style.display = 'block';
+                    break;
+                case 'BOLLINGER':
+                    document.getElementById('bollinger-params').style.display = 'block';
+                    break;
+                case 'MACD':
+                    document.getElementById('macd-params').style.display = 'block';
+                    break;
+                case 'MANUAL':
+                    document.getElementById('manual-params').style.display = 'block';
+                    break;
+            }
+        }
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            updateParamsFields();
+        });
+    </script>
 </head>
 <body>
     <div layout:fragment="content">
@@ -204,13 +255,123 @@
                                   placeholder="전략에 대한 설명을 입력하세요"></textarea>
                     </div>
 
-                    <div class="form-group">
-                        <label for="type">전략 유형 (Type)</label>
-                        <select id="type" name="type" class="form-select">
-                            <option value="MANUAL">수동 (Manual)</option>
-                            <option value="SIGNAL">시그널 (Signal)</option>
-                            <option value="AUTO">자동 (Auto)</option>
-                        </select>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="type">전략 유형 (Type) *</label>
+                            <select id="type" name="type" class="form-select" required onchange="updateParamsFields()">
+                                <option value="MA_CROSSOVER">이동평균 크로스오버 (MA Crossover)</option>
+                                <option value="RSI">RSI</option>
+                                <option value="BOLLINGER">볼린저 밴드 (Bollinger Bands)</option>
+                                <option value="MACD">MACD</option>
+                                <option value="MANUAL">수동 (Manual)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mode">실행 모드 (Mode) *</label>
+                            <select id="mode" name="mode" class="form-select" required>
+                                <option value="PAPER">모의투자 (Paper Trading)</option>
+                                <option value="LIVE">실거래 (Live Trading)</option>
+                            </select>
+                            <p class="form-help-text">PAPER: 모의투자 / LIVE: 실제 거래</p>
+                        </div>
+                    </div>
+
+                    <!-- 전략 파라미터 섹션 -->
+                    <div id="params-section" class="params-section">
+                        <h3 style="color: var(--text-primary); margin-bottom: 15px; font-size: 16px;">전략 파라미터 (Strategy Parameters)</h3>
+
+                        <!-- MA Crossover 파라미터 -->
+                        <div id="ma-params" class="param-group">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="shortPeriod">단기 이평선 기간 (Short Period)</label>
+                                    <input type="number" id="shortPeriod" name="shortPeriod" class="form-input"
+                                           value="5" min="1" max="100">
+                                    <p class="form-help-text">단기 이동평균선 기간 (일반적으로 5~20)</p>
+                                </div>
+                                <div class="form-group">
+                                    <label for="longPeriod">장기 이평선 기간 (Long Period)</label>
+                                    <input type="number" id="longPeriod" name="longPeriod" class="form-input"
+                                           value="20" min="1" max="200">
+                                    <p class="form-help-text">장기 이동평균선 기간 (일반적으로 20~60)</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- RSI 파라미터 -->
+                        <div id="rsi-params" class="param-group" style="display: none;">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="rsiPeriod">RSI 기간 (Period)</label>
+                                    <input type="number" id="rsiPeriod" name="rsiPeriod" class="form-input"
+                                           value="14" min="1" max="100">
+                                </div>
+                                <div class="form-group">
+                                    <label for="oversold">과매도 기준 (Oversold)</label>
+                                    <input type="number" id="oversold" name="oversold" class="form-input"
+                                           value="30" min="0" max="100">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="overbought">과매수 기준 (Overbought)</label>
+                                    <input type="number" id="overbought" name="overbought" class="form-input"
+                                           value="70" min="0" max="100">
+                                </div>
+                                <div class="form-group"></div>
+                            </div>
+                        </div>
+
+                        <!-- Bollinger 파라미터 -->
+                        <div id="bollinger-params" class="param-group" style="display: none;">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="bollingerPeriod">기간 (Period)</label>
+                                    <input type="number" id="bollingerPeriod" name="bollingerPeriod" class="form-input"
+                                           value="20" min="1" max="100">
+                                </div>
+                                <div class="form-group">
+                                    <label for="stdDev">표준편차 배수 (Std Dev)</label>
+                                    <input type="number" id="stdDev" name="stdDev" class="form-input"
+                                           value="2" min="1" max="5" step="0.5">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- MACD 파라미터 -->
+                        <div id="macd-params" class="param-group" style="display: none;">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="fastPeriod">단기 기간 (Fast Period)</label>
+                                    <input type="number" id="fastPeriod" name="fastPeriod" class="form-input"
+                                           value="12" min="1" max="100">
+                                </div>
+                                <div class="form-group">
+                                    <label for="slowPeriod">장기 기간 (Slow Period)</label>
+                                    <input type="number" id="slowPeriod" name="slowPeriod" class="form-input"
+                                           value="26" min="1" max="200">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="signalPeriod">시그널 기간 (Signal Period)</label>
+                                    <input type="number" id="signalPeriod" name="signalPeriod" class="form-input"
+                                           value="9" min="1" max="100">
+                                </div>
+                                <div class="form-group"></div>
+                            </div>
+                        </div>
+
+                        <!-- Manual 파라미터 -->
+                        <div id="manual-params" class="param-group" style="display: none;">
+                            <div class="form-group">
+                                <label for="ttlSeconds">신호 유효시간 (TTL Seconds)</label>
+                                <input type="number" id="ttlSeconds" name="ttlSeconds" class="form-input"
+                                       value="300" min="60" max="3600">
+                                <p class="form-help-text">신호가 유효한 시간 (초 단위)</p>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-actions">

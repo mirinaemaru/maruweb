@@ -113,16 +113,35 @@ public class StrategyController {
     public String createStrategy(
             @RequestParam String name,
             @RequestParam(required = false) String description,
-            @RequestParam(required = false) String type,
+            @RequestParam String type,
+            @RequestParam String mode,
             @RequestParam(required = false) String symbol,
             @RequestParam(required = false) String accountId,
+            // MA Crossover params
+            @RequestParam(required = false) Integer shortPeriod,
+            @RequestParam(required = false) Integer longPeriod,
+            // RSI params
+            @RequestParam(required = false) Integer rsiPeriod,
+            @RequestParam(required = false) Integer oversold,
+            @RequestParam(required = false) Integer overbought,
+            // Bollinger params
+            @RequestParam(required = false) Integer bollingerPeriod,
+            @RequestParam(required = false) Double stdDev,
+            // MACD params
+            @RequestParam(required = false) Integer fastPeriod,
+            @RequestParam(required = false) Integer slowPeriod,
+            @RequestParam(required = false) Integer signalPeriod,
+            // Manual params
+            @RequestParam(required = false) Integer ttlSeconds,
             RedirectAttributes redirectAttributes) {
 
         try {
-            log.info("Creating new strategy via API: name={}", name);
+            log.info("Creating new strategy via API: name={}, type={}, mode={}", name, type, mode);
 
             Map<String, Object> strategyData = new HashMap<>();
             strategyData.put("name", name);
+            strategyData.put("mode", mode);
+
             if (description != null && !description.isEmpty()) {
                 strategyData.put("description", description);
             }
@@ -136,6 +155,38 @@ public class StrategyController {
                 strategyData.put("accountId", accountId);
             }
 
+            // Build params based on strategy type
+            Map<String, Object> params = new HashMap<>();
+            params.put("ttlSeconds", ttlSeconds != null ? ttlSeconds : 300);
+
+            switch (type) {
+                case "MA_CROSSOVER":
+                    params.put("shortPeriod", shortPeriod != null ? shortPeriod : 5);
+                    params.put("longPeriod", longPeriod != null ? longPeriod : 20);
+                    break;
+                case "RSI":
+                    params.put("period", rsiPeriod != null ? rsiPeriod : 14);
+                    params.put("oversold", oversold != null ? oversold : 30);
+                    params.put("overbought", overbought != null ? overbought : 70);
+                    break;
+                case "BOLLINGER":
+                    params.put("period", bollingerPeriod != null ? bollingerPeriod : 20);
+                    params.put("stdDev", stdDev != null ? stdDev : 2.0);
+                    break;
+                case "MACD":
+                    params.put("fastPeriod", fastPeriod != null ? fastPeriod : 12);
+                    params.put("slowPeriod", slowPeriod != null ? slowPeriod : 26);
+                    params.put("signalPeriod", signalPeriod != null ? signalPeriod : 9);
+                    break;
+                case "MANUAL":
+                default:
+                    // Only ttlSeconds for manual
+                    break;
+            }
+
+            strategyData.put("params", params);
+
+            log.debug("Strategy data to send: {}", strategyData);
             Map<String, Object> result = tradingApiService.createStrategy(strategyData);
 
             if (result != null && result.containsKey("strategyId")) {
@@ -235,22 +286,73 @@ public class StrategyController {
     public String updateStrategy(@PathVariable String id,
                                  @RequestParam String name,
                                  @RequestParam(required = false) String description,
-                                 @RequestParam(required = false) String type,
+                                 @RequestParam String type,
+                                 @RequestParam String mode,
                                  @RequestParam(required = false) String status,
                                  @RequestParam(required = false) String symbol,
                                  @RequestParam(required = false) String accountId,
+                                 // MA Crossover params
+                                 @RequestParam(required = false) Integer shortPeriod,
+                                 @RequestParam(required = false) Integer longPeriod,
+                                 // RSI params
+                                 @RequestParam(required = false) Integer rsiPeriod,
+                                 @RequestParam(required = false) Integer oversold,
+                                 @RequestParam(required = false) Integer overbought,
+                                 // Bollinger params
+                                 @RequestParam(required = false) Integer bollingerPeriod,
+                                 @RequestParam(required = false) Double stdDev,
+                                 // MACD params
+                                 @RequestParam(required = false) Integer fastPeriod,
+                                 @RequestParam(required = false) Integer slowPeriod,
+                                 @RequestParam(required = false) Integer signalPeriod,
+                                 // Manual params
+                                 @RequestParam(required = false) Integer ttlSeconds,
                                  RedirectAttributes redirectAttributes) {
         try {
-            log.info("Updating strategy: {}", id);
+            log.info("Updating strategy: {} with type={}, mode={}", id, type, mode);
 
             Map<String, Object> strategyData = new HashMap<>();
             strategyData.put("name", name);
+            strategyData.put("type", type);
+            strategyData.put("mode", mode);
+
             if (description != null && !description.isEmpty()) strategyData.put("description", description);
-            if (type != null && !type.isEmpty()) strategyData.put("type", type);
             if (status != null && !status.isEmpty()) strategyData.put("status", status);
             if (symbol != null && !symbol.isEmpty()) strategyData.put("symbol", symbol);
             if (accountId != null && !accountId.isEmpty()) strategyData.put("accountId", accountId);
 
+            // Build params based on strategy type
+            Map<String, Object> params = new HashMap<>();
+            params.put("ttlSeconds", ttlSeconds != null ? ttlSeconds : 300);
+
+            switch (type) {
+                case "MA_CROSSOVER":
+                    params.put("shortPeriod", shortPeriod != null ? shortPeriod : 5);
+                    params.put("longPeriod", longPeriod != null ? longPeriod : 20);
+                    break;
+                case "RSI":
+                    params.put("period", rsiPeriod != null ? rsiPeriod : 14);
+                    params.put("oversold", oversold != null ? oversold : 30);
+                    params.put("overbought", overbought != null ? overbought : 70);
+                    break;
+                case "BOLLINGER":
+                    params.put("period", bollingerPeriod != null ? bollingerPeriod : 20);
+                    params.put("stdDev", stdDev != null ? stdDev : 2.0);
+                    break;
+                case "MACD":
+                    params.put("fastPeriod", fastPeriod != null ? fastPeriod : 12);
+                    params.put("slowPeriod", slowPeriod != null ? slowPeriod : 26);
+                    params.put("signalPeriod", signalPeriod != null ? signalPeriod : 9);
+                    break;
+                case "MANUAL":
+                default:
+                    // Only ttlSeconds for manual
+                    break;
+            }
+
+            strategyData.put("params", params);
+
+            log.debug("Strategy update data: {}", strategyData);
             tradingApiService.updateStrategy(id, strategyData);
 
             redirectAttributes.addFlashAttribute("success", "전략이 수정되었습니다.");
