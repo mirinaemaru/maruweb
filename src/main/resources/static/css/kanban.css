@@ -303,6 +303,22 @@
     opacity: 0.8;
 }
 
+.task-number-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+[data-theme="dark"] .task-number-badge {
+    background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+}
+
 .task-priority.low {
     background: #e0e0e0;
     color: #616161;

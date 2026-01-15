@@ -118,10 +118,10 @@
 
                 <div class="column-body">
                     <!-- Task Cards -->
-                    <div th:each="task : ${tasksByStatus.get(status.name())}" class="task-card">
+                    <div th:each="task : ${tasksByStatus.get(status.name())}" class="task-card" th:data-task-id="${task.id}">
                         <div class="task-header">
                             <span class="task-priority" th:classappend="${task.priority.toLowerCase()}">
-                                <span class="task-id">#<span th:text="${task.id}">1</span></span>
+                                <span class="task-id">#<span th:text="${task.taskNumber}">1</span></span>
                                 <span th:text="${task.priority == 'LOW' ? '낮음' : task.priority == 'MEDIUM' ? '보통' : '높음'}">Priority</span>
                             </span>
                             <div class="task-actions">
@@ -286,10 +286,10 @@
 
                     <div class="column-body">
                         <!-- Task Cards -->
-                        <div th:each="task : ${tasksByStatus.get(status.name())}" class="task-card">
+                        <div th:each="task : ${tasksByStatus.get(status.name())}" class="task-card" th:data-task-id="${task.id}">
                             <div class="task-header">
                                 <span class="task-priority" th:classappend="${task.priority.toLowerCase()}">
-                                    <span class="task-id">#<span th:text="${task.id}">1</span></span>
+                                    <span class="task-id">#<span th:text="${task.taskNumber}">1</span></span>
                                     <span th:text="${task.priority == 'LOW' ? '낮음' : task.priority == 'MEDIUM' ? '보통' : '높음'}">Priority</span>
                                 </span>
                                 <div class="task-actions">
@@ -440,10 +440,10 @@
 
                     <div class="column-body">
                         <!-- Task Cards -->
-                        <div th:each="task : ${tasksByStatus.get(status.name())}" class="task-card">
+                        <div th:each="task : ${tasksByStatus.get(status.name())}" class="task-card" th:data-task-id="${task.id}">
                             <div class="task-header">
                                 <span class="task-priority" th:classappend="${task.priority.toLowerCase()}">
-                                    <span class="task-id">#<span th:text="${task.id}">1</span></span>
+                                    <span class="task-id">#<span th:text="${task.taskNumber}">1</span></span>
                                     <span th:text="${task.priority == 'LOW' ? '낮음' : task.priority == 'MEDIUM' ? '보통' : '높음'}">Priority</span>
                                 </span>
                                 <div class="task-actions">
@@ -562,10 +562,10 @@
 
                 <div class="column-body">
                     <!-- Task Cards -->
-                    <div th:each="task : ${tasksByStatus.get(status.name())}" class="task-card">
+                    <div th:each="task : ${tasksByStatus.get(status.name())}" class="task-card" th:data-task-id="${task.id}">
                         <div class="task-header">
                             <span class="task-priority" th:classappend="${task.priority.toLowerCase()}">
-                                <span class="task-id">#<span th:text="${task.id}">1</span></span>
+                                <span class="task-id">#<span th:text="${task.taskNumber}">1</span></span>
                                 <span th:text="${task.priority == 'LOW' ? '낮음' : task.priority == 'MEDIUM' ? '보통' : '높음'}">Priority</span>
                             </span>
                             <div class="task-actions">
@@ -873,8 +873,8 @@
             draggedCard = this;
             this.classList.add('dragging');
 
-            // Set drag data
-            const taskId = this.querySelector('.task-id span').textContent;
+            // Set drag data (use data-task-id attribute for actual ID)
+            const taskId = this.getAttribute('data-task-id');
             e.dataTransfer.setData('text/plain', taskId);
             e.dataTransfer.effectAllowed = 'move';
 
@@ -935,8 +935,8 @@
                 return;
             }
 
-            // Get task ID
-            const taskId = draggedCard.querySelector('.task-id span').textContent;
+            // Get task ID (use data-task-id attribute for actual ID)
+            const taskId = draggedCard.getAttribute('data-task-id');
 
             // Update task status via API
             updateTaskStatus(taskId, statusClass, this);

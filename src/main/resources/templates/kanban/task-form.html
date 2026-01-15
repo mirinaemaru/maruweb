@@ -10,7 +10,7 @@
 <div layout:fragment="content">
     <div class="form-container">
         <div class="form-header">
-            <h2>태스크 수정</h2>
+            <h2>태스크 수정 <span class="task-number-badge">#<span th:text="${task.taskNumber}">1</span></span></h2>
             <a th:href="@{/kanban(projectId=${task.project.id})}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> 뒤로
             </a>

@@ -39,4 +39,9 @@ public interface KanbanTaskRepository extends JpaRepository<KanbanTask, Long> {
     Integer getMaxDisplayOrderByProjectAndStatus(
             @Param("projectId") Long projectId,
             @Param("status") String status);
+
+    // Get max task number for a project (for generating next task number)
+    @Query("SELECT COALESCE(MAX(t.taskNumber), 0) FROM KanbanTask t " +
+           "WHERE t.project.id = :projectId")
+    Integer getMaxTaskNumberByProject(@Param("projectId") Long projectId);
 }

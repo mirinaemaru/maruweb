@@ -23,6 +23,9 @@ public class KanbanTask {
     @JoinColumn(name = "project_id", nullable = false)
     private KanbanProject project;
 
+    @Column(name = "task_number")
+    private Integer taskNumber;
+
     @NotBlank(message = "Task title is required")
     @Column(nullable = false, length = 500)
     private String title;

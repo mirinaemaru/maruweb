@@ -88,6 +88,10 @@ public class KanbanTaskService {
             task.setDisplayOrder(maxOrder != null ? maxOrder + 1 : 0);
         }
 
+        // Set project-specific task number
+        Integer maxTaskNumber = taskRepository.getMaxTaskNumberByProject(task.getProject().getId());
+        task.setTaskNumber(maxTaskNumber + 1);
+
         // Save task first to get ID for file storage
         KanbanTask saved = taskRepository.save(task);
 
