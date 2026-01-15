@@ -67,13 +67,25 @@ else
     exit 1
 fi
 
+# Log directory setup
+LOG_DIR="/var/logs/trading"
+LOG_FILE="${LOG_DIR}/maruweb.log"
+
+# Create log directory if it doesn't exist
+if [ ! -d "$LOG_DIR" ]; then
+    echo "Creating log directory: $LOG_DIR"
+    sudo mkdir -p "$LOG_DIR"
+    sudo chown $(whoami):staff "$LOG_DIR"
+    echo -e "${GREEN}✓ Log directory created${NC}"
+fi
+
 # Start the server
 echo ""
 echo "========================================="
 echo "  Starting Spring Boot Server"
 echo "========================================="
 echo ""
-echo "Log file: /tmp/maruweb.log"
+echo "Log file: $LOG_FILE"
 echo "Server URL: http://localhost:8090"
 echo ""
 
@@ -86,7 +98,7 @@ GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" \
 GOOGLE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET" \
 CALENDAR_ENCRYPTION_KEY="$CALENDAR_ENCRYPTION_KEY" \
 TRADING_API_BASE_URL="$TRADING_API_BASE_URL" \
-nohup ./mvnw spring-boot:run > /tmp/maruweb.log 2>&1 &
+nohup ./mvnw spring-boot:run > "$LOG_FILE" 2>&1 &
 
 SERVER_PID=$!
 echo "Server process ID: $SERVER_PID"
@@ -106,7 +118,7 @@ for i in {1..30}; do
         echo ""
         echo "  URL: http://localhost:8090"
         echo "  PID: $SERVER_PID"
-        echo "  Logs: tail -f /tmp/maruweb.log"
+        echo "  Logs: tail -f $LOG_FILE"
         echo ""
         exit 0
     fi
@@ -119,8 +131,8 @@ echo -e "${RED}✗ Server failed to start within 30 seconds${NC}"
 echo ""
 echo "Recent logs:"
 echo "----------------------------------------"
-tail -30 /tmp/maruweb.log
+tail -30 "$LOG_FILE"
 echo "----------------------------------------"
 echo ""
-echo "Full logs: /tmp/maruweb.log"
+echo "Full logs: $LOG_FILE"
 exit 1
