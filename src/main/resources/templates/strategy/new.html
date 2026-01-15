@@ -4,8 +4,6 @@
       layout:decorate="~{layout/main}">
 <head>
     <title>New Strategy</title>
-    <!-- Symbol Search Component -->
-    <link rel="stylesheet" th:href="@{/css/symbol-search.css}">
     <style>
         .edit-container {
             max-width: 800px;
@@ -206,40 +204,12 @@
                                   placeholder="전략에 대한 설명을 입력하세요"></textarea>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="type">전략 유형 (Type)</label>
-                            <select id="type" name="type" class="form-select">
-                                <option value="MANUAL">수동 (Manual)</option>
-                                <option value="SIGNAL">시그널 (Signal)</option>
-                                <option value="AUTO">자동 (Auto)</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="symbol">종목 코드 (Symbol)</label>
-                            <div class="symbol-search-wrapper">
-                                <input type="text"
-                                       id="symbol"
-                                       name="symbol"
-                                       class="form-input"
-                                       placeholder="예: 005930">
-                                <button type="button" class="symbol-search-btn" onclick="SymbolSearch.open('symbol')" title="종목 검색">
-                                    🔍
-                                </button>
-                            </div>
-                            <p class="form-help-text">국내 주식: 6자리 코드, 해외 주식: 티커</p>
-                        </div>
-                    </div>
-
                     <div class="form-group">
-                        <label for="accountId">계좌 (Account)</label>
-                        <select id="accountId" name="accountId" class="form-select">
-                            <option value="">선택 안함</option>
-                            <option th:each="account : ${accounts}"
-                                    th:value="${account['accountId']}"
-                                    th:text="${account['alias'] != null ? account['alias'] + ' (' + account['cano'] + ')' : account['cano']}">
-                            </option>
+                        <label for="type">전략 유형 (Type)</label>
+                        <select id="type" name="type" class="form-select">
+                            <option value="MANUAL">수동 (Manual)</option>
+                            <option value="SIGNAL">시그널 (Signal)</option>
+                            <option value="AUTO">자동 (Auto)</option>
                         </select>
                     </div>
 
@@ -250,12 +220,6 @@
                 </form>
             </div>
         </div>
-
-        <!-- Symbol Search Modal (Common Component) -->
-        <div th:replace="~{fragments/symbol-search :: modal}"></div>
-
-        <!-- Symbol Search Component Script -->
-        <script th:src="@{/js/symbol-search.js}"></script>
     </div>
 </body>
 </html>

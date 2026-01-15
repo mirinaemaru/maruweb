@@ -33,6 +33,9 @@ application-secret.properties
 **/secret/
 **/secrets/
 
+# Uploads (user uploaded files)
+uploads/
+
 # Logs
 *.log
 
