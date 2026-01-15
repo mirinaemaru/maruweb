@@ -71,7 +71,9 @@ class ExecutionHistoryControllerTest {
     void history_WithStrategyFilter() throws Exception {
         // Mock strategy data from API
         Map<String, Object> strategy = new HashMap<>();
+        strategy.put("id", "strategy-001");
         strategy.put("strategyId", "strategy-001");
+        strategy.put("title", "테스트 전략");
         strategy.put("name", "테스트 전략");
         strategy.put("status", "ACTIVE");
 
@@ -99,7 +101,7 @@ class ExecutionHistoryControllerTest {
         historyResponse.put("failedExecutions", 0);
         historyResponse.put("totalProfitLoss", 10000);
 
-        when(tradingApiService.getExecutionHistory(any(), any(), any(), any()))
+        when(tradingApiService.getExecutionHistory("strategy-001", "2025-01-01", "2025-12-31", null))
                 .thenReturn(historyResponse);
 
         mockMvc.perform(get("/trading/execution-history")
@@ -113,13 +115,18 @@ class ExecutionHistoryControllerTest {
     }
 
     @Test
-    @DisplayName("실행 히스토리 - API 오류 시")
+    @DisplayName("실행 히스토리 - API 오류 시 (전략 목록 조회 실패)")
     void history_ApiError() throws Exception {
+        // getStrategies 실패 시 strategies만 빈 리스트가 됨 (내부 catch에서 처리)
         when(tradingApiService.getStrategies()).thenThrow(new RuntimeException("Connection refused"));
+        // getExecutionHistory도 실패하면 warning 메시지가 추가됨
+        when(tradingApiService.getExecutionHistory(any(), any(), any(), any()))
+                .thenThrow(new RuntimeException("Connection refused"));
 
         mockMvc.perform(get("/trading/execution-history"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("trading/execution-history"))
-                .andExpect(model().attributeExists("error"));
+                .andExpect(model().attributeExists("warning"))
+                .andExpect(model().attribute("strategies", Collections.emptyList()));
     }
 }
