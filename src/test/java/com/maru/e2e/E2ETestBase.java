@@ -134,7 +134,9 @@ public abstract class E2ETestBase {
     protected Map<String, Object> createTestAccountData() {
         Map<String, Object> account = new HashMap<>();
         account.put("broker", "키움증권");
-        account.put("cano", "TEST" + System.currentTimeMillis());
+        // cano는 8자리로 제한됨 - 타임스탬프 마지막 8자리 사용
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        account.put("cano", timestamp.substring(timestamp.length() - 8));
         account.put("acntPrdtCd", "01");
         account.put("alias", "E2E 테스트 계좌");
         account.put("environment", "PAPER");
@@ -145,6 +147,7 @@ public abstract class E2ETestBase {
         Map<String, Object> strategy = new HashMap<>();
         strategy.put("name", "E2E 테스트 전략 " + System.currentTimeMillis());
         strategy.put("description", "E2E 테스트용 자동매매 전략");
+        strategy.put("mode", "PAPER"); // cautostock requires mode (PAPER/LIVE)
         strategy.put("strategyType", "AUTO_TRADING");
         strategy.put("symbol", "005930");
         strategy.put("assetType", "STOCK");
@@ -155,6 +158,11 @@ public abstract class E2ETestBase {
         strategy.put("stopLossValue", new BigDecimal("5"));
         strategy.put("takeProfitType", "PERCENT");
         strategy.put("takeProfitValue", new BigDecimal("10"));
+        // cautostock requires params map
+        Map<String, Object> params = new HashMap<>();
+        params.put("symbol", "005930");
+        params.put("maxPositions", 3);
+        strategy.put("params", params);
         return strategy;
     }
 

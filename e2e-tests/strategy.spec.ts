@@ -231,4 +231,218 @@ test.describe('Strategy Management', () => {
       }
     }
   });
+
+  // ========== 저장 후 재조회 검증 테스트 (Round-Trip) ==========
+
+  test('자동매매 설정 저장 후 재조회 검증', async ({ page }) => {
+    // Given - 전략 목록에서 첫 번째 전략 선택
+    await page.goto('/trading/strategies');
+
+    const strategyLink = page.locator('a[href*="/strategies/"]').first();
+    if (await strategyLink.count() === 0) {
+      console.log('No strategies found, skipping test');
+      return;
+    }
+
+    // 전략 ID 추출
+    const href = await strategyLink.getAttribute('href');
+    const strategyId = href?.match(/\/strategies\/([^\/]+)/)?.[1];
+    if (!strategyId) {
+      console.log('Could not extract strategy ID');
+      return;
+    }
+
+    // 자동매매 설정 페이지로 이동
+    await page.goto(`/trading/strategies/${strategyId}/trading`);
+
+    // 페이지 로드 확인
+    const pageLoaded = await page.locator('body').isVisible();
+    if (!pageLoaded) return;
+
+    // When - 설정 입력
+    const testSymbol = '005930';
+    const testStopLoss = '5';
+    const testMaxPositions = '3';
+
+    const symbolInput = page.locator('input[name="symbol"], #symbol');
+    if (await symbolInput.count() > 0) {
+      await symbolInput.fill(testSymbol);
+    }
+
+    const stopLossInput = page.locator('input[name="stopLossValue"], #stopLossValue');
+    if (await stopLossInput.count() > 0) {
+      await stopLossInput.fill(testStopLoss);
+    }
+
+    const maxPositionsInput = page.locator('input[name="maxPositions"], #maxPositions');
+    if (await maxPositionsInput.count() > 0) {
+      await maxPositionsInput.fill(testMaxPositions);
+    }
+
+    // 저장 버튼 클릭
+    const saveBtn = page.locator('button:has-text("저장"), button[type="submit"]').first();
+    if (await saveBtn.count() > 0) {
+      await saveBtn.click();
+      await page.waitForURL(/\/trading\/strategies\//);
+    }
+
+    // Then - 다시 설정 페이지로 가서 저장된 값 확인
+    await page.goto(`/trading/strategies/${strategyId}/trading`);
+    await page.waitForLoadState('networkidle');
+
+    // 저장된 값 검증
+    if (await symbolInput.count() > 0) {
+      const savedSymbol = await symbolInput.inputValue();
+      expect(savedSymbol).toBe(testSymbol);
+    }
+
+    if (await stopLossInput.count() > 0) {
+      const savedStopLoss = await stopLossInput.inputValue();
+      expect(savedStopLoss).toBe(testStopLoss);
+    }
+
+    if (await maxPositionsInput.count() > 0) {
+      const savedMaxPositions = await maxPositionsInput.inputValue();
+      expect(savedMaxPositions).toBe(testMaxPositions);
+    }
+  });
+
+  test('전략 생성 후 재조회 검증', async ({ page }) => {
+    // Given - 새 전략 페이지로 이동
+    await page.goto('/trading/strategies/new');
+
+    const nameInput = page.locator('input[name="name"], #name');
+    if (await nameInput.count() === 0) {
+      console.log('Name input not found, skipping test');
+      return;
+    }
+
+    // When - 고유한 전략명으로 생성
+    const uniqueName = `E2E 테스트 전략 ${Date.now()}`;
+    await nameInput.fill(uniqueName);
+
+    const descInput = page.locator('textarea[name="description"], #description');
+    if (await descInput.count() > 0) {
+      await descInput.fill('Round-trip 검증용 테스트 전략');
+    }
+
+    // 전략 유형 선택 (있는 경우)
+    const typeSelect = page.locator('select[name="type"], #type, select[name="strategyType"]');
+    if (await typeSelect.count() > 0) {
+      const options = await typeSelect.locator('option').all();
+      if (options.length > 1) {
+        await typeSelect.selectOption({ index: 1 });
+      }
+    }
+
+    // 모드 선택 (있는 경우)
+    const modeSelect = page.locator('select[name="mode"], #mode');
+    if (await modeSelect.count() > 0) {
+      await modeSelect.selectOption('PAPER');
+    }
+
+    // 저장
+    const saveBtn = page.locator('button:has-text("저장"), button:has-text("생성"), button[type="submit"]').first();
+    if (await saveBtn.count() > 0) {
+      await saveBtn.click();
+      await page.waitForTimeout(2000);
+    }
+
+    // Then - 목록에서 생성된 전략 확인
+    await page.goto('/trading/strategies');
+    await page.waitForLoadState('networkidle');
+
+    const createdStrategy = page.locator(`text=${uniqueName}`);
+    await expect(createdStrategy).toBeVisible({ timeout: 5000 });
+  });
+
+  test('전략 수정 후 변경 내용 유지 검증', async ({ page }) => {
+    // Given - 전략 목록에서 첫 번째 전략 선택
+    await page.goto('/trading/strategies');
+
+    const editBtn = page.locator('a:has-text("수정"), a[href*="edit"]').first();
+    if (await editBtn.count() === 0) {
+      console.log('No edit button found, skipping test');
+      return;
+    }
+
+    // 수정 페이지로 이동
+    await editBtn.click();
+    await page.waitForLoadState('networkidle');
+
+    // 현재 URL에서 전략 ID 추출
+    const currentUrl = page.url();
+    const strategyIdMatch = currentUrl.match(/\/strategies\/([^\/]+)/);
+    const strategyId = strategyIdMatch?.[1];
+
+    // When - 설명 필드 수정
+    const uniqueDesc = `E2E 수정 테스트 ${Date.now()}`;
+    const descInput = page.locator('textarea[name="description"], #description');
+
+    if (await descInput.count() > 0) {
+      await descInput.fill(uniqueDesc);
+    }
+
+    // 저장
+    const saveBtn = page.locator('button:has-text("저장"), button[type="submit"]').first();
+    if (await saveBtn.count() > 0) {
+      await saveBtn.click();
+      await page.waitForTimeout(2000);
+    }
+
+    // Then - 다시 수정 페이지로 가서 변경 내용 확인
+    if (strategyId) {
+      await page.goto(`/trading/strategies/${strategyId}/edit`);
+      await page.waitForLoadState('networkidle');
+
+      if (await descInput.count() > 0) {
+        const savedDesc = await descInput.inputValue();
+        expect(savedDesc).toBe(uniqueDesc);
+      }
+    }
+  });
+
+  test('자동매매 계좌 선택 저장 검증', async ({ page }) => {
+    // Given
+    await page.goto('/trading/strategies');
+
+    const strategyLink = page.locator('a[href*="/strategies/"]').first();
+    if (await strategyLink.count() === 0) {
+      console.log('No strategies found, skipping test');
+      return;
+    }
+
+    const href = await strategyLink.getAttribute('href');
+    const strategyId = href?.match(/\/strategies\/([^\/]+)/)?.[1];
+    if (!strategyId) return;
+
+    await page.goto(`/trading/strategies/${strategyId}/trading`);
+
+    // When - 계좌 선택 (첫 번째 옵션이 아닌 다른 옵션 선택)
+    const accountSelect = page.locator('select[name="accountId"], #accountId');
+    if (await accountSelect.count() > 0) {
+      const options = await accountSelect.locator('option').all();
+      if (options.length > 1) {
+        // 두 번째 옵션 선택 (첫 번째는 보통 placeholder)
+        const secondOptionValue = await options[1].getAttribute('value');
+        if (secondOptionValue) {
+          await accountSelect.selectOption(secondOptionValue);
+
+          // 저장
+          const saveBtn = page.locator('button:has-text("저장"), button[type="submit"]').first();
+          if (await saveBtn.count() > 0) {
+            await saveBtn.click();
+            await page.waitForURL(/\/trading\/strategies\//);
+          }
+
+          // Then - 재조회하여 선택한 계좌가 유지되는지 확인
+          await page.goto(`/trading/strategies/${strategyId}/trading`);
+          await page.waitForLoadState('networkidle');
+
+          const savedValue = await accountSelect.inputValue();
+          expect(savedValue).toBe(secondOptionValue);
+        }
+      }
+    }
+  });
 });

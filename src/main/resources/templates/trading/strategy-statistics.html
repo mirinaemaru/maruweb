@@ -271,27 +271,27 @@
                 <div class="summary-grid">
                     <div class="summary-item">
                         <label>총 전략 수</label>
-                        <div class="value" th:text="${summary.totalStrategies}">0</div>
+                        <div class="value" th:text="${summary['totalStrategies'] ?: 0}">0</div>
                     </div>
                     <div class="summary-item">
                         <label>활성 전략</label>
-                        <div class="value" th:text="${summary.activeStrategies}">0</div>
+                        <div class="value" th:text="${summary['activeStrategies'] ?: 0}">0</div>
                     </div>
                     <div class="summary-item">
                         <label>총 거래 횟수</label>
-                        <div class="value" th:text="${summary.totalTrades}">0</div>
+                        <div class="value" th:text="${summary['totalTrades'] ?: 0}">0</div>
                     </div>
                     <div class="summary-item">
                         <label>전체 수익/손실</label>
                         <div class="value"
-                             th:classappend="${summary.totalProfitLoss >= 0} ? 'positive' : 'negative'"
-                             th:text="${#numbers.formatDecimal(summary.totalProfitLoss, 0, 'COMMA', 0, 'POINT')} + '원'">
+                             th:classappend="${(summary['totalProfitLoss'] ?: 0) >= 0} ? 'positive' : 'negative'"
+                             th:text="${#numbers.formatDecimal(summary['totalProfitLoss'] ?: 0, 0, 'COMMA', 0, 'POINT')} + '원'">
                             0원
                         </div>
                     </div>
                     <div class="summary-item">
                         <label>평균 승률</label>
-                        <div class="value" th:text="${#numbers.formatDecimal(summary.avgWinRate, 1, 'COMMA', 2, 'POINT')} + '%'">0%</div>
+                        <div class="value" th:text="${#numbers.formatDecimal(summary['avgWinRate'] ?: 0, 1, 'COMMA', 2, 'POINT')} + '%'">0%</div>
                     </div>
                 </div>
             </div>
@@ -300,12 +300,12 @@
             <div class="strategy-cards" th:if="${strategies != null && !#lists.isEmpty(strategies)}">
                 <div class="strategy-card" th:each="strategy : ${strategies}">
                     <div class="strategy-card-header">
-                        <div class="strategy-name" th:text="${strategy.name}">전략명</div>
+                        <div class="strategy-name" th:text="${strategy['name']}">전략명</div>
                         <div class="strategy-id">
-                            <span th:text="'ID: ' + ${strategy.id}">ID: 1</span>
+                            <span th:text="'ID: ' + ${strategy['id']}">ID: 1</span>
                             <span class="status-badge"
-                                  th:classappend="${strategy.status == 'ACTIVE'} ? 'active' : 'inactive'"
-                                  th:text="${strategy.status == 'ACTIVE'} ? '활성' : '비활성'">
+                                  th:classappend="${strategy['status'] == 'ACTIVE'} ? 'active' : 'inactive'"
+                                  th:text="${strategy['status'] == 'ACTIVE'} ? '활성' : '비활성'">
                                 활성
                             </span>
                         </div>
@@ -313,43 +313,43 @@
                     <div class="strategy-card-body">
                         <div class="stat-row">
                             <span class="stat-label">총 거래</span>
-                            <span class="stat-value" th:text="${strategy.totalTrades}">0</span>
+                            <span class="stat-value" th:text="${strategy['totalTrades'] ?: 0}">0</span>
                         </div>
                         <div class="stat-row">
                             <span class="stat-label">승리</span>
-                            <span class="stat-value positive" th:text="${strategy.winningTrades}">0</span>
+                            <span class="stat-value positive" th:text="${strategy['winningTrades'] ?: 0}">0</span>
                         </div>
                         <div class="stat-row">
                             <span class="stat-label">패배</span>
-                            <span class="stat-value negative" th:text="${strategy.losingTrades}">0</span>
+                            <span class="stat-value negative" th:text="${strategy['losingTrades'] ?: 0}">0</span>
                         </div>
                         <div class="stat-row">
                             <span class="stat-label">승률</span>
-                            <span class="stat-value" th:text="${#numbers.formatDecimal(strategy.winRate, 1, 'COMMA', 2, 'POINT')} + '%'">0%</span>
+                            <span class="stat-value" th:text="${#numbers.formatDecimal(strategy['winRate'] ?: 0, 1, 'COMMA', 2, 'POINT')} + '%'">0%</span>
                         </div>
                         <div class="stat-row">
                             <span class="stat-label">총 수익/손실</span>
                             <span class="stat-value"
-                                  th:classappend="${strategy.totalProfitLoss >= 0} ? 'positive' : 'negative'"
-                                  th:text="${#numbers.formatDecimal(strategy.totalProfitLoss, 0, 'COMMA', 0, 'POINT')} + '원'">
+                                  th:classappend="${(strategy['totalProfitLoss'] ?: 0) >= 0} ? 'positive' : 'negative'"
+                                  th:text="${#numbers.formatDecimal(strategy['totalProfitLoss'] ?: 0, 0, 'COMMA', 0, 'POINT')} + '원'">
                                 0원
                             </span>
                         </div>
                         <div class="stat-row">
                             <span class="stat-label">평균 수익/손실</span>
                             <span class="stat-value"
-                                  th:classappend="${strategy.avgProfitLoss >= 0} ? 'positive' : 'negative'"
-                                  th:text="${#numbers.formatDecimal(strategy.avgProfitLoss, 0, 'COMMA', 0, 'POINT')} + '원'">
+                                  th:classappend="${(strategy['avgProfitLoss'] ?: 0) >= 0} ? 'positive' : 'negative'"
+                                  th:text="${#numbers.formatDecimal(strategy['avgProfitLoss'] ?: 0, 0, 'COMMA', 0, 'POINT')} + '원'">
                                 0원
                             </span>
                         </div>
                         <div class="stat-row">
                             <span class="stat-label">최대 이익</span>
-                            <span class="stat-value positive" th:text="${#numbers.formatDecimal(strategy.maxProfit, 0, 'COMMA', 0, 'POINT')} + '원'">0원</span>
+                            <span class="stat-value positive" th:text="${#numbers.formatDecimal(strategy['maxProfit'] ?: 0, 0, 'COMMA', 0, 'POINT')} + '원'">0원</span>
                         </div>
                         <div class="stat-row">
                             <span class="stat-label">최대 손실</span>
-                            <span class="stat-value negative" th:text="${#numbers.formatDecimal(strategy.maxLoss, 0, 'COMMA', 0, 'POINT')} + '원'">0원</span>
+                            <span class="stat-value negative" th:text="${#numbers.formatDecimal(strategy['maxLoss'] ?: 0, 0, 'COMMA', 0, 'POINT')} + '원'">0원</span>
                         </div>
                     </div>
                 </div>

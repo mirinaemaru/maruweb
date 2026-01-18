@@ -13,8 +13,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import org.mockito.ArgumentCaptor;
+
 import java.util.*;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -152,7 +155,7 @@ class StrategyControllerIT {
     }
 
     @Test
-    @DisplayName("전략 생성 - 성공")
+    @DisplayName("전략 생성 - 성공 (ArgumentCaptor로 파라미터 검증)")
     void createStrategy_Success() throws Exception {
         // Given
         Map<String, Object> result = new HashMap<>();
@@ -160,7 +163,7 @@ class StrategyControllerIT {
 
         when(tradingApiService.createStrategy(anyMap())).thenReturn(result);
 
-        // When & Then
+        // When
         mockMvc.perform(post("/trading/strategies/new")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("name", "새 전략")
@@ -173,7 +176,23 @@ class StrategyControllerIT {
                 .andExpect(redirectedUrl("/trading/strategies/new-strategy-1"))
                 .andExpect(flash().attributeExists("success"));
 
-        verify(tradingApiService).createStrategy(anyMap());
+        // Then - ArgumentCaptor로 정확한 파라미터 검증
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass(Map.class);
+        verify(tradingApiService).createStrategy(captor.capture());
+
+        Map<String, Object> savedData = captor.getValue();
+        assertThat(savedData).containsEntry("name", "새 전략");
+        assertThat(savedData).containsEntry("type", "RSI");
+        assertThat(savedData).containsEntry("mode", "PAPER");
+
+        // params 내 RSI 설정 검증
+        @SuppressWarnings("unchecked")
+        Map<String, Object> params = (Map<String, Object>) savedData.get("params");
+        assertThat(params).isNotNull();
+        assertThat(params).containsEntry("period", 14);
+        assertThat(params).containsEntry("oversold", 30);
+        assertThat(params).containsEntry("overbought", 70);
     }
 
     @Test
@@ -326,9 +345,9 @@ class StrategyControllerIT {
     }
 
     @Test
-    @DisplayName("전략 수정 - 성공")
+    @DisplayName("전략 수정 - 성공 (ArgumentCaptor로 파라미터 검증)")
     void updateStrategy_Success() throws Exception {
-        // When & Then
+        // When
         mockMvc.perform(post("/trading/strategies/strategy-1/edit")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("name", "수정된 전략")
@@ -341,7 +360,23 @@ class StrategyControllerIT {
                 .andExpect(redirectedUrl("/trading/strategies/strategy-1"))
                 .andExpect(flash().attributeExists("success"));
 
-        verify(tradingApiService).updateStrategy(eq("strategy-1"), anyMap());
+        // Then - ArgumentCaptor로 정확한 파라미터 검증
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass(Map.class);
+        verify(tradingApiService).updateStrategy(eq("strategy-1"), captor.capture());
+
+        Map<String, Object> savedData = captor.getValue();
+        assertThat(savedData).containsEntry("name", "수정된 전략");
+        assertThat(savedData).containsEntry("type", "RSI");
+        assertThat(savedData).containsEntry("mode", "LIVE");
+
+        // params 내 RSI 설정 검증
+        @SuppressWarnings("unchecked")
+        Map<String, Object> params = (Map<String, Object>) savedData.get("params");
+        assertThat(params).isNotNull();
+        assertThat(params).containsEntry("period", 21);
+        assertThat(params).containsEntry("oversold", 25);
+        assertThat(params).containsEntry("overbought", 75);
     }
 
     @Test
@@ -387,9 +422,9 @@ class StrategyControllerIT {
     }
 
     @Test
-    @DisplayName("자동매매 설정 저장 - 성공")
+    @DisplayName("자동매매 설정 저장 - 성공 (ArgumentCaptor로 파라미터 검증)")
     void updateTradingConfig_Success() throws Exception {
-        // When & Then
+        // When
         mockMvc.perform(post("/trading/strategies/strategy-1/trading")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("accountId", "account-1")
@@ -406,7 +441,96 @@ class StrategyControllerIT {
                 .andExpect(redirectedUrl("/trading/strategies/strategy-1"))
                 .andExpect(flash().attributeExists("success"));
 
-        verify(tradingApiService).updateStrategy(eq("strategy-1"), anyMap());
+        // Then - ArgumentCaptor로 정확한 파라미터 검증
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass(Map.class);
+        verify(tradingApiService).updateStrategy(eq("strategy-1"), captor.capture());
+
+        Map<String, Object> savedConfig = captor.getValue();
+        assertThat(savedConfig).containsEntry("accountId", "account-1");
+        assertThat(savedConfig).containsEntry("symbol", "005930");
+        assertThat(savedConfig).containsEntry("assetType", "STOCK");
+        assertThat(savedConfig).containsEntry("stopLossType", "PERCENT");
+        assertThat(savedConfig).containsEntry("stopLossValue", 5.0);
+        assertThat(savedConfig).containsEntry("takeProfitType", "PERCENT");
+        assertThat(savedConfig).containsEntry("takeProfitValue", 10.0);
+        assertThat(savedConfig).containsEntry("positionSizeType", "FIXED");
+        assertThat(savedConfig).containsEntry("positionSizeValue", 1000000.0);
+        assertThat(savedConfig).containsEntry("maxPositions", 3);
+    }
+
+    @Test
+    @DisplayName("자동매매 설정 저장 - Round-Trip 검증 (저장 후 재조회)")
+    void updateTradingConfig_RoundTrip_VerifySavedData() throws Exception {
+        // Given - Mock이 저장된 데이터를 반환하도록 설정
+        Map<String, Object> savedStrategy = new HashMap<>();
+        savedStrategy.put("strategyId", "strategy-1");
+        savedStrategy.put("name", "테스트 전략");
+        savedStrategy.put("accountId", "account-1");
+        savedStrategy.put("symbol", "005930");
+        savedStrategy.put("assetType", "STOCK");
+        savedStrategy.put("stopLossType", "PERCENT");
+        savedStrategy.put("stopLossValue", 5.0);
+        savedStrategy.put("takeProfitType", "PERCENT");
+        savedStrategy.put("takeProfitValue", 10.0);
+        savedStrategy.put("positionSizeType", "FIXED");
+        savedStrategy.put("positionSizeValue", 1000000.0);
+        savedStrategy.put("maxPositions", 3);
+
+        when(tradingApiService.getStrategy("strategy-1")).thenReturn(savedStrategy);
+
+        Map<String, Object> accountsData = new HashMap<>();
+        accountsData.put("items", Collections.emptyList());
+        when(tradingApiService.getAccounts()).thenReturn(accountsData);
+
+        // When - 저장
+        mockMvc.perform(post("/trading/strategies/strategy-1/trading")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("accountId", "account-1")
+                        .param("symbol", "005930")
+                        .param("assetType", "STOCK")
+                        .param("stopLossType", "PERCENT")
+                        .param("stopLossValue", "5.0")
+                        .param("takeProfitType", "PERCENT")
+                        .param("takeProfitValue", "10.0")
+                        .param("positionSizeType", "FIXED")
+                        .param("positionSizeValue", "1000000")
+                        .param("maxPositions", "3"))
+                .andExpect(status().is3xxRedirection());
+
+        // Then - 재조회하여 저장된 값 검증
+        mockMvc.perform(get("/trading/strategies/strategy-1/trading"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("strategy/trading-config"))
+                .andExpect(model().attribute("strategy",
+                    org.hamcrest.Matchers.hasEntry("accountId", "account-1")))
+                .andExpect(model().attribute("strategy",
+                    org.hamcrest.Matchers.hasEntry("symbol", "005930")))
+                .andExpect(model().attribute("strategy",
+                    org.hamcrest.Matchers.hasEntry("stopLossValue", 5.0)));
+    }
+
+    @Test
+    @DisplayName("자동매매 설정 - 일부 필드만 저장 시 누락 확인")
+    void updateTradingConfig_PartialFields_VerifyOnlyProvidedFieldsSaved() throws Exception {
+        // When - 일부 필드만 전송
+        mockMvc.perform(post("/trading/strategies/strategy-1/trading")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("accountId", "account-1")
+                        .param("symbol", "005930"))
+                .andExpect(status().is3xxRedirection());
+
+        // Then - 전송한 필드만 저장되었는지 확인
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass(Map.class);
+        verify(tradingApiService).updateStrategy(eq("strategy-1"), captor.capture());
+
+        Map<String, Object> savedConfig = captor.getValue();
+        assertThat(savedConfig).containsEntry("accountId", "account-1");
+        assertThat(savedConfig).containsEntry("symbol", "005930");
+        // 전송하지 않은 필드는 저장되지 않아야 함
+        assertThat(savedConfig).doesNotContainKey("stopLossValue");
+        assertThat(savedConfig).doesNotContainKey("takeProfitValue");
     }
 
     // ========== Activate/Deactivate Tests ==========
