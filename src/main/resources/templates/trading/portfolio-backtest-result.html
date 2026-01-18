@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/main}">
+<head>
+    <title>Portfolio Backtest 결과</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container-fluid py-4">
+        <div class="row mb-4">
+            <div class="col">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2>📊 Portfolio Backtest 결과</h2>
+                    <a th:href="@{/trading/backtests/advanced/portfolio}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> 뒤로가기
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-circle"></i> <span th:text="${error}">Error message</span>
+        </div>
+
+        <div th:if="${result}" class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-briefcase"></i> 포트폴리오 백테스트 결과</h5>
+            </div>
+            <div class="card-body">
+                <p>분석 기간: <span th:text="${startDate}">2024-01-01</span> ~ <span th:text="${endDate}">2024-06-30</span></p>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6>포트폴리오 수익률</h6>
+                                <h3 th:text="${result.portfolioReturn != null} ? ${#numbers.formatDecimal(result.portfolioReturn * 100, 1, 2)} + '%' : 'N/A'">12%</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6>샤프 비율</h6>
+                                <h3 th:text="${result.sharpeRatio != null} ? ${#numbers.formatDecimal(result.sharpeRatio, 1, 2)} : 'N/A'">1.5</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

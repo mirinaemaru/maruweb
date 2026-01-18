@@ -42,3 +42,12 @@ uploads/
 # Temp files
 *.tmp
 *.swp
+
+# Node.js (Playwright E2E tests)
+node_modules/
+package-lock.json
+
+# Playwright
+playwright-report/
+test-results/
+playwright/.cache/

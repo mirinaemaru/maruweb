@@ -1,7 +1,7 @@
 package com.maru.trading.controller;
 
-import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
@@ -19,8 +19,11 @@ import java.util.Locale;
  * Minimal configuration for @WebMvcTest in trading controller tests.
  * This configuration excludes JPA, Security, and Thymeleaf auto-configuration.
  * Uses a primary ViewResolver that returns mock views to avoid template rendering issues.
+ *
+ * @Configuration을 사용하여 통합테스트에 영향을 주지 않습니다.
+ * @WebMvcTest에서 @ContextConfiguration(classes = TestConfig.class)로 명시적으로 로드합니다.
  */
-@SpringBootConfiguration
+@Configuration
 @EnableAutoConfiguration(exclude = {
         DataSourceAutoConfiguration.class,
         HibernateJpaAutoConfiguration.class,

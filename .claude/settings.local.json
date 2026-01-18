@@ -110,7 +110,20 @@
       "mcp__playwright__browser_drag",
       "mcp__playwright__browser_console_messages",
       "mcp__playwright__browser_snapshot",
-      "mcp__sequential-thinking__sequentialthinking"
+      "mcp__sequential-thinking__sequentialthinking",
+      "mcp__mysql-maruweb__execute_ddl",
+      "mcp__mysql-maruweb__create_record",
+      "Bash(STRATEGY_ID=\"01KDZDGKWFN8GCJA4AZMWQ32CE\")",
+      "Bash(STRATEGY_ID=\"01KE0A82HKHWYMX900TA94GTTP\")",
+      "mcp__mysql-maruweb__bulk_insert",
+      "mcp__mysql-maruweb__bulk_update",
+      "Bash(./mvnw verify:*)",
+      "Bash(./mvnw*)",
+      "Bash(./gradlew clean:*)",
+      "Bash(JAVA_HOME=/Users/changsupark/Library/Java/JavaVirtualMachines/corretto-17.0.5/Contents/Home ./gradlew clean:*)",
+      "Bash(export JAVA_HOME=/Users/changsupark/Library/Java/JavaVirtualMachines/corretto-17.0.5/Contents/Home:*)",
+      "Bash(mvn test:*)",
+      "Bash(./gradlew test:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

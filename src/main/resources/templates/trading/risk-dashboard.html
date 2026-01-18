@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>리스크 대시보드</title>
+    <style>
+        .dashboard-container {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+            [data-theme="dark"] .dashboard-header {
+                background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+        .dashboard-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+        }
+
+        .dashboard-header p {
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        .date-range {
+            background: var(--bg-secondary);
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .date-range span {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .date-range strong {
+            color: var(--text-primary);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .dashboard-card {
+            background: var(--bg-secondary);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-card h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .var-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .var-metric {
+            background: var(--bg-tertiary);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .var-metric-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .var-metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #f5576c;
+        }
+
+        .var-metric-value.positive {
+            color: #10b981;
+        }
+
+        .correlation-info {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .correlation-matrix {
+            overflow-x: auto;
+        }
+
+        .correlation-matrix table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .correlation-matrix th,
+        .correlation-matrix td {
+            padding: 10px 8px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .correlation-matrix th {
+            background: var(--bg-tertiary);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .correlation-matrix td {
+            font-weight: 500;
+        }
+
+        .quick-links {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .quick-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 20px;
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .quick-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .quick-link-icon {
+            font-size: 24px;
+        }
+
+        .quick-link-text h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin: 0 0 4px 0;
+        }
+
+        .quick-link-text p {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #fecaca;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h1>📊 리스크 대시보드</h1>
+                <p>포트폴리오 리스크를 한눈에 모니터링합니다</p>
+            </div>
+
+            <div th:if="${error}" class="error-message">
+                <span th:text="${error}">오류 메시지</span>
+            </div>
+
+            <div class="date-range">
+                <span>분석 기간:</span>
+                <strong th:text="${startDate}">2024-01-01</strong>
+                <span>~</span>
+                <strong th:text="${endDate}">2024-01-31</strong>
+            </div>
+
+            <!-- 빠른 링크 -->
+            <div class="dashboard-card" style="margin-bottom: 20px;">
+                <h2>🔗 상세 분석</h2>
+                <div class="quick-links">
+                    <a th:href="@{/trading/risk/var}" class="quick-link">
+                        <span class="quick-link-icon">📉</span>
+                        <div class="quick-link-text">
+                            <h3>VaR 분석</h3>
+                            <p>Value at Risk 상세 분석</p>
+                        </div>
+                    </a>
+                    <a th:href="@{/trading/risk/correlation}" class="quick-link">
+                        <span class="quick-link-icon">🔗</span>
+                        <div class="quick-link-text">
+                            <h3>상관관계 분석</h3>
+                            <p>전략 간 상관관계 매트릭스</p>
+                        </div>
+                    </a>
+                    <a th:href="@{/trading/optimization}" class="quick-link">
+                        <span class="quick-link-icon">🎯</span>
+                        <div class="quick-link-text">
+                            <h3>파라미터 최적화</h3>
+                            <p>그리드 서치 및 유전 알고리즘</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- VaR 요약 -->
+                <div class="dashboard-card">
+                    <h2>📉 VaR (Value at Risk) 요약</h2>
+                    <div th:if="${varData != null}" class="var-metrics">
+                        <div class="var-metric">
+                            <div class="var-metric-label">일별 VaR (95%)</div>
+                            <div class="var-metric-value"
+                                 th:text="${varData.dailyVaR != null ? #numbers.formatDecimal(varData.dailyVaR, 0, 'COMMA', 0, 'POINT') + '원' : 'N/A'}">
+                                -50,000원
+                            </div>
+                        </div>
+                        <div class="var-metric">
+                            <div class="var-metric-label">주별 VaR</div>
+                            <div class="var-metric-value"
+                                 th:text="${varData.weeklyVaR != null ? #numbers.formatDecimal(varData.weeklyVaR, 0, 'COMMA', 0, 'POINT') + '원' : 'N/A'}">
+                                -100,000원
+                            </div>
+                        </div>
+                        <div class="var-metric">
+                            <div class="var-metric-label">월별 VaR</div>
+                            <div class="var-metric-value"
+                                 th:text="${varData.monthlyVaR != null ? #numbers.formatDecimal(varData.monthlyVaR, 0, 'COMMA', 0, 'POINT') + '원' : 'N/A'}">
+                                -300,000원
+                            </div>
+                        </div>
+                        <div class="var-metric">
+                            <div class="var-metric-label">CVaR (Expected Shortfall)</div>
+                            <div class="var-metric-value"
+                                 th:text="${varData.cvar != null ? #numbers.formatDecimal(varData.cvar, 0, 'COMMA', 0, 'POINT') + '원' : 'N/A'}">
+                                -75,000원
+                            </div>
+                        </div>
+                    </div>
+                    <div th:if="${varData == null}" class="no-data">
+                        VaR 데이터가 없습니다.
+                    </div>
+                </div>
+
+                <!-- 상관관계 요약 -->
+                <div class="dashboard-card">
+                    <h2>🔗 상관관계 매트릭스</h2>
+                    <div th:if="${correlationMatrix != null and #lists.size(correlationMatrix) > 0}" class="correlation-matrix">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th th:each="item : ${correlationMatrix}" th:text="${item.strategy1}">전략1</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="item : ${correlationMatrix}">
+                                    <th th:text="${item.strategy2}">전략2</th>
+                                    <td th:each="col : ${correlationMatrix}"
+                                        th:text="${#numbers.formatDecimal(item.correlation, 1, 'COMMA', 2, 'POINT')}"
+                                        th:style="${item.correlation > 0.7} ? 'background: rgba(16, 185, 129, 0.2); color: #10b981;' : (${item.correlation < -0.3} ? 'background: rgba(239, 68, 68, 0.2); color: #ef4444;' : '')">
+                                        0.85
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div th:if="${correlationMatrix == null or #lists.size(correlationMatrix) == 0}" class="correlation-info">
+                        <p>상관관계 데이터가 없습니다.</p>
+                        <p style="font-size: 13px; margin-top: 10px;">
+                            여러 전략이 활성화되어 있어야 상관관계를 계산할 수 있습니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 추가 통계 -->
+            <div class="dashboard-card" th:if="${varData != null}">
+                <h2>📈 추가 리스크 지표</h2>
+                <div class="var-metrics" style="grid-template-columns: repeat(4, 1fr);">
+                    <div class="var-metric">
+                        <div class="var-metric-label">포트폴리오 가치</div>
+                        <div class="var-metric-value positive"
+                             th:text="${varData.portfolioValue != null ? #numbers.formatDecimal(varData.portfolioValue, 0, 'COMMA', 0, 'POINT') + '원' : 'N/A'}">
+                            10,000,000원
+                        </div>
+                    </div>
+                    <div class="var-metric">
+                        <div class="var-metric-label">신뢰 수준</div>
+                        <div class="var-metric-value" style="color: var(--text-primary);"
+                             th:text="${varData.confidenceLevel != null ? (varData.confidenceLevel * 100) + '%' : '95%'}">
+                            95%
+                        </div>
+                    </div>
+                    <div class="var-metric">
+                        <div class="var-metric-label">평균 손익</div>
+                        <div class="var-metric-value"
+                             th:classappend="${varData.meanPL != null and varData.meanPL >= 0} ? 'positive' : ''"
+                             th:text="${varData.meanPL != null ? #numbers.formatDecimal(varData.meanPL, 0, 'COMMA', 0, 'POINT') + '원' : 'N/A'}">
+                            50,000원
+                        </div>
+                    </div>
+                    <div class="var-metric">
+                        <div class="var-metric-label">표준편차</div>
+                        <div class="var-metric-value" style="color: var(--text-primary);"
+                             th:text="${varData.stdPL != null ? #numbers.formatDecimal(varData.stdPL, 0, 'COMMA', 0, 'POINT') + '원' : 'N/A'}">
+                            30,000원
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

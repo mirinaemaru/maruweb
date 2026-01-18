@@ -110,8 +110,7 @@ class RiskAnalysisControllerTest {
     }
 
     @Test
-    @DisplayName("리스크 대시보드 - 템플릿 미구현으로 비활성화")
-    @org.junit.jupiter.api.Disabled("Template trading/risk-dashboard not yet implemented")
+    @DisplayName("리스크 대시보드 - 성공")
     void riskDashboard_Success() throws Exception {
         when(tradingApiService.calculateVaR(any(), anyDouble(), anyInt(), any(), any()))
                 .thenReturn(createMockVarResponse());

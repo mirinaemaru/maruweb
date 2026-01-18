@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>최적화 결과</title>
+    <style>
+        .results-container {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .results-header {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+            [data-theme="dark"] .results-header {
+                background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+        .results-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+        }
+
+        .results-header p {
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-primary);
+            text-decoration: none;
+            padding: 10px 16px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            transition: all 0.2s ease;
+        }
+
+        .back-link:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .filter-section {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .btn-filter {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .btn-filter:hover {
+            opacity: 0.9;
+        }
+
+        [data-theme="dark"] .btn-filter {
+            background: #6c757d;
+        }
+
+        .results-table-container {
+            background: var(--bg-secondary);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+
+        .results-table-container h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 20px 0;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .results-table th {
+            background: var(--bg-tertiary);
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .results-table tbody tr:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .results-table td {
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .rank-badge.gold {
+            background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
+            color: #7a5200;
+        }
+
+        .rank-badge.silver {
+            background: linear-gradient(135deg, #c0c0c0 0%, #a8a8a8 100%);
+            color: #555;
+        }
+
+        .rank-badge.bronze {
+            background: linear-gradient(135deg, #cd7f32 0%, #b87333 100%);
+            color: #4a3419;
+        }
+
+        .rank-badge.normal {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        .profit-positive {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .profit-negative {
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        .win-rate-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .win-rate-bar-bg {
+            flex: 1;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            max-width: 100px;
+        }
+
+        .win-rate-bar-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            border-radius: 4px;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #fecaca;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .no-data-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .no-data h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 10px 0;
+        }
+
+        .no-data p {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .summary-card-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .summary-card-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .summary-card-value.highlight {
+            color: #fa709a;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="results-container">
+            <a th:href="@{/trading/optimization}" class="back-link">
+                ← 최적화 페이지로 돌아가기
+            </a>
+
+            <div class="results-header">
+                <h1>📊 최적화 결과</h1>
+                <p>파라미터 최적화 분석 결과를 확인합니다</p>
+            </div>
+
+            <div th:if="${error}" class="error-message">
+                <span th:text="${error}">오류 메시지</span>
+            </div>
+
+            <!-- 필터 -->
+            <form method="get" th:action="@{/trading/optimization/results}">
+                <div class="filter-section">
+                    <div class="filter-group">
+                        <label>전략 ID (선택)</label>
+                        <input type="text" name="strategyId" th:value="${strategyId}" placeholder="전체 결과 보기">
+                    </div>
+                    <button type="submit" class="btn-filter">🔍 조회</button>
+                </div>
+            </form>
+
+            <!-- 결과가 있을 때 -->
+            <th:block th:if="${results != null and #lists.size(results) > 0}">
+                <!-- 요약 카드 -->
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <div class="summary-card-label">총 결과 수</div>
+                        <div class="summary-card-value highlight" th:text="${#lists.size(results)}">15</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-card-label">최고 수익률</div>
+                        <div class="summary-card-value" style="color: #10b981;">
+                            <span th:if="${results[0].profitLoss != null}"
+                                  th:text="${#numbers.formatDecimal(results[0].profitLoss, 0, 'COMMA', 0, 'POINT')} + '원'">
+                                150,000원
+                            </span>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-card-label">최고 승률</div>
+                        <div class="summary-card-value">
+                            <span th:if="${results[0].winRate != null}"
+                                  th:text="${#numbers.formatDecimal(results[0].winRate, 1, 'COMMA', 1, 'POINT')} + '%'">
+                                75.5%
+                            </span>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-card-label">최적 파라미터</div>
+                        <div class="summary-card-value highlight" th:text="${results[0].parameterValue}">2.5</div>
+                    </div>
+                </div>
+
+                <!-- 결과 테이블 -->
+                <div class="results-table-container">
+                    <h2>🏆 최적화 결과 순위</h2>
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>순위</th>
+                                <th>파라미터 값</th>
+                                <th>수익/손실</th>
+                                <th>승률</th>
+                                <th>총 거래</th>
+                                <th>승리</th>
+                                <th>패배</th>
+                                <th>샤프 비율</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="result, iterStat : ${results}">
+                                <td>
+                                    <span class="rank-badge"
+                                          th:classappend="${iterStat.index == 0} ? 'gold' : (${iterStat.index == 1} ? 'silver' : (${iterStat.index == 2} ? 'bronze' : 'normal'))"
+                                          th:text="${iterStat.index + 1}">1</span>
+                                </td>
+                                <td th:text="${result.parameterValue}">2.5</td>
+                                <td th:classappend="${result.profitLoss >= 0} ? 'profit-positive' : 'profit-negative'"
+                                    th:text="${result.profitLoss != null ? #numbers.formatDecimal(result.profitLoss, 0, 'COMMA', 0, 'POINT') + '원' : 'N/A'}">
+                                    +150,000원
+                                </td>
+                                <td>
+                                    <div class="win-rate-bar">
+                                        <span th:text="${result.winRate != null ? #numbers.formatDecimal(result.winRate, 1, 'COMMA', 1, 'POINT') + '%' : 'N/A'}">75.5%</span>
+                                        <div class="win-rate-bar-bg">
+                                            <div class="win-rate-bar-fill" th:style="'width: ' + ${result.winRate != null ? result.winRate : 0} + '%'"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td th:text="${result.totalTrades}">100</td>
+                                <td th:text="${result.winningTrades}" style="color: #10b981;">75</td>
+                                <td th:text="${result.losingTrades}" style="color: #ef4444;">25</td>
+                                <td th:text="${result.sharpeRatio != null ? #numbers.formatDecimal(result.sharpeRatio, 1, 'COMMA', 2, 'POINT') : 'N/A'}">1.85</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </th:block>
+
+            <!-- 결과가 없을 때 -->
+            <div th:if="${results == null or #lists.size(results) == 0}" class="results-table-container">
+                <div class="no-data">
+                    <div class="no-data-icon">📭</div>
+                    <h3>최적화 결과가 없습니다</h3>
+                    <p>파라미터 최적화를 실행하면 여기에 결과가 표시됩니다.</p>
+                    <a th:href="@{/trading/optimization}" class="btn-filter" style="display: inline-block; margin-top: 20px; text-decoration: none;">
+                        🎯 최적화 실행하기
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

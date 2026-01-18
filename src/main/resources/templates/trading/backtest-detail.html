@@ -91,12 +91,20 @@
 <body>
     <div layout:fragment="content">
         <div class="detail-container">
-            <header>
-                <h1>📊 백테스팅 상세 결과</h1>
-                <p th:text="${backtest.strategyName}">Strategy Name</p>
-            </header>
+            <!-- Error Message -->
+            <div th:if="${error != null}" class="alert alert-error" style="background: #fef2f2; border: 1px solid #fecaca; padding: 20px; border-radius: 8px; margin-bottom: 20px; color: #dc2626;">
+                <h2 style="margin-top: 0;">⚠️ 오류 발생</h2>
+                <p th:text="${error}">오류 메시지</p>
+                <a href="/trading/backtests" class="btn-primary" style="display: inline-block; padding: 10px 20px; background: var(--primary); color: white; text-decoration: none; border-radius: 6px; margin-top: 10px;">목록으로 돌아가기</a>
+            </div>
 
-            <!-- Metrics Grid -->
+            <div th:if="${error == null}">
+                <header>
+                    <h1>📊 백테스팅 상세 결과</h1>
+                    <p th:text="${backtest?.strategyName}">Strategy Name</p>
+                </header>
+
+                <!-- Metrics Grid -->
             <div class="metrics-grid">
                 <div class="metric-card">
                     <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 10px;">총 손익</div>
@@ -155,6 +163,7 @@
                     </tbody>
                 </table>
             </div>
+            </div><!-- th:if="${error == null}" -->
         </div>
     </div>
 

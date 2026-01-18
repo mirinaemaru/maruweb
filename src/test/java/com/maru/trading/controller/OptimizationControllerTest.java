@@ -57,8 +57,7 @@ class OptimizationControllerTest {
     }
 
     @Test
-    @DisplayName("최적화 결과 페이지 - 템플릿 미구현으로 비활성화")
-    @org.junit.jupiter.api.Disabled("Template trading/optimization-results not yet implemented")
+    @DisplayName("최적화 결과 페이지 - 성공")
     void optimizationResults_Success() throws Exception {
         when(tradingApiService.getOptimizationResults(any()))
                 .thenReturn(createMockOptimizationResultsResponse());

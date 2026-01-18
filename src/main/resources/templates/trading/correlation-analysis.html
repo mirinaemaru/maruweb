@@ -298,13 +298,7 @@
                             <td th:each="colStrategy, colStat : ${strategies}"
                                 th:with="corrValue=${correlationMatrix[rowStat.index][colStat.index]}"
                                 th:text="${#numbers.formatDecimal(corrValue, 1, 'COMMA', 2, 'POINT')}"
-                                th:classappend="${corrValue >= 0.7} ? 'corr-strong-positive' :
-                                                ${corrValue >= 0.3} ? 'corr-moderate-positive' :
-                                                ${corrValue > 0.0} ? 'corr-weak-positive' :
-                                                ${corrValue == 0.0} ? 'corr-neutral' :
-                                                ${corrValue > -0.3} ? 'corr-weak-negative' :
-                                                ${corrValue > -0.7} ? 'corr-moderate-negative' :
-                                                'corr-strong-negative'">
+                                th:classappend="${corrValue >= 0.7 ? 'corr-strong-positive' : (corrValue >= 0.3 ? 'corr-moderate-positive' : (corrValue > 0.0 ? 'corr-weak-positive' : (corrValue == 0.0 ? 'corr-neutral' : (corrValue > -0.3 ? 'corr-weak-negative' : (corrValue > -0.7 ? 'corr-moderate-negative' : 'corr-strong-negative')))))}">
                                 1.00
                             </td>
                         </tr>
