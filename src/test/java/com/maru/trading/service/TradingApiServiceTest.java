@@ -462,6 +462,114 @@ class TradingApiServiceTest {
         assertThat(result.get("todayFills")).isEqualTo(0);
     }
 
+    @Test
+    @DisplayName("대시보드 통계 조회 - 전체 필드 검증")
+    void getDashboardStats_AllFieldsReturned() {
+        // given
+        Map<String, Object> statsResponse = new HashMap<>();
+        statsResponse.put("todayOrders", 15);
+        statsResponse.put("todayFills", 12);
+        statsResponse.put("todayProfitLoss", 150000);
+        statsResponse.put("totalProfitLoss", 2500000);
+        statsResponse.put("winRate", 0.72);
+        statsResponse.put("recentActivities", java.util.Arrays.asList(
+            Map.of("type", "ORDER", "message", "삼성전자 매수"),
+            Map.of("type", "FILL", "message", "삼성전자 체결")
+        ));
+        statsResponse.put("dailyStats", java.util.Arrays.asList(
+            Map.of("date", "2026-01-19", "profitLoss", 50000),
+            Map.of("date", "2026-01-18", "profitLoss", 100000)
+        ));
+
+        when(restTemplate.exchange(
+                eq("/api/v1/query/dashboard/stats"),
+                eq(HttpMethod.GET),
+                any(),
+                any(ParameterizedTypeReference.class)
+        )).thenReturn(new ResponseEntity<>(statsResponse, HttpStatus.OK));
+
+        // when
+        Map<String, Object> result = tradingApiService.getDashboardStats();
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.get("todayOrders")).isEqualTo(15);
+        assertThat(result.get("todayFills")).isEqualTo(12);
+        assertThat(result.get("todayProfitLoss")).isEqualTo(150000);
+        assertThat(result.get("totalProfitLoss")).isEqualTo(2500000);
+        assertThat(result.get("winRate")).isEqualTo(0.72);
+        assertThat(result.get("recentActivities")).isNotNull();
+        assertThat(result.get("dailyStats")).isNotNull();
+        assertThat((java.util.List<?>) result.get("recentActivities")).hasSize(2);
+        assertThat((java.util.List<?>) result.get("dailyStats")).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("대시보드 통계 조회 - 404 에러 시 빈 통계 반환")
+    void getDashboardStats_NotFound_ReturnsEmptyStats() {
+        // given
+        when(restTemplate.exchange(
+                eq("/api/v1/query/dashboard/stats"),
+                eq(HttpMethod.GET),
+                any(),
+                any(ParameterizedTypeReference.class)
+        )).thenThrow(HttpClientErrorException.create(
+                HttpStatus.NOT_FOUND, "Not Found", null, null, null));
+
+        // when
+        Map<String, Object> result = tradingApiService.getDashboardStats();
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.get("todayOrders")).isEqualTo(0);
+        assertThat(result.get("todayFills")).isEqualTo(0);
+        assertThat(result.get("totalProfitLoss")).isEqualTo(0);
+        assertThat(result.get("winRate")).isEqualTo(0.0);
+    }
+
+    @Test
+    @DisplayName("대시보드 통계 조회 - 500 에러 시 빈 통계 반환")
+    void getDashboardStats_ServerError_ReturnsEmptyStats() {
+        // given
+        when(restTemplate.exchange(
+                eq("/api/v1/query/dashboard/stats"),
+                eq(HttpMethod.GET),
+                any(),
+                any(ParameterizedTypeReference.class)
+        )).thenThrow(HttpServerErrorException.create(
+                HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", null, null, null));
+
+        // when
+        Map<String, Object> result = tradingApiService.getDashboardStats();
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.get("todayOrders")).isEqualTo(0);
+        assertThat(result).containsKey("recentActivities");
+        assertThat(result).containsKey("dailyStats");
+    }
+
+    @Test
+    @DisplayName("대시보드 통계 조회 - 빈 응답 처리")
+    void getDashboardStats_EmptyResponse() {
+        // given
+        Map<String, Object> emptyResponse = new HashMap<>();
+
+        when(restTemplate.exchange(
+                eq("/api/v1/query/dashboard/stats"),
+                eq(HttpMethod.GET),
+                any(),
+                any(ParameterizedTypeReference.class)
+        )).thenReturn(new ResponseEntity<>(emptyResponse, HttpStatus.OK));
+
+        // when
+        Map<String, Object> result = tradingApiService.getDashboardStats();
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result).isEmpty();
+    }
+
     // ==================== Position Tests ====================
 
     @Test

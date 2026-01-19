@@ -121,6 +121,80 @@ class TradingControllerTest {
                 .andExpect(model().attributeExists("error"));
     }
 
+    @Test
+    @DisplayName("대시보드 페이지 조회 - 통계 데이터 검증")
+    void dashboard_StatsDataVerification() throws Exception {
+        when(tradingApiService.getHealthStatus()).thenReturn(createMockHealthResponse());
+        when(tradingApiService.getKillSwitchStatus()).thenReturn(createMockKillSwitchResponse());
+        when(tradingApiService.getAccounts()).thenReturn(createMockAccountsResponse());
+        when(tradingApiService.getStrategies()).thenReturn(createMockStrategiesResponse());
+        when(tradingApiService.getDashboardStats()).thenReturn(createMockDashboardStats());
+
+        mockMvc.perform(get("/trading/dashboard"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("trading/dashboard"))
+                .andExpect(model().attribute("todayOrders", 10))
+                .andExpect(model().attribute("todayFills", 8))
+                .andExpect(model().attribute("todayProfitLoss", 50000))
+                .andExpect(model().attribute("totalProfitLoss", 1000000))
+                .andExpect(model().attribute("winRate", 0.65))
+                .andExpect(model().attributeExists("recentActivities"))
+                .andExpect(model().attributeExists("dailyStats"));
+    }
+
+    @Test
+    @DisplayName("대시보드 페이지 조회 - 통계 API 실패 시 빈 통계로 페이지 로드")
+    void dashboard_StatsApiFailure_LoadsPageWithEmptyStats() throws Exception {
+        Map<String, Object> emptyStats = new HashMap<>();
+        emptyStats.put("todayOrders", 0);
+        emptyStats.put("todayFills", 0);
+        emptyStats.put("todayProfitLoss", 0);
+        emptyStats.put("totalProfitLoss", 0);
+        emptyStats.put("winRate", 0.0);
+        emptyStats.put("recentActivities", Arrays.asList());
+        emptyStats.put("dailyStats", Arrays.asList());
+
+        when(tradingApiService.getHealthStatus()).thenReturn(createMockHealthResponse());
+        when(tradingApiService.getKillSwitchStatus()).thenReturn(createMockKillSwitchResponse());
+        when(tradingApiService.getAccounts()).thenReturn(createMockAccountsResponse());
+        when(tradingApiService.getStrategies()).thenReturn(createMockStrategiesResponse());
+        when(tradingApiService.getDashboardStats()).thenReturn(emptyStats);
+
+        mockMvc.perform(get("/trading/dashboard"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("trading/dashboard"))
+                .andExpect(model().attribute("todayOrders", 0))
+                .andExpect(model().attribute("todayFills", 0))
+                .andExpect(model().attribute("winRate", 0.0));
+    }
+
+    @Test
+    @DisplayName("대시보드 페이지 조회 - 활성 전략 카운트 검증")
+    void dashboard_ActiveStrategyCount() throws Exception {
+        Map<String, Object> strategies = new HashMap<>();
+        Map<String, Object> strategy1 = new HashMap<>();
+        strategy1.put("strategyId", "strategy-001");
+        strategy1.put("status", "ACTIVE");
+        Map<String, Object> strategy2 = new HashMap<>();
+        strategy2.put("strategyId", "strategy-002");
+        strategy2.put("status", "INACTIVE");
+        Map<String, Object> strategy3 = new HashMap<>();
+        strategy3.put("strategyId", "strategy-003");
+        strategy3.put("status", "ACTIVE");
+        strategies.put("items", Arrays.asList(strategy1, strategy2, strategy3));
+
+        when(tradingApiService.getHealthStatus()).thenReturn(createMockHealthResponse());
+        when(tradingApiService.getKillSwitchStatus()).thenReturn(createMockKillSwitchResponse());
+        when(tradingApiService.getAccounts()).thenReturn(createMockAccountsResponse());
+        when(tradingApiService.getStrategies()).thenReturn(strategies);
+        when(tradingApiService.getDashboardStats()).thenReturn(createMockDashboardStats());
+
+        mockMvc.perform(get("/trading/dashboard"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("trading/dashboard"))
+                .andExpect(model().attribute("activeStrategyCount", 2L));
+    }
+
     // ==================== Accounts Tests ====================
 
     @Test
