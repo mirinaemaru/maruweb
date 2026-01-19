@@ -154,7 +154,7 @@
 
                 <div class="status-card">
                     <div class="status-label">종목 (Symbol)</div>
-                    <div class="status-value" th:text="${strategy['symbol'] ?: '-'}">-</div>
+                    <div class="status-value" th:text="${strategy['symbolNames'] ?: (strategy['symbol'] ?: '-')}">-</div>
                 </div>
 
                 <div class="status-card">
@@ -189,7 +189,7 @@
                     </tr>
                     <tr th:if="${strategy['symbol'] != null}">
                         <th>종목:</th>
-                        <td th:text="${strategy['symbol']}">-</td>
+                        <td th:text="${strategy['symbolNames'] ?: strategy['symbol']}">-</td>
                     </tr>
                     <tr th:if="${strategy['accountId'] != null}">
                         <th>계좌 ID:</th>

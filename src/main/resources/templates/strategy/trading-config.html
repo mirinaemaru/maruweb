@@ -164,7 +164,10 @@
                                 🔍
                             </button>
                         </div>
-                        <p class="info-text">국내 주식: 6자리 코드, 해외 주식: 티커 (예: AAPL)</p>
+                        <p class="info-text" th:if="${strategy['symbolNames'] != null}">
+                            현재 종목: <strong th:text="${strategy['symbolNames']}"></strong>
+                        </p>
+                        <p class="info-text" th:unless="${strategy['symbolNames'] != null}">국내 주식: 6자리 코드, 해외 주식: 티커 (예: AAPL)</p>
                     </div>
                 </div>
 

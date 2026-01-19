@@ -545,7 +545,7 @@
                                   th:text="${strategy['type']}">Type</span>
                             <span th:if="${strategy['symbol'] != null}"
                                   class="badge badge-planning"
-                                  th:text="${strategy['symbol']}">Symbol</span>
+                                  th:text="${strategy['symbolNames'] != null} ? ${strategy['symbolNames']} : ${strategy['symbol']}">Symbol</span>
                         </div>
                     </div>
 

@@ -46,6 +46,26 @@ public class StrategyController {
                 strategies = Collections.emptyList();
             }
 
+            // 종목코드 -> 종목명 매핑을 위한 캐시 생성
+            Map<String, String> symbolNameCache = buildSymbolNameCache(strategies);
+
+            // 각 전략에 symbolNames 필드 추가
+            strategies = strategies.stream()
+                    .map(s -> {
+                        if (s instanceof Map) {
+                            @SuppressWarnings("unchecked")
+                            Map<String, Object> strategyMap = new HashMap<>((Map<String, Object>) s);
+                            Object symbolObj = strategyMap.get("symbol");
+                            if (symbolObj != null) {
+                                String symbolNames = convertSymbolsToNames(symbolObj.toString(), symbolNameCache);
+                                strategyMap.put("symbolNames", symbolNames);
+                            }
+                            return strategyMap;
+                        }
+                        return s;
+                    })
+                    .collect(Collectors.toList());
+
             // 상태 필터 적용
             if (status != null && !status.isEmpty()) {
                 final String filterStatus = status;
@@ -87,6 +107,78 @@ public class StrategyController {
         model.addAttribute("keyword", keyword);
 
         return "strategy/list";
+    }
+
+    /**
+     * 전략 목록에서 사용되는 모든 종목코드에 대한 종목명 캐시 생성
+     */
+    private Map<String, String> buildSymbolNameCache(List<?> strategies) {
+        Map<String, String> cache = new HashMap<>();
+
+        // 모든 전략에서 사용된 종목코드 수집
+        java.util.Set<String> allSymbols = new java.util.HashSet<>();
+        for (Object s : strategies) {
+            if (s instanceof Map) {
+                Object symbolObj = ((Map<?, ?>) s).get("symbol");
+                if (symbolObj != null) {
+                    String symbolStr = symbolObj.toString();
+                    // 쉼표로 구분된 여러 종목코드 처리
+                    for (String symbol : symbolStr.split(",")) {
+                        String trimmed = symbol.trim();
+                        if (!trimmed.isEmpty()) {
+                            allSymbols.add(trimmed);
+                        }
+                    }
+                }
+            }
+        }
+
+        // 각 종목코드에 대해 종목명 조회
+        for (String symbol : allSymbols) {
+            try {
+                Map<String, Object> instrument = tradingApiService.getInstrument(symbol);
+                if (instrument != null && !instrument.containsKey("error")) {
+    // nameKr(한글명) 우선, 없으면 nameEn(영문명), 둘 다 없으면 코드 사용
+                    Object nameKr = instrument.get("nameKr");
+                    Object nameEn = instrument.get("nameEn");
+                    if (nameKr != null && !nameKr.toString().isEmpty()) {
+                        cache.put(symbol, nameKr.toString());
+                    } else if (nameEn != null && !nameEn.toString().isEmpty()) {
+                        cache.put(symbol, nameEn.toString());
+                    } else {
+                        cache.put(symbol, symbol); // 이름이 없으면 코드 그대로 사용
+                    }
+                } else {
+                    cache.put(symbol, symbol); // 조회 실패시 코드 그대로 사용
+                }
+            } catch (Exception e) {
+                log.warn("Failed to get instrument name for symbol: {}", symbol);
+                cache.put(symbol, symbol);
+            }
+        }
+
+        return cache;
+    }
+
+    /**
+     * 종목코드 문자열을 종목명 문자열로 변환
+     */
+    private String convertSymbolsToNames(String symbols, Map<String, String> cache) {
+        if (symbols == null || symbols.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder result = new StringBuilder();
+        for (String symbol : symbols.split(",")) {
+            String trimmed = symbol.trim();
+            if (!trimmed.isEmpty()) {
+                if (result.length() > 0) {
+                    result.append(", ");
+                }
+                result.append(cache.getOrDefault(trimmed, trimmed));
+            }
+        }
+        return result.toString();
     }
 
     /**
@@ -217,6 +309,14 @@ public class StrategyController {
             if (strategy == null || strategy.containsKey("error")) {
                 redirectAttributes.addFlashAttribute("error", "전략을 찾을 수 없습니다.");
                 return "redirect:/trading/strategies";
+            }
+
+            // 종목코드를 종목명으로 변환
+            Object symbolObj = strategy.get("symbol");
+            if (symbolObj != null && !symbolObj.toString().isEmpty()) {
+                Map<String, String> symbolNameCache = buildSymbolNameCache(Collections.singletonList(strategy));
+                String symbolNames = convertSymbolsToNames(symbolObj.toString(), symbolNameCache);
+                strategy.put("symbolNames", symbolNames);
             }
 
             model.addAttribute("strategy", strategy);
@@ -378,6 +478,14 @@ public class StrategyController {
             if (strategy == null || strategy.containsKey("error")) {
                 redirectAttributes.addFlashAttribute("error", "전략을 찾을 수 없습니다.");
                 return "redirect:/trading/strategies";
+            }
+
+            // 종목코드를 종목명으로 변환
+            Object symbolObj = strategy.get("symbol");
+            if (symbolObj != null && !symbolObj.toString().isEmpty()) {
+                Map<String, String> symbolNameCache = buildSymbolNameCache(Collections.singletonList(strategy));
+                String symbolNames = convertSymbolsToNames(symbolObj.toString(), symbolNameCache);
+                strategy.put("symbolNames", symbolNames);
             }
 
             model.addAttribute("strategy", strategy);
