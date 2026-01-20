@@ -164,6 +164,9 @@
                             <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/execution-history')} ? 'active' : ''">
                                 <a th:href="@{/trading/execution-history}">실행 히스토리</a>
                             </li>
+                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/system-logs')} ? 'active' : ''">
+                                <a th:href="@{/trading/system-logs}">시스템 로그</a>
+                            </li>
 
                             <!-- 데모 & 테스트 -->
                             <li class="submenu-header"><span>🎯 데모 & 테스트</span></li>
@@ -397,7 +400,8 @@
                 '/trading/performance': { name: '성과 분석', icon: '📊' },
                 '/trading/backtests': { name: '백테스팅', icon: '📈' },
                 '/trading/market-data': { name: '구독 종목 관리', icon: '📡' },
-                '/trading/scheduler': { name: '스케줄러 관리', icon: '⏰' }
+                '/trading/scheduler': { name: '스케줄러 관리', icon: '⏰' },
+                '/trading/system-logs': { name: '시스템 로그', icon: '📋' }
             };
 
             // 쿠키 읽기

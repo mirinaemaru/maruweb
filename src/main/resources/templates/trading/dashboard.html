@@ -346,9 +346,9 @@
                             <div class="activity-desc" style="text-align: center; color: var(--text-muted);">최근 활동이 없습니다.</div>
                         </li>
                         <li th:each="activity : ${recentActivities}" class="activity-item">
-                            <div class="activity-time" th:text="${activity.timestamp}">2024-01-01 10:00:00</div>
-                            <div class="activity-title" th:text="${activity.title}">활동 제목</div>
-                            <div class="activity-desc" th:text="${activity.description}">활동 설명</div>
+                            <div class="activity-time" th:text="${activity['timestamp']}">2024-01-01 10:00:00</div>
+                            <div class="activity-title" th:text="${activity['title']}">활동 제목</div>
+                            <div class="activity-desc" th:text="${activity['description']}">활동 설명</div>
                         </li>
                     </ul>
                 </div>
@@ -363,24 +363,32 @@
                             <span class="card-icon">🏥</span>
                             <span>시스템 상태</span>
                         </div>
-                        <span class="status-badge" th:classappend="${systemStatus == 'UP' ? 'up' : 'down'}" th:text="${systemStatus ?: 'UNKNOWN'}">UP</span>
+                        <span id="health-system" class="status-badge" th:classappend="${systemStatus == 'UP' ? 'up' : 'down'}" th:text="${systemStatus ?: 'UNKNOWN'}">UP</span>
                     </div>
                     <div class="status-grid">
                         <div class="status-item">
                             <span>Database</span>
-                            <span class="status-badge up">UP</span>
+                            <span id="health-db" class="status-badge"
+                                  th:classappend="${health != null and health['components'] != null and health['components']['db'] == 'UP' ? 'up' : 'down'}"
+                                  th:text="${health != null and health['components'] != null ? health['components']['db'] : 'UNKNOWN'}">UP</span>
                         </div>
                         <div class="status-item">
                             <span>KIS REST</span>
-                            <span class="status-badge up">UP</span>
+                            <span id="health-kisRest" class="status-badge"
+                                  th:classappend="${health != null and health['components'] != null and health['components']['kisRest'] == 'UP' ? 'up' : 'down'}"
+                                  th:text="${health != null and health['components'] != null ? health['components']['kisRest'] : 'UNKNOWN'}">UP</span>
                         </div>
                         <div class="status-item">
                             <span>KIS WebSocket</span>
-                            <span class="status-badge up">UP</span>
+                            <span id="health-kisWs" class="status-badge"
+                                  th:classappend="${health != null and health['components'] != null and health['components']['kisWs'] == 'UP' ? 'up' : 'down'}"
+                                  th:text="${health != null and health['components'] != null ? health['components']['kisWs'] : 'UNKNOWN'}">UP</span>
                         </div>
                         <div class="status-item">
                             <span>Token</span>
-                            <span class="status-badge up">VALID</span>
+                            <span id="health-token" class="status-badge"
+                                  th:classappend="${health != null and health['components'] != null and health['components']['token'] == 'VALID' ? 'up' : 'down'}"
+                                  th:text="${health != null and health['components'] != null ? health['components']['token'] : 'UNKNOWN'}">VALID</span>
                         </div>
                     </div>
                 </div>
@@ -615,7 +623,47 @@
                         .then(stats => updateDashboardStats(stats))
                         .catch(error => console.error('Failed to fetch dashboard stats:', error));
                 }, 30000);
+
+                // 헬스 상태 자동 새로고침 (30초마다)
+                refreshHealthStatus();
+                setInterval(refreshHealthStatus, 30000);
             });
+
+            // 헬스 상태 새로고침 함수
+            function refreshHealthStatus() {
+                fetch('/trading/api/health')
+                    .then(response => response.json())
+                    .then(health => {
+                        updateHealthBadge('health-system', health.status);
+                        const components = health.components || {};
+                        updateHealthBadge('health-db', components.db);
+                        updateHealthBadge('health-kisRest', components.kisRest);
+                        updateHealthBadge('health-kisWs', components.kisWs);
+                        updateHealthBadge('health-token', components.token, 'VALID');
+                    })
+                    .catch(error => {
+                        console.error('Health check failed:', error);
+                        // 연결 실패 시 모든 상태를 UNKNOWN으로 표시
+                        ['health-system', 'health-db', 'health-kisRest', 'health-kisWs', 'health-token'].forEach(id => {
+                            const badge = document.getElementById(id);
+                            if (badge) {
+                                badge.textContent = 'UNKNOWN';
+                                badge.classList.remove('up');
+                                badge.classList.add('down');
+                            }
+                        });
+                    });
+            }
+
+            // 개별 헬스 뱃지 업데이트 함수
+            function updateHealthBadge(id, value, successValue = 'UP') {
+                const badge = document.getElementById(id);
+                if (badge) {
+                    badge.textContent = value || 'UNKNOWN';
+                    badge.classList.remove('up', 'down');
+                    badge.classList.add(value === successValue ? 'up' : 'down');
+                }
+            }
         </script>
     </th:block>
 </body>

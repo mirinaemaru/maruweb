@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.HashMap;
@@ -810,6 +811,30 @@ public class TradingController {
             log.error("Failed to update account permission: {}", accountId, e);
             redirectAttributes.addFlashAttribute("error", "계좌 권한 업데이트에 실패했습니다: " + e.getMessage());
             return "redirect:/trading/accounts/" + accountId + "/permissions";
+        }
+    }
+
+    // ==================== Health Check API ====================
+
+    /**
+     * 시스템 헬스 상태 조회 API (JSON)
+     * 실시간 새로고침을 위한 REST 엔드포인트
+     */
+    @GetMapping("/api/health")
+    @ResponseBody
+    public Map<String, Object> getHealthStatus() {
+        try {
+            return tradingApiService.getHealthStatus();
+        } catch (Exception e) {
+            log.error("Failed to get health status", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("status", "DOWN");
+            errorResponse.put("db", "UNKNOWN");
+            errorResponse.put("kisRest", "UNKNOWN");
+            errorResponse.put("kisWs", "UNKNOWN");
+            errorResponse.put("token", "UNKNOWN");
+            errorResponse.put("error", e.getMessage());
+            return errorResponse;
         }
     }
 

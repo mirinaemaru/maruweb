@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>시스템 로그</title>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .log-container {
+                max-width: 100%;
+                margin: 0 auto;
+                padding: 20px;
+                padding-bottom: 40px;
+            }
+
+            .page-header {
+                margin-bottom: 30px;
+                background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+                padding: 30px 40px;
+                border-radius: 16px;
+                color: white;
+                box-shadow: 0 10px 40px rgba(55, 65, 81, 0.3);
+            }
+            [data-theme="dark"] .page-header {
+                background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .page-header h2 {
+                font-size: 28px;
+                font-weight: 700;
+                margin: 0;
+                color: white;
+            }
+
+            .page-header p {
+                margin: 10px 0 0 0;
+                opacity: 0.9;
+                font-size: 14px;
+            }
+
+            .main-content {
+                display: flex;
+                gap: 20px;
+            }
+
+            .sidebar {
+                width: 250px;
+                flex-shrink: 0;
+            }
+
+            .log-viewer {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .card {
+                background: var(--bg-secondary);
+                border: none;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                margin-bottom: 20px;
+            }
+
+            .card-header {
+                background: var(--bg-tertiary);
+                border-bottom: 1px solid var(--border-color);
+                padding: 15px 20px;
+                border-radius: 12px 12px 0 0;
+            }
+
+            .card-header h5 {
+                margin: 0;
+                font-size: 16px;
+                font-weight: 600;
+                color: var(--text-primary);
+            }
+
+            .card-body {
+                padding: 20px;
+            }
+
+            /* File List */
+            .file-list {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .file-item {
+                padding: 12px 15px;
+                border-bottom: 1px solid var(--border-color);
+                cursor: pointer;
+                transition: all 0.2s ease;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .file-item:hover {
+                background: var(--bg-tertiary);
+            }
+
+            .file-item.active {
+                background: rgba(102, 126, 234, 0.15);
+                border-left: 3px solid #667eea;
+            }
+
+            .file-name {
+                font-weight: 500;
+                color: var(--text-primary);
+                font-size: 14px;
+            }
+
+            .file-name .icon {
+                margin-right: 8px;
+            }
+
+            .file-meta {
+                font-size: 12px;
+                color: var(--text-secondary);
+            }
+
+            /* Filter Controls */
+            .filter-row {
+                display: flex;
+                gap: 15px;
+                flex-wrap: wrap;
+                align-items: center;
+                margin-bottom: 15px;
+            }
+
+            .filter-group {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .filter-label {
+                font-size: 13px;
+                font-weight: 500;
+                color: var(--text-secondary);
+            }
+
+            .level-filters {
+                display: flex;
+                gap: 5px;
+            }
+
+            .level-badge {
+                padding: 4px 10px;
+                border-radius: 6px;
+                font-size: 11px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+                border: 1px solid transparent;
+                user-select: none;
+            }
+
+            .level-badge.error { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+            .level-badge.warn { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+            .level-badge.info { background: rgba(96, 165, 250, 0.15); color: #60a5fa; }
+            .level-badge.debug { background: rgba(52, 211, 153, 0.15); color: #34d399; }
+
+            .level-badge.active {
+                border-color: currentColor;
+            }
+
+            .level-badge:not(.active) {
+                opacity: 0.4;
+            }
+
+            .search-input {
+                padding: 8px 12px;
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                background: var(--bg-primary);
+                color: var(--text-primary);
+                font-size: 13px;
+                width: 200px;
+            }
+
+            .search-input:focus {
+                outline: none;
+                border-color: #667eea;
+            }
+
+            .lines-select {
+                padding: 8px 12px;
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                background: var(--bg-primary);
+                color: var(--text-primary);
+                font-size: 13px;
+                width: 100px;
+            }
+
+            /* Log Output */
+            .log-output {
+                background: #1e1e1e;
+                border-radius: 8px;
+                padding: 15px;
+                font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+                font-size: 12px;
+                line-height: 1.6;
+                overflow-x: auto;
+                max-height: 600px;
+                overflow-y: auto;
+            }
+
+            .log-line {
+                display: block;
+                white-space: pre-wrap;
+                word-break: break-all;
+                padding: 2px 0;
+            }
+
+            .log-line .timestamp { color: #6b7280; }
+            .log-line .thread { color: #9ca3af; }
+            .log-line .logger { color: #818cf8; }
+            .log-line .message { color: #e5e7eb; }
+
+            .log-line.error { background: rgba(239, 68, 68, 0.1); }
+            .log-line.error .level { color: #ef4444; font-weight: bold; }
+
+            .log-line.warn { background: rgba(245, 158, 11, 0.05); }
+            .log-line.warn .level { color: #f59e0b; font-weight: bold; }
+
+            .log-line.info .level { color: #60a5fa; }
+            .log-line.debug .level { color: #34d399; }
+            .log-line.trace .level { color: #6b7280; }
+
+            .highlight {
+                background: rgba(234, 179, 8, 0.4);
+                padding: 0 2px;
+                border-radius: 2px;
+            }
+
+            /* Toolbar */
+            .toolbar {
+                display: flex;
+                gap: 10px;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 15px;
+            }
+
+            .toolbar-left {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+            }
+
+            .toolbar-right {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+            }
+
+            .btn {
+                padding: 8px 16px;
+                border-radius: 8px;
+                font-size: 13px;
+                font-weight: 500;
+                cursor: pointer;
+                border: none;
+                transition: all 0.2s;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .btn-primary {
+                background: #667eea;
+                color: white;
+            }
+            .btn-primary:hover {
+                background: #5a67d8;
+            }
+
+            .btn-secondary {
+                background: var(--bg-tertiary);
+                color: var(--text-primary);
+                border: 1px solid var(--border-color);
+            }
+            .btn-secondary:hover {
+                background: var(--bg-primary);
+            }
+
+            [data-theme="dark"] .btn-secondary {
+                background: #4a5568;
+                border-color: #4a5568;
+            }
+            [data-theme="dark"] .btn-secondary:hover {
+                background: #5a6578;
+            }
+
+            .btn-stream {
+                background: #10b981;
+                color: white;
+            }
+            .btn-stream:hover {
+                background: #059669;
+            }
+            .btn-stream.streaming {
+                background: #ef4444;
+            }
+            .btn-stream.streaming:hover {
+                background: #dc2626;
+            }
+
+            .toggle-checkbox {
+                position: relative;
+                width: 44px;
+                height: 24px;
+                appearance: none;
+                background: var(--border-color);
+                border-radius: 12px;
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+
+            .toggle-checkbox:checked {
+                background: #667eea;
+            }
+
+            .toggle-checkbox::after {
+                content: '';
+                position: absolute;
+                width: 20px;
+                height: 20px;
+                background: white;
+                border-radius: 50%;
+                top: 2px;
+                left: 2px;
+                transition: all 0.3s;
+            }
+
+            .toggle-checkbox:checked::after {
+                left: 22px;
+            }
+
+            .status-text {
+                font-size: 13px;
+                color: var(--text-secondary);
+            }
+
+            .status-text.streaming {
+                color: #10b981;
+                font-weight: 500;
+            }
+
+            /* Loading */
+            .loading {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 200px;
+                color: var(--text-secondary);
+            }
+
+            .spinner {
+                width: 30px;
+                height: 30px;
+                border: 3px solid var(--border-color);
+                border-top-color: #667eea;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin-right: 10px;
+            }
+
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+
+            /* Empty State */
+            .empty-state {
+                text-align: center;
+                padding: 60px 20px;
+                color: var(--text-secondary);
+            }
+
+            .empty-state .icon {
+                font-size: 48px;
+                margin-bottom: 15px;
+                opacity: 0.5;
+            }
+
+            /* Responsive */
+            @media (max-width: 992px) {
+                .main-content {
+                    flex-direction: column;
+                }
+                .sidebar {
+                    width: 100%;
+                }
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+<div layout:fragment="content" class="log-container">
+    <div class="page-header">
+        <h2>System Logs</h2>
+        <p>실시간 시스템 로그 모니터링 - <span th:text="${logDirectory}"></span></p>
+    </div>
+
+    <div class="main-content">
+        <!-- Sidebar: File List -->
+        <div class="sidebar">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Log Files</h5>
+                </div>
+                <ul class="file-list" id="fileList">
+                    <li th:each="file : ${logFiles}"
+                        th:class="'file-item' + (${file.current} ? ' active' : '')"
+                        th:data-filename="${file.filename}"
+                        onclick="selectFile(this)">
+                        <div>
+                            <div class="file-name">
+                                <span th:if="${file.archived}" class="icon">&#128230;</span>
+                                <span th:unless="${file.archived}" class="icon">&#128196;</span>
+                                <span th:text="${file.filename}"></span>
+                            </div>
+                            <div class="file-meta">
+                                <span th:text="${file.sizeFormatted}"></span>
+                            </div>
+                        </div>
+                    </li>
+                    <li th:if="${#lists.isEmpty(logFiles)}" class="empty-state" style="padding: 30px;">
+                        <div class="icon">&#128194;</div>
+                        <p>로그 파일 없음</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main: Log Viewer -->
+        <div class="log-viewer">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Log Viewer - <span id="currentFileName" th:text="${currentFile}"></span></h5>
+                </div>
+                <div class="card-body">
+                    <!-- Filter Controls -->
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <span class="filter-label">Level:</span>
+                            <div class="level-filters">
+                                <span class="level-badge error active" data-level="ERROR" onclick="toggleLevel(this)">ERROR</span>
+                                <span class="level-badge warn active" data-level="WARN" onclick="toggleLevel(this)">WARN</span>
+                                <span class="level-badge info active" data-level="INFO" onclick="toggleLevel(this)">INFO</span>
+                                <span class="level-badge debug" data-level="DEBUG" onclick="toggleLevel(this)">DEBUG</span>
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <span class="filter-label">Search:</span>
+                            <input type="text" class="search-input" id="keywordInput" placeholder="Keyword...">
+                        </div>
+                        <div class="filter-group">
+                            <span class="filter-label">Lines:</span>
+                            <select class="lines-select" id="linesSelect">
+                                <option value="100">100</option>
+                                <option value="200">200</option>
+                                <option value="500" selected>500</option>
+                                <option value="1000">1000</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" onclick="loadLogs()">
+                            <span>&#8635;</span> Refresh
+                        </button>
+                    </div>
+
+                    <!-- Log Output -->
+                    <div class="log-output" id="logOutput">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <span>Loading logs...</span>
+                        </div>
+                    </div>
+
+                    <!-- Toolbar -->
+                    <div class="toolbar">
+                        <div class="toolbar-left">
+                            <button class="btn btn-stream" id="streamBtn" onclick="toggleStream()">
+                                <span id="streamIcon">&#9654;</span>
+                                <span id="streamText">Start Stream</span>
+                            </button>
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" class="toggle-checkbox" id="autoScrollToggle" checked>
+                                <span class="filter-label">Auto-scroll</span>
+                            </label>
+                            <span class="status-text" id="statusText">Idle</span>
+                        </div>
+                        <div class="toolbar-right">
+                            <button class="btn btn-secondary" onclick="clearLogs()">
+                                <span>&#128465;</span> Clear
+                            </button>
+                            <button class="btn btn-secondary" onclick="downloadLog()">
+                                <span>&#8681;</span> Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="extra-scripts">
+    <script th:inline="javascript">
+        let currentFile = /*[[${currentFile}]]*/ 'maruweb.log';
+        let isStreaming = false;
+        let streamInterval = null;
+        let lastLineCount = 0;
+        let logStompClient = null;
+        let useWebSocket = true;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadLogs();
+
+            // Enter key triggers search
+            document.getElementById('keywordInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    loadLogs();
+                }
+            });
+        });
+
+        function selectFile(element) {
+            document.querySelectorAll('.file-item').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            currentFile = element.dataset.filename;
+            document.getElementById('currentFileName').textContent = currentFile;
+            loadLogs();
+        }
+
+        function toggleLevel(element) {
+            element.classList.toggle('active');
+            loadLogs();
+        }
+
+        function getActiveLevels() {
+            return Array.from(document.querySelectorAll('.level-badge.active'))
+                .map(el => el.dataset.level);
+        }
+
+        function loadLogs() {
+            const levels = getActiveLevels();
+            const keyword = document.getElementById('keywordInput').value;
+            const lines = document.getElementById('linesSelect').value;
+
+            const params = new URLSearchParams();
+            params.append('filename', currentFile);
+            params.append('lines', lines);
+            levels.forEach(l => params.append('levels', l));
+            if (keyword) params.append('keyword', keyword);
+
+            document.getElementById('logOutput').innerHTML = '<div class="loading"><div class="spinner"></div><span>Loading logs...</span></div>';
+            updateStatus('Loading...');
+
+            fetch(`/trading/api/logs/tail?${params.toString()}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        renderLogs(data.entries, keyword);
+                        lastLineCount = data.totalLines;
+                        updateStatus(`${data.totalLines} lines loaded`);
+                    } else {
+                        showError(data.error || 'Failed to load logs');
+                    }
+                })
+                .catch(error => {
+                    showError('Error: ' + error.message);
+                });
+        }
+
+        function renderLogs(entries, keyword) {
+            const output = document.getElementById('logOutput');
+
+            if (!entries || entries.length === 0) {
+                output.innerHTML = '<div class="empty-state"><div class="icon">&#128196;</div><p>No log entries found</p></div>';
+                return;
+            }
+
+            let html = '';
+            entries.forEach(entry => {
+                const levelClass = (entry.level || 'trace').toLowerCase();
+                let line = escapeHtml(entry.rawLine || '');
+
+                // Highlight keyword
+                if (keyword) {
+                    const regex = new RegExp(`(${escapeRegex(keyword)})`, 'gi');
+                    line = line.replace(regex, '<span class="highlight">$1</span>');
+                }
+
+                // Format structured log
+                if (entry.timestamp) {
+                    html += `<span class="log-line ${levelClass}">`;
+                    html += `<span class="timestamp">${escapeHtml(entry.timestamp)}</span> `;
+                    html += `[<span class="thread">${escapeHtml(entry.thread || '')}</span>] `;
+                    html += `<span class="level">${escapeHtml(entry.level || '')}</span> `;
+                    html += `<span class="logger">${escapeHtml(entry.logger || '')}</span> - `;
+
+                    let message = escapeHtml(entry.message || '');
+                    if (keyword) {
+                        const regex = new RegExp(`(${escapeRegex(keyword)})`, 'gi');
+                        message = message.replace(regex, '<span class="highlight">$1</span>');
+                    }
+                    html += `<span class="message">${message}</span>`;
+                    html += `</span>\n`;
+                } else {
+                    html += `<span class="log-line ${levelClass}">${line}</span>\n`;
+                }
+            });
+
+            output.innerHTML = html;
+
+            if (document.getElementById('autoScrollToggle').checked) {
+                output.scrollTop = output.scrollHeight;
+            }
+        }
+
+        function toggleStream() {
+            const btn = document.getElementById('streamBtn');
+            const icon = document.getElementById('streamIcon');
+            const text = document.getElementById('streamText');
+
+            if (isStreaming) {
+                // Stop streaming
+                stopStreaming();
+                btn.classList.remove('streaming');
+                icon.innerHTML = '&#9654;';
+                text.textContent = 'Start Stream';
+                updateStatus('Stream stopped');
+            } else {
+                // Start streaming
+                startStreaming();
+                btn.classList.add('streaming');
+                icon.innerHTML = '&#9632;';
+                text.textContent = 'Stop Stream';
+            }
+        }
+
+        function startStreaming() {
+            isStreaming = true;
+
+            if (useWebSocket) {
+                // WebSocket 연결 시도
+                connectWebSocket();
+            } else {
+                // 폴링 방식 사용
+                updateStatus('Streaming (Polling)...', true);
+                streamInterval = setInterval(() => {
+                    pollNewLogs();
+                }, 2000);
+            }
+        }
+
+        function stopStreaming() {
+            isStreaming = false;
+
+            if (logStompClient && logStompClient.connected) {
+                logStompClient.disconnect();
+                logStompClient = null;
+            }
+
+            if (streamInterval) {
+                clearInterval(streamInterval);
+                streamInterval = null;
+            }
+        }
+
+        function connectWebSocket() {
+            updateStatus('Connecting WebSocket...', true);
+
+            try {
+                const socket = new SockJS('/ws-trading');
+                logStompClient = Stomp.over(socket);
+                logStompClient.debug = null; // 디버그 로그 비활성화
+
+                logStompClient.connect({}, function(frame) {
+                    updateStatus('Streaming (WebSocket)...', true);
+
+                    // 로그 토픽 구독
+                    logStompClient.subscribe('/topic/logs', function(message) {
+                        const data = JSON.parse(message.body);
+                        if (data.type === 'LOG_ENTRIES' && data.entries) {
+                            const keyword = document.getElementById('keywordInput').value;
+                            const levels = getActiveLevels();
+
+                            // 레벨 필터링
+                            const filteredEntries = data.entries.filter(entry => {
+                                if (levels.length > 0 && entry.level) {
+                                    return levels.includes(entry.level);
+                                }
+                                return true;
+                            });
+
+                            if (filteredEntries.length > 0) {
+                                appendNewLogs(filteredEntries, keyword);
+                            }
+                        }
+                    });
+                }, function(error) {
+                    console.error('WebSocket 연결 실패:', error);
+                    // 폴링으로 폴백
+                    useWebSocket = false;
+                    updateStatus('Streaming (Polling)...', true);
+                    streamInterval = setInterval(() => {
+                        pollNewLogs();
+                    }, 2000);
+                });
+            } catch (e) {
+                console.error('WebSocket 초기화 실패:', e);
+                // 폴링으로 폴백
+                useWebSocket = false;
+                updateStatus('Streaming (Polling)...', true);
+                streamInterval = setInterval(() => {
+                    pollNewLogs();
+                }, 2000);
+            }
+        }
+
+        function pollNewLogs() {
+            const levels = getActiveLevels();
+            const keyword = document.getElementById('keywordInput').value;
+            const lines = 50; // Poll fewer lines
+
+            const params = new URLSearchParams();
+            params.append('filename', currentFile);
+            params.append('lines', lines);
+            levels.forEach(l => params.append('levels', l));
+            if (keyword) params.append('keyword', keyword);
+
+            fetch(`/trading/api/logs/tail?${params.toString()}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.entries && data.entries.length > 0) {
+                        appendNewLogs(data.entries, keyword);
+                    }
+                })
+                .catch(error => {
+                    console.error('Stream error:', error);
+                });
+        }
+
+        function appendNewLogs(entries, keyword) {
+            const output = document.getElementById('logOutput');
+
+            entries.forEach(entry => {
+                const levelClass = (entry.level || 'trace').toLowerCase();
+                let line = escapeHtml(entry.rawLine || '');
+
+                const span = document.createElement('span');
+                span.className = `log-line ${levelClass}`;
+
+                if (entry.timestamp) {
+                    let message = escapeHtml(entry.message || '');
+                    if (keyword) {
+                        const regex = new RegExp(`(${escapeRegex(keyword)})`, 'gi');
+                        message = message.replace(regex, '<span class="highlight">$1</span>');
+                    }
+                    span.innerHTML = `<span class="timestamp">${escapeHtml(entry.timestamp)}</span> ` +
+                        `[<span class="thread">${escapeHtml(entry.thread || '')}</span>] ` +
+                        `<span class="level">${escapeHtml(entry.level || '')}</span> ` +
+                        `<span class="logger">${escapeHtml(entry.logger || '')}</span> - ` +
+                        `<span class="message">${message}</span>`;
+                } else {
+                    if (keyword) {
+                        const regex = new RegExp(`(${escapeRegex(keyword)})`, 'gi');
+                        line = line.replace(regex, '<span class="highlight">$1</span>');
+                    }
+                    span.innerHTML = line;
+                }
+
+                output.appendChild(span);
+                output.appendChild(document.createTextNode('\n'));
+            });
+
+            // Limit lines
+            const lines = output.querySelectorAll('.log-line');
+            while (lines.length > 1000) {
+                const first = output.querySelector('.log-line');
+                if (first) first.remove();
+            }
+
+            if (document.getElementById('autoScrollToggle').checked) {
+                output.scrollTop = output.scrollHeight;
+            }
+        }
+
+        function clearLogs() {
+            document.getElementById('logOutput').innerHTML = '<div class="empty-state"><div class="icon">&#128196;</div><p>Log cleared</p></div>';
+            lastLineCount = 0;
+        }
+
+        function downloadLog() {
+            window.location.href = `/trading/api/logs/download?filename=${encodeURIComponent(currentFile)}`;
+        }
+
+        function updateStatus(text, isStreaming = false) {
+            const statusText = document.getElementById('statusText');
+            statusText.textContent = text;
+            statusText.classList.toggle('streaming', isStreaming);
+        }
+
+        function showError(message) {
+            const output = document.getElementById('logOutput');
+            output.innerHTML = `<div class="empty-state"><div class="icon" style="color: #ef4444;">&#9888;</div><p>${escapeHtml(message)}</p></div>`;
+            updateStatus('Error');
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function escapeRegex(str) {
+            return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+    </script>
+</th:block>
+</body>
+</html>
