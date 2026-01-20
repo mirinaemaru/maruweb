@@ -4,6 +4,8 @@
       layout:decorate="~{layout/main}">
 <head>
     <title>체결 내역 조회</title>
+    <!-- Symbol Search Component -->
+    <link rel="stylesheet" th:href="@{/css/symbol-search.css}">
     <th:block layout:fragment="extra-css">
         <style>
             .fills-container {
@@ -369,12 +371,19 @@
                     </div>
 
                     <div class="filter-item">
-                        <label class="form-label">종목코드</label>
-                        <input type="text"
-                               name="symbol"
-                               th:value="${selectedSymbol}"
-                               placeholder="예: 005930"
-                               class="form-control">
+                        <label class="form-label">종목</label>
+                        <div class="symbol-search-wrapper">
+                            <input type="text"
+                                   name="symbol"
+                                   id="symbolInput"
+                                   th:value="${selectedSymbol}"
+                                   placeholder="종목 검색"
+                                   class="form-control"
+                                   readonly>
+                            <button type="button" class="symbol-search-btn" onclick="SymbolSearch.open('symbolInput', {multiSelect: false})" title="종목 검색">
+                                🔍
+                            </button>
+                        </div>
                     </div>
 
                     <div class="filter-item">
@@ -463,16 +472,25 @@
                 <p>계좌를 선택하고 조회 버튼을 클릭하세요.</p>
             </div>
         </div>
+
+        <!-- Symbol Search Modal (Common Component) -->
+        <div th:replace="~{fragments/symbol-search :: modal}"></div>
+
+        <!-- Symbol Search Component Script -->
+        <script th:src="@{/js/symbol-search.js}"></script>
+
+        <script>
+            function exportToExcel() {
+                const params = new URLSearchParams(window.location.search);
+                window.location.href = '/trading/fills/export?' + params.toString();
+            }
+
+            // Clear symbol input when clicking on it (allow manual clearing)
+            document.getElementById('symbolInput')?.addEventListener('dblclick', function() {
+                this.value = '';
+            });
+        </script>
     </div>
 </div>
-
-<th:block layout:fragment="scripts">
-<script>
-    function exportToExcel() {
-        const params = new URLSearchParams(window.location.search);
-        window.location.href = '/trading/fills/export?' + params.toString();
-    }
-</script>
-</th:block>
 </body>
 </html>
