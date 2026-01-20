@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Market Data 구독 관리</title>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .market-data-container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px;
+                padding-bottom: 40px;
+            }
+
+            .page-header {
+                margin-bottom: 30px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 30px 40px;
+                border-radius: 16px;
+                color: white;
+                box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+            }
+            [data-theme="dark"] .page-header {
+                background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .page-header h2 {
+                font-size: 28px;
+                font-weight: 700;
+                margin: 0;
+                color: white;
+            }
+
+            .page-header p {
+                margin: 10px 0 0 0;
+                opacity: 0.9;
+                font-size: 14px;
+            }
+
+            .alert {
+                padding: 15px 20px;
+                margin-bottom: 20px;
+                border-radius: 12px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            }
+
+            .alert-success {
+                background: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
+
+            .alert-error {
+                background: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+            }
+
+            [data-theme="dark"] .alert-success {
+                background: rgba(40, 167, 69, 0.2);
+                color: #75d99b;
+                border-color: rgba(40, 167, 69, 0.3);
+            }
+
+            [data-theme="dark"] .alert-error {
+                background: rgba(220, 53, 69, 0.2);
+                color: #f5a5ae;
+                border-color: rgba(220, 53, 69, 0.3);
+            }
+
+            .card {
+                background: var(--bg-secondary);
+                border: none;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                transition: all 0.3s ease;
+                margin-bottom: 20px;
+            }
+
+            .card:hover {
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            }
+
+            .card-header {
+                background: var(--bg-tertiary);
+                border-bottom: 1px solid var(--border-color);
+                padding: 15px 20px;
+                border-radius: 12px 12px 0 0;
+            }
+
+            .card-header h5 {
+                margin: 0;
+                font-size: 16px;
+                font-weight: 600;
+                color: var(--text-primary);
+            }
+
+            .card-body {
+                color: var(--text-primary);
+                padding: 20px;
+            }
+
+            .status-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 15px;
+            }
+
+            .status-item {
+                padding: 15px;
+                background: var(--bg-tertiary);
+                border-radius: 10px;
+                transition: background-color 0.3s ease;
+            }
+
+            .status-label {
+                font-size: 13px;
+                color: var(--text-secondary);
+                margin-bottom: 5px;
+                font-weight: 500;
+            }
+
+            .status-value {
+                font-size: 16px;
+                font-weight: 600;
+                color: var(--text-primary);
+            }
+
+            .status-value.active {
+                color: #28a745;
+            }
+
+            .status-value.inactive {
+                color: #dc3545;
+            }
+
+            .symbols-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                margin-top: 10px;
+            }
+
+            .symbol-tag {
+                display: inline-flex;
+                align-items: center;
+                padding: 8px 16px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border-radius: 20px;
+                font-size: 14px;
+                font-weight: 500;
+                box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+            }
+
+            [data-theme="dark"] .symbol-tag {
+                background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            }
+
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            .form-label {
+                display: block;
+                font-weight: 600;
+                color: var(--text-primary);
+                font-size: 14px;
+                margin-bottom: 8px;
+            }
+
+            .form-control {
+                width: 100%;
+                padding: 12px 15px;
+                border: 2px solid var(--border-color);
+                border-radius: 8px;
+                font-size: 14px;
+                background: var(--bg-tertiary);
+                color: var(--text-primary);
+                transition: all 0.3s ease;
+                box-sizing: border-box;
+            }
+
+            .form-control:focus {
+                outline: none;
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+
+            .form-text {
+                font-size: 12px;
+                color: var(--text-muted);
+                margin-top: 5px;
+            }
+
+            .btn {
+                padding: 12px 24px;
+                border: none;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .btn-primary {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            }
+
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            }
+
+            .btn-danger {
+                background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+                color: white;
+                box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+            }
+
+            .btn-danger:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+            }
+
+            .btn-secondary {
+                background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
+                color: white;
+                box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+            }
+
+            .btn-secondary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+            }
+
+            [data-theme="dark"] .btn-primary,
+            [data-theme="dark"] .btn-danger,
+            [data-theme="dark"] .btn-secondary {
+                background: #4a5568;
+                box-shadow: 0 4px 15px rgba(74, 85, 104, 0.3);
+            }
+
+            [data-theme="dark"] .btn-primary:hover,
+            [data-theme="dark"] .btn-danger:hover,
+            [data-theme="dark"] .btn-secondary:hover {
+                background: #5a6778;
+            }
+
+            .action-cards {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+                gap: 20px;
+            }
+
+            .empty-symbols {
+                text-align: center;
+                padding: 30px;
+                color: var(--text-muted);
+            }
+
+            .empty-symbols-icon {
+                font-size: 48px;
+                margin-bottom: 10px;
+            }
+
+            .info-box {
+                background: var(--bg-secondary);
+                padding: 20px;
+                border-radius: 12px;
+                border-left: 4px solid #667eea;
+                margin-top: 20px;
+                transition: background-color 0.3s ease;
+            }
+
+            [data-theme="dark"] .info-box {
+                border-left-color: #8b9df0;
+            }
+
+            .info-box h3 {
+                margin-top: 0;
+                color: #667eea;
+                font-size: 16px;
+            }
+
+            [data-theme="dark"] .info-box h3 {
+                color: #8b9df0;
+            }
+
+            .info-box p {
+                margin: 8px 0;
+                color: var(--text-primary);
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="market-data-container">
+        <!-- 페이지 헤더 -->
+        <div class="page-header">
+            <h2>📡 Market Data 구독 관리</h2>
+            <p>실시간 시세 데이터 구독 종목을 관리합니다</p>
+        </div>
+
+        <!-- 에러 메시지 -->
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <!-- 성공 메시지 -->
+        <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+        <!-- 구독 상태 카드 -->
+        <div class="card" th:if="${status}">
+            <div class="card-header">
+                <h5>📊 구독 상태</h5>
+            </div>
+            <div class="card-body">
+                <div class="status-grid">
+                    <div class="status-item">
+                        <div class="status-label">구독 상태</div>
+                        <div class="status-value" th:classappend="${status.subscribed ? 'active' : 'inactive'}"
+                             th:text="${status.subscribed ? '✅ 활성' : '❌ 비활성'}">활성</div>
+                    </div>
+                    <div class="status-item" th:if="${status.subscriptionId}">
+                        <div class="status-label">구독 ID</div>
+                        <div class="status-value" th:text="${status.subscriptionId}">-</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-label">종목 수</div>
+                        <div class="status-value" th:text="${status.symbolCount} + '개'">0개</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-label">연결 상태</div>
+                        <div class="status-value" th:classappend="${status.connected ? 'active' : 'inactive'}"
+                             th:text="${status.connected ? '🟢 연결됨' : '🔴 연결 안됨'}">연결됨</div>
+                    </div>
+                </div>
+                <div th:if="${status.message}" class="status-item" style="margin-top: 15px;">
+                    <div class="status-label">메시지</div>
+                    <div class="status-value" th:text="${status.message}">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 구독 종목 목록 카드 -->
+        <div class="card" th:if="${symbols}">
+            <div class="card-header">
+                <h5>📋 구독 종목 목록 (<span th:text="${symbols.total}">0</span>개)</h5>
+            </div>
+            <div class="card-body">
+                <div th:if="${symbols.symbols != null and !symbols.symbols.isEmpty()}" class="symbols-list">
+                    <span class="symbol-tag" th:each="symbol : ${symbols.symbols}" th:text="${symbol}">005490</span>
+                </div>
+                <div th:if="${symbols.symbols == null or symbols.symbols.isEmpty()}" class="empty-symbols">
+                    <div class="empty-symbols-icon">📭</div>
+                    <p>구독 중인 종목이 없습니다.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 액션 카드들 (그리드) -->
+        <div class="action-cards">
+            <!-- 종목 추가 폼 -->
+            <div class="card">
+                <div class="card-header">
+                    <h5>➕ 종목 추가</h5>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/trading/market-data/add}" method="post">
+                        <div class="form-group">
+                            <label for="addSymbols" class="form-label">종목 코드</label>
+                            <input type="text" class="form-control" id="addSymbols" name="symbols"
+                                   placeholder="예: 005490,000270" required>
+                            <div class="form-text">종목 코드를 쉼표로 구분하여 입력하세요.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span>➕</span> 추가
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 종목 삭제 폼 -->
+            <div class="card">
+                <div class="card-header">
+                    <h5>➖ 종목 삭제</h5>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/trading/market-data/remove}" method="post">
+                        <div class="form-group">
+                            <label for="removeSymbols" class="form-label">종목 코드</label>
+                            <input type="text" class="form-control" id="removeSymbols" name="symbols"
+                                   placeholder="예: 005490" required>
+                            <div class="form-text">삭제할 종목 코드를 쉼표로 구분하여 입력하세요.</div>
+                        </div>
+                        <button type="submit" class="btn btn-danger">
+                            <span>🗑️</span> 삭제
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 재구독 카드 -->
+        <div class="card">
+            <div class="card-header">
+                <h5>🔄 재구독</h5>
+            </div>
+            <div class="card-body">
+                <p style="margin-bottom: 15px; color: var(--text-secondary);">모든 구독 종목의 연결을 갱신합니다. 연결 문제가 있을 때 사용하세요.</p>
+                <form th:action="@{/trading/market-data/resubscribe}" method="post">
+                    <button type="submit" class="btn btn-secondary">
+                        <span>🔄</span> 재구독
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Info Box -->
+        <div class="info-box">
+            <h3>ℹ️ Market Data 구독 안내</h3>
+            <p><strong>구독 상태:</strong> 현재 실시간 시세 데이터 수신 상태를 나타냅니다.</p>
+            <p><strong>종목 추가:</strong> 실시간 시세를 받고 싶은 종목 코드를 추가합니다.</p>
+            <p><strong>종목 삭제:</strong> 더 이상 시세를 받지 않을 종목을 구독에서 제외합니다.</p>
+            <p><strong>재구독:</strong> 연결 문제 발생 시 모든 종목의 구독을 다시 시작합니다.</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>
