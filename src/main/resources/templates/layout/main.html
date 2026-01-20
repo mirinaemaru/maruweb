@@ -86,11 +86,17 @@
                             <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/instruments')} ? 'active' : ''">
                                 <a th:href="@{/trading/instruments}">종목 관리</a>
                             </li>
+                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/market-data')} ? 'active' : ''">
+                                <a th:href="@{/trading/market-data}">구독 종목 관리</a>
+                            </li>
 
                             <!-- 거래 & 실행 -->
                             <li class="submenu-header"><span>💼 거래 & 실행</span></li>
                             <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/strategies')} ? 'active' : ''">
                                 <a th:href="@{/trading/strategies}">전략 관리</a>
+                            </li>
+                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/scheduler')} ? 'active' : ''">
+                                <a th:href="@{/trading/scheduler}">스케줄러 관리</a>
                             </li>
                             <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/orders')} ? 'active' : ''">
                                 <a th:href="@{/trading/orders}">주문조회</a>
@@ -389,7 +395,9 @@
                 '/trading/kill-switch': { name: 'Kill Switch', icon: '⚡' },
                 '/trading/risk-rules': { name: '리스크 룰', icon: '⚙️' },
                 '/trading/performance': { name: '성과 분석', icon: '📊' },
-                '/trading/backtests': { name: '백테스팅', icon: '📈' }
+                '/trading/backtests': { name: '백테스팅', icon: '📈' },
+                '/trading/market-data': { name: '구독 종목 관리', icon: '📡' },
+                '/trading/scheduler': { name: '스케줄러 관리', icon: '⏰' }
             };
 
             // 쿠키 읽기
