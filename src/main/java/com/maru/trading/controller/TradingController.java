@@ -748,4 +748,69 @@ public class TradingController {
         }
     }
 
+    // ==================== 계좌 권한 관리 ====================
+
+    /**
+     * 계좌 권한 설정 페이지
+     */
+    @GetMapping("/accounts/{accountId}/permissions")
+    public String accountPermission(@PathVariable String accountId, Model model, RedirectAttributes redirectAttributes) {
+        try {
+            log.info("Viewing account permission page: accountId={}", accountId);
+
+            // 계좌 정보 조회
+            Map<String, Object> account = tradingApiService.getAccount(accountId);
+            model.addAttribute("account", account);
+            model.addAttribute("accountId", accountId);
+
+            // 계좌 권한 조회
+            Map<String, Object> permission = tradingApiService.getAccountPermission(accountId);
+            model.addAttribute("permission", permission);
+
+            return "trading/account-permission";
+
+        } catch (Exception e) {
+            log.error("Failed to load account permission page: {}", accountId, e);
+            redirectAttributes.addFlashAttribute("error", "계좌 권한 정보를 불러올 수 없습니다: " + e.getMessage());
+            return "redirect:/trading/accounts";
+        }
+    }
+
+    /**
+     * 계좌 권한 업데이트 처리
+     */
+    @PostMapping("/accounts/{accountId}/permissions")
+    public String updateAccountPermission(
+            @PathVariable String accountId,
+            @RequestParam(name = "tradeBuy", defaultValue = "false") boolean tradeBuy,
+            @RequestParam(name = "tradeSell", defaultValue = "false") boolean tradeSell,
+            @RequestParam(name = "autoTrade", defaultValue = "false") boolean autoTrade,
+            @RequestParam(name = "manualTrade", defaultValue = "false") boolean manualTrade,
+            @RequestParam(name = "paperOnly", defaultValue = "true") boolean paperOnly,
+            RedirectAttributes redirectAttributes) {
+        try {
+            log.info("Updating account permission: accountId={}, tradeBuy={}, tradeSell={}, autoTrade={}, manualTrade={}, paperOnly={}",
+                    accountId, tradeBuy, tradeSell, autoTrade, manualTrade, paperOnly);
+
+            // 권한 데이터 생성
+            Map<String, Object> permissionData = new HashMap<>();
+            permissionData.put("tradeBuy", tradeBuy);
+            permissionData.put("tradeSell", tradeSell);
+            permissionData.put("autoTrade", autoTrade);
+            permissionData.put("manualTrade", manualTrade);
+            permissionData.put("paperOnly", paperOnly);
+
+            // API 호출
+            Map<String, Object> result = tradingApiService.updateAccountPermission(accountId, permissionData);
+
+            redirectAttributes.addFlashAttribute("message", "계좌 권한이 성공적으로 업데이트되었습니다.");
+            return "redirect:/trading/accounts/" + accountId + "/permissions";
+
+        } catch (Exception e) {
+            log.error("Failed to update account permission: {}", accountId, e);
+            redirectAttributes.addFlashAttribute("error", "계좌 권한 업데이트에 실패했습니다: " + e.getMessage());
+            return "redirect:/trading/accounts/" + accountId + "/permissions";
+        }
+    }
+
 }

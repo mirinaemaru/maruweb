@@ -6,6 +6,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -1811,6 +1812,71 @@ public class TradingApiService {
             Map<String, Object> errorResult = new HashMap<>();
             errorResult.put("error", "데모 데이터 삭제에 실패했습니다.");
             return errorResult;
+        }
+    }
+
+    // ==================== 계좌 권한 관리 (Account Permission) ====================
+
+    /**
+     * 계좌 권한 조회
+     */
+    public Map<String, Object> getAccountPermission(String accountId) {
+        String url = "/api/v1/admin/accounts/" + accountId + "/permissions";
+        try {
+            log.debug("Calling Trading API for account permission: {}", url);
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                log.error("Account not found: {}", accountId, e);
+                throw new RuntimeException("계좌를 찾을 수 없습니다.", e);
+            } else {
+                log.error("Client error from Trading System API: {} - {}", e.getStatusCode(), e.getResponseBodyAsString(), e);
+                throw new RuntimeException("계좌 권한 정보를 가져올 수 없습니다.", e);
+            }
+        } catch (RestClientException e) {
+            log.error("Failed to get account permission from Trading System", e);
+            throw new RuntimeException("계좌 권한 정보를 가져올 수 없습니다.", e);
+        }
+    }
+
+    /**
+     * 계좌 권한 업데이트
+     */
+    public Map<String, Object> updateAccountPermission(String accountId, Map<String, Object> permissionData) {
+        String url = "/api/v1/admin/accounts/" + accountId + "/permissions";
+        try {
+            log.info("Updating account permission: accountId={}, data={}", accountId, permissionData);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(permissionData, headers);
+
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                url,
+                HttpMethod.PUT,
+                request,
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                log.error("Account not found: {}", accountId, e);
+                throw new RuntimeException("계좌를 찾을 수 없습니다.", e);
+            } else if (e.getStatusCode() == HttpStatus.BAD_REQUEST) {
+                log.error("Invalid permission data: {}", permissionData, e);
+                throw new RuntimeException("잘못된 권한 데이터입니다.", e);
+            } else {
+                log.error("Client error from Trading System API: {} - {}", e.getStatusCode(), e.getResponseBodyAsString(), e);
+                throw new RuntimeException("계좌 권한 업데이트에 실패했습니다.", e);
+            }
+        } catch (RestClientException e) {
+            log.error("Failed to update account permission in Trading System", e);
+            throw new RuntimeException("계좌 권한 업데이트에 실패했습니다.", e);
         }
     }
 }

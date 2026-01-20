@@ -286,6 +286,7 @@
                 <div class="action-buttons">
                     <a th:href="@{/trading/accounts}" class="btn btn-outline">← 목록으로</a>
                     <a th:href="@{/trading/accounts/{id}/edit(id=${account.accountId})}" class="btn btn-secondary">수정</a>
+                    <a th:href="@{/trading/accounts/{id}/permissions(id=${account.accountId})}" class="btn btn-primary">🔐 권한 관리</a>
 
                     <!-- Delete Button with Confirmation -->
                     <form class="delete-form"

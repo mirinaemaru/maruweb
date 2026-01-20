@@ -5261,4 +5261,303 @@ class TradingApiServiceTest {
         // then
         assertThat(result).isNotNull();
     }
+
+    // ==================== Account Permission Tests ====================
+
+    @Test
+    @DisplayName("계좌 권한 조회 - 성공")
+    void getAccountPermission_Success() {
+        // given
+        String accountId = "01KF9BPSTD82MHTFBNPNB3NDNJ";
+        Map<String, Object> permissionResponse = new HashMap<>();
+        permissionResponse.put("accountId", accountId);
+        permissionResponse.put("tradeBuy", true);
+        permissionResponse.put("tradeSell", true);
+        permissionResponse.put("autoTrade", false);
+        permissionResponse.put("manualTrade", true);
+        permissionResponse.put("paperOnly", true);
+        permissionResponse.put("updatedAt", "2024-01-15T14:30:45");
+
+        when(restTemplate.exchange(
+                eq("/api/v1/admin/accounts/" + accountId + "/permissions"),
+                eq(HttpMethod.GET),
+                any(),
+                any(ParameterizedTypeReference.class)
+        )).thenReturn(new ResponseEntity<>(permissionResponse, HttpStatus.OK));
+
+        // when
+        Map<String, Object> result = tradingApiService.getAccountPermission(accountId);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.get("accountId")).isEqualTo(accountId);
+        assertThat(result.get("tradeBuy")).isEqualTo(true);
+        assertThat(result.get("tradeSell")).isEqualTo(true);
+        assertThat(result.get("autoTrade")).isEqualTo(false);
+        assertThat(result.get("manualTrade")).isEqualTo(true);
+        assertThat(result.get("paperOnly")).isEqualTo(true);
+        assertThat(result.get("updatedAt")).isNotNull();
+    }
+
+    @Test
+    @DisplayName("계좌 권한 조회 - 기본값 반환")
+    void getAccountPermission_DefaultValues() {
+        // given
+        String accountId = "01KF9BPSTD82MHTFBNPNB3NDNJ";
+        Map<String, Object> permissionResponse = new HashMap<>();
+        permissionResponse.put("accountId", accountId);
+        permissionResponse.put("tradeBuy", false);
+        permissionResponse.put("tradeSell", false);
+        permissionResponse.put("autoTrade", false);
+        permissionResponse.put("manualTrade", false);
+        permissionResponse.put("paperOnly", true);
+        permissionResponse.put("updatedAt", "2024-01-15T14:30:45");
+
+        when(restTemplate.exchange(
+                eq("/api/v1/admin/accounts/" + accountId + "/permissions"),
+                eq(HttpMethod.GET),
+                any(),
+                any(ParameterizedTypeReference.class)
+        )).thenReturn(new ResponseEntity<>(permissionResponse, HttpStatus.OK));
+
+        // when
+        Map<String, Object> result = tradingApiService.getAccountPermission(accountId);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.get("tradeBuy")).isEqualTo(false);
+        assertThat(result.get("tradeSell")).isEqualTo(false);
+        assertThat(result.get("autoTrade")).isEqualTo(false);
+        assertThat(result.get("manualTrade")).isEqualTo(false);
+        assertThat(result.get("paperOnly")).isEqualTo(true);
+    }
+
+    @Test
+    @DisplayName("계좌 권한 조회 - 계좌 미존재 시 예외 발생")
+    void getAccountPermission_AccountNotFound() {
+        // given
+        String accountId = "invalid_account_id";
+
+        when(restTemplate.exchange(
+                eq("/api/v1/admin/accounts/" + accountId + "/permissions"),
+                eq(HttpMethod.GET),
+                any(),
+                any(ParameterizedTypeReference.class)
+        )).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
+
+        // when & then
+        assertThatThrownBy(() -> tradingApiService.getAccountPermission(accountId))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("계좌를 찾을 수 없습니다");
+    }
+
+    @Test
+    @DisplayName("계좌 권한 조회 - API 장애 시 예외 발생")
+    void getAccountPermission_ApiFailure() {
+        // given
+        String accountId = "01KF9BPSTD82MHTFBNPNB3NDNJ";
+
+        when(restTemplate.exchange(
+                eq("/api/v1/admin/accounts/" + accountId + "/permissions"),
+                eq(HttpMethod.GET),
+                any(),
+                any(ParameterizedTypeReference.class)
+        )).thenThrow(new RestClientException("Connection refused"));
+
+        // when & then
+        assertThatThrownBy(() -> tradingApiService.getAccountPermission(accountId))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("계좌 권한 정보를 가져올 수 없습니다");
+    }
+
+    @Test
+    @DisplayName("계좌 권한 업데이트 - 성공")
+    void updateAccountPermission_Success() {
+        // given
+        String accountId = "01KF9BPSTD82MHTFBNPNB3NDNJ";
+        Map<String, Object> permissionData = new HashMap<>();
+        permissionData.put("tradeBuy", true);
+        permissionData.put("tradeSell", true);
+        permissionData.put("autoTrade", true);
+        permissionData.put("manualTrade", true);
+        permissionData.put("paperOnly", false);
+
+        Map<String, Object> permissionResponse = new HashMap<>();
+        permissionResponse.put("accountId", accountId);
+        permissionResponse.put("tradeBuy", true);
+        permissionResponse.put("tradeSell", true);
+        permissionResponse.put("autoTrade", true);
+        permissionResponse.put("manualTrade", true);
+        permissionResponse.put("paperOnly", false);
+        permissionResponse.put("updatedAt", "2024-01-15T14:30:45");
+
+        when(restTemplate.exchange(
+                eq("/api/v1/admin/accounts/" + accountId + "/permissions"),
+                eq(HttpMethod.PUT),
+                any(HttpEntity.class),
+                any(ParameterizedTypeReference.class)
+        )).thenReturn(new ResponseEntity<>(permissionResponse, HttpStatus.OK));
+
+        // when
+        Map<String, Object> result = tradingApiService.updateAccountPermission(accountId, permissionData);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.get("accountId")).isEqualTo(accountId);
+        assertThat(result.get("tradeBuy")).isEqualTo(true);
+        assertThat(result.get("tradeSell")).isEqualTo(true);
+        assertThat(result.get("autoTrade")).isEqualTo(true);
+        assertThat(result.get("manualTrade")).isEqualTo(true);
+        assertThat(result.get("paperOnly")).isEqualTo(false);
+        assertThat(result.get("updatedAt")).isNotNull();
+    }
+
+    @Test
+    @DisplayName("계좌 권한 업데이트 - PAPER 전용 설정")
+    void updateAccountPermission_PaperOnly() {
+        // given
+        String accountId = "01KF9BPSTD82MHTFBNPNB3NDNJ";
+        Map<String, Object> permissionData = new HashMap<>();
+        permissionData.put("tradeBuy", true);
+        permissionData.put("tradeSell", false);
+        permissionData.put("autoTrade", false);
+        permissionData.put("manualTrade", true);
+        permissionData.put("paperOnly", true);
+
+        Map<String, Object> permissionResponse = new HashMap<>();
+        permissionResponse.put("accountId", accountId);
+        permissionResponse.put("tradeBuy", true);
+        permissionResponse.put("tradeSell", false);
+        permissionResponse.put("autoTrade", false);
+        permissionResponse.put("manualTrade", true);
+        permissionResponse.put("paperOnly", true);
+        permissionResponse.put("updatedAt", "2024-01-15T14:30:45");
+
+        when(restTemplate.exchange(
+                eq("/api/v1/admin/accounts/" + accountId + "/permissions"),
+                eq(HttpMethod.PUT),
+                any(HttpEntity.class),
+                any(ParameterizedTypeReference.class)
+        )).thenReturn(new ResponseEntity<>(permissionResponse, HttpStatus.OK));
+
+        // when
+        Map<String, Object> result = tradingApiService.updateAccountPermission(accountId, permissionData);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.get("paperOnly")).isEqualTo(true);
+        assertThat(result.get("tradeSell")).isEqualTo(false);
+    }
+
+    @Test
+    @DisplayName("계좌 권한 업데이트 - 계좌 미존재 시 예외 발생")
+    void updateAccountPermission_AccountNotFound() {
+        // given
+        String accountId = "invalid_account_id";
+        Map<String, Object> permissionData = new HashMap<>();
+        permissionData.put("tradeBuy", true);
+        permissionData.put("tradeSell", true);
+        permissionData.put("autoTrade", false);
+        permissionData.put("manualTrade", true);
+        permissionData.put("paperOnly", true);
+
+        when(restTemplate.exchange(
+                eq("/api/v1/admin/accounts/" + accountId + "/permissions"),
+                eq(HttpMethod.PUT),
+                any(HttpEntity.class),
+                any(ParameterizedTypeReference.class)
+        )).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
+
+        // when & then
+        assertThatThrownBy(() -> tradingApiService.updateAccountPermission(accountId, permissionData))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("계좌를 찾을 수 없습니다");
+    }
+
+    @Test
+    @DisplayName("계좌 권한 업데이트 - 필수 필드 누락 시 예외 발생")
+    void updateAccountPermission_MissingRequiredField() {
+        // given
+        String accountId = "01KF9BPSTD82MHTFBNPNB3NDNJ";
+        Map<String, Object> permissionData = new HashMap<>();
+        permissionData.put("tradeBuy", true);
+        // tradeSell 누락
+
+        when(restTemplate.exchange(
+                eq("/api/v1/admin/accounts/" + accountId + "/permissions"),
+                eq(HttpMethod.PUT),
+                any(HttpEntity.class),
+                any(ParameterizedTypeReference.class)
+        )).thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
+
+        // when & then
+        assertThatThrownBy(() -> tradingApiService.updateAccountPermission(accountId, permissionData))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("잘못된 권한 데이터입니다");
+    }
+
+    @Test
+    @DisplayName("계좌 권한 업데이트 - API 장애 시 예외 발생")
+    void updateAccountPermission_ApiFailure() {
+        // given
+        String accountId = "01KF9BPSTD82MHTFBNPNB3NDNJ";
+        Map<String, Object> permissionData = new HashMap<>();
+        permissionData.put("tradeBuy", true);
+        permissionData.put("tradeSell", true);
+        permissionData.put("autoTrade", false);
+        permissionData.put("manualTrade", true);
+        permissionData.put("paperOnly", true);
+
+        when(restTemplate.exchange(
+                eq("/api/v1/admin/accounts/" + accountId + "/permissions"),
+                eq(HttpMethod.PUT),
+                any(HttpEntity.class),
+                any(ParameterizedTypeReference.class)
+        )).thenThrow(new RestClientException("Connection refused"));
+
+        // when & then
+        assertThatThrownBy(() -> tradingApiService.updateAccountPermission(accountId, permissionData))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("계좌 권한 업데이트에 실패했습니다");
+    }
+
+    @Test
+    @DisplayName("계좌 권한 업데이트 - 모든 권한 비활성화")
+    void updateAccountPermission_AllPermissionsDisabled() {
+        // given
+        String accountId = "01KF9BPSTD82MHTFBNPNB3NDNJ";
+        Map<String, Object> permissionData = new HashMap<>();
+        permissionData.put("tradeBuy", false);
+        permissionData.put("tradeSell", false);
+        permissionData.put("autoTrade", false);
+        permissionData.put("manualTrade", false);
+        permissionData.put("paperOnly", true);
+
+        Map<String, Object> permissionResponse = new HashMap<>();
+        permissionResponse.put("accountId", accountId);
+        permissionResponse.put("tradeBuy", false);
+        permissionResponse.put("tradeSell", false);
+        permissionResponse.put("autoTrade", false);
+        permissionResponse.put("manualTrade", false);
+        permissionResponse.put("paperOnly", true);
+        permissionResponse.put("updatedAt", "2024-01-15T14:30:45");
+
+        when(restTemplate.exchange(
+                eq("/api/v1/admin/accounts/" + accountId + "/permissions"),
+                eq(HttpMethod.PUT),
+                any(HttpEntity.class),
+                any(ParameterizedTypeReference.class)
+        )).thenReturn(new ResponseEntity<>(permissionResponse, HttpStatus.OK));
+
+        // when
+        Map<String, Object> result = tradingApiService.updateAccountPermission(accountId, permissionData);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.get("tradeBuy")).isEqualTo(false);
+        assertThat(result.get("tradeSell")).isEqualTo(false);
+        assertThat(result.get("autoTrade")).isEqualTo(false);
+        assertThat(result.get("manualTrade")).isEqualTo(false);
+        assertThat(result.get("paperOnly")).isEqualTo(true);
+    }
 }

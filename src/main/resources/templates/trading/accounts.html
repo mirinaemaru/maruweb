@@ -401,6 +401,7 @@
                                 <div class="account-actions" onclick="event.stopPropagation()">
                                     <a th:href="@{/trading/accounts/{id}(id=${account.accountId})}" class="btn btn-primary btn-sm">상세보기</a>
                                     <a th:href="@{/trading/accounts/{id}/edit(id=${account.accountId})}" class="btn btn-secondary btn-sm">수정</a>
+                                    <a th:href="@{/trading/accounts/{id}/permissions(id=${account.accountId})}" class="btn btn-warning btn-sm">🔐 권한 관리</a>
 
                                     <!-- Status Toggle Buttons -->
                                     <form th:if="${account.status == 'INACTIVE'}" class="delete-form"

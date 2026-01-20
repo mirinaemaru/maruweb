@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>계좌 권한 관리</title>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .form-page {
+                padding: 30px;
+                max-width: 900px;
+                margin: 0 auto;
+            }
+            .page-header {
+                margin-bottom: 40px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 40px;
+                border-radius: 16px;
+                color: white;
+                box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+            }
+            [data-theme="dark"] .page-header {
+                background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            .page-header h1 {
+                font-size: 36px;
+                font-weight: 700;
+                margin-bottom: 10px;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+            .page-header p {
+                font-size: 16px;
+                opacity: 0.95;
+                margin: 0;
+            }
+
+            .account-info-card {
+                background: var(--bg-secondary);
+                border-radius: 16px;
+                padding: 30px;
+                margin-bottom: 30px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+                border: 1px solid rgba(0,0,0,0.04);
+            }
+            .account-info-title {
+                font-size: 18px;
+                font-weight: 700;
+                color: var(--text-primary);
+                margin-bottom: 20px;
+                padding-bottom: 15px;
+                border-bottom: 2px solid var(--border-color);
+            }
+            .account-info-row {
+                display: flex;
+                padding: 12px 0;
+                border-bottom: 1px solid var(--border-color);
+            }
+            .account-info-row:last-child {
+                border-bottom: none;
+            }
+            .account-info-label {
+                font-weight: 600;
+                color: var(--text-secondary);
+                min-width: 150px;
+            }
+            .account-info-value {
+                color: var(--text-primary);
+                flex: 1;
+            }
+
+            .form-container {
+                background: var(--bg-secondary);
+                border-radius: 16px;
+                padding: 40px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+                border: 1px solid rgba(0,0,0,0.04);
+            }
+            .form-section-title {
+                font-size: 20px;
+                font-weight: 700;
+                color: var(--text-primary);
+                margin-bottom: 25px;
+                padding-bottom: 15px;
+                border-bottom: 2px solid var(--border-color);
+            }
+            .permission-group {
+                margin-bottom: 30px;
+            }
+            .permission-category {
+                font-size: 16px;
+                font-weight: 600;
+                color: var(--text-primary);
+                margin-bottom: 15px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .permission-items {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+                padding-left: 10px;
+            }
+            .permission-item {
+                display: flex;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 18px;
+                background: var(--bg-primary);
+                border-radius: 12px;
+                border: 2px solid var(--border-color);
+                transition: all 0.3s;
+                cursor: pointer;
+            }
+            .permission-item:hover {
+                border-color: #667eea;
+                background: var(--bg-tertiary);
+            }
+            .permission-item input[type="checkbox"] {
+                width: 22px;
+                height: 22px;
+                cursor: pointer;
+                margin-top: 2px;
+                flex-shrink: 0;
+            }
+            .permission-content {
+                flex: 1;
+            }
+            .permission-label {
+                font-weight: 600;
+                color: var(--text-primary);
+                font-size: 15px;
+                margin-bottom: 5px;
+                display: block;
+                cursor: pointer;
+            }
+            .permission-description {
+                font-size: 13px;
+                color: var(--text-muted);
+                line-height: 1.5;
+            }
+            .permission-item.checked {
+                border-color: #667eea;
+                background: rgba(102, 126, 234, 0.08);
+            }
+            [data-theme="dark"] .permission-item.checked {
+                background: rgba(102, 126, 234, 0.15);
+            }
+
+            .form-actions {
+                display: flex;
+                gap: 15px;
+                margin-top: 35px;
+                padding-top: 25px;
+                border-top: 2px solid var(--border-color);
+            }
+            .btn {
+                padding: 14px 32px;
+                border: none;
+                border-radius: 10px;
+                font-size: 15px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                text-decoration: none;
+                display: inline-block;
+            }
+            .btn-primary {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            }
+            .btn-primary:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            }
+            [data-theme="dark"] .btn-primary {
+                background: var(--bg-tertiary);
+                color: var(--text-primary);
+            }
+            [data-theme="dark"] .btn-primary:hover {
+                background: #4a5568;
+            }
+            .btn-secondary {
+                background: #e8e8e8;
+                color: var(--text-secondary);
+            }
+            .btn-secondary:hover {
+                background: #d0d0d0;
+            }
+            [data-theme="dark"] .btn-secondary {
+                background: var(--bg-tertiary);
+                color: var(--text-primary);
+            }
+            [data-theme="dark"] .btn-secondary:hover {
+                background: #4a5568;
+            }
+
+            .alert {
+                padding: 14px 20px;
+                border-radius: 10px;
+                margin-bottom: 25px;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .alert-success {
+                background-color: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
+            .alert-error {
+                background-color: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+            }
+            [data-theme="dark"] .alert-success {
+                background-color: rgba(40, 167, 69, 0.2);
+                color: #a8e6af;
+                border-color: rgba(40, 167, 69, 0.4);
+            }
+            [data-theme="dark"] .alert-error {
+                background-color: rgba(220, 53, 69, 0.2);
+                color: #f8b4b4;
+                border-color: rgba(220, 53, 69, 0.4);
+            }
+
+            .warning-box {
+                background: #fff3cd;
+                border: 2px solid #ffc107;
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 30px;
+                display: flex;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            [data-theme="dark"] .warning-box {
+                background: rgba(255, 193, 7, 0.15);
+                border-color: rgba(255, 193, 7, 0.4);
+            }
+            .warning-icon {
+                font-size: 24px;
+                flex-shrink: 0;
+            }
+            .warning-content {
+                flex: 1;
+            }
+            .warning-title {
+                font-weight: 700;
+                color: #856404;
+                margin-bottom: 8px;
+            }
+            [data-theme="dark"] .warning-title {
+                color: #ffc107;
+            }
+            .warning-text {
+                color: #856404;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+            [data-theme="dark"] .warning-text {
+                color: #ffd966;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="form-page">
+            <div class="page-header">
+                <h1>🔐 계좌 권한 관리</h1>
+                <p>계좌의 거래 권한을 설정합니다.</p>
+            </div>
+
+            <div th:if="${message}" class="alert alert-success">
+                <span>✓</span>
+                <span th:text="${message}">성공 메시지</span>
+            </div>
+
+            <div th:if="${error}" class="alert alert-error">
+                <span>✗</span>
+                <span th:text="${error}">오류 메시지</span>
+            </div>
+
+            <!-- 계좌 정보 카드 -->
+            <div class="account-info-card">
+                <div class="account-info-title">📋 계좌 정보</div>
+                <div class="account-info-row">
+                    <div class="account-info-label">계좌 ID</div>
+                    <div class="account-info-value" th:text="${account?.accountId}">-</div>
+                </div>
+                <div class="account-info-row">
+                    <div class="account-info-label">계좌 별칭</div>
+                    <div class="account-info-value" th:text="${account?.alias}">-</div>
+                </div>
+                <div class="account-info-row">
+                    <div class="account-info-label">증권사</div>
+                    <div class="account-info-value" th:text="${account?.broker}">-</div>
+                </div>
+                <div class="account-info-row">
+                    <div class="account-info-label">계좌번호</div>
+                    <div class="account-info-value" th:text="${account?.cano + '-' + account?.acntPrdtCd}">-</div>
+                </div>
+                <div class="account-info-row">
+                    <div class="account-info-label">계좌 타입</div>
+                    <div class="account-info-value">
+                        <span th:if="${account?.environment == 'PAPER'}" style="color: #667eea; font-weight: 600;">📝 PAPER (모의투자)</span>
+                        <span th:if="${account?.environment == 'LIVE'}" style="color: #dc3545; font-weight: 600;">💰 LIVE (실전투자)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 경고 메시지 -->
+            <div class="warning-box" th:if="${account?.environment == 'LIVE'}">
+                <div class="warning-icon">⚠️</div>
+                <div class="warning-content">
+                    <div class="warning-title">실전투자 계좌 권한 설정</div>
+                    <div class="warning-text">
+                        이 계좌는 실제 자금으로 거래됩니다. 권한 설정 시 신중하게 확인하시기 바랍니다.
+                        특히 자동매매(Auto Trade) 권한은 시스템이 자동으로 매매를 실행하므로 주의가 필요합니다.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 권한 설정 폼 -->
+            <div class="form-container">
+                <form th:action="@{/trading/accounts/{accountId}/permissions(accountId=${accountId})}"
+                      method="post"
+                      id="permissionForm">
+
+                    <div class="form-section-title">권한 설정</div>
+
+                    <!-- 거래 권한 -->
+                    <div class="permission-group">
+                        <div class="permission-category">
+                            💼 거래 권한
+                        </div>
+                        <div class="permission-items">
+                            <label class="permission-item" th:classappend="${permission?.tradeBuy == true ? 'checked' : ''}">
+                                <input type="checkbox"
+                                       name="tradeBuy"
+                                       th:checked="${permission?.tradeBuy == true}"
+                                       onchange="updateItemStyle(this)">
+                                <div class="permission-content">
+                                    <span class="permission-label">매수 권한 (Trade Buy)</span>
+                                    <div class="permission-description">
+                                        주식을 매수할 수 있는 권한입니다.
+                                    </div>
+                                </div>
+                            </label>
+
+                            <label class="permission-item" th:classappend="${permission?.tradeSell == true ? 'checked' : ''}">
+                                <input type="checkbox"
+                                       name="tradeSell"
+                                       th:checked="${permission?.tradeSell == true}"
+                                       onchange="updateItemStyle(this)">
+                                <div class="permission-content">
+                                    <span class="permission-label">매도 권한 (Trade Sell)</span>
+                                    <div class="permission-description">
+                                        주식을 매도할 수 있는 권한입니다.
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 매매 방식 권한 -->
+                    <div class="permission-group">
+                        <div class="permission-category">
+                            🎯 매매 방식 권한
+                        </div>
+                        <div class="permission-items">
+                            <label class="permission-item" th:classappend="${permission?.autoTrade == true ? 'checked' : ''}">
+                                <input type="checkbox"
+                                       name="autoTrade"
+                                       th:checked="${permission?.autoTrade == true}"
+                                       onchange="updateItemStyle(this)">
+                                <div class="permission-content">
+                                    <span class="permission-label">자동매매 권한 (Auto Trade)</span>
+                                    <div class="permission-description">
+                                        시스템이 자동으로 매매를 실행할 수 있는 권한입니다.
+                                    </div>
+                                </div>
+                            </label>
+
+                            <label class="permission-item" th:classappend="${permission?.manualTrade == true ? 'checked' : ''}">
+                                <input type="checkbox"
+                                       name="manualTrade"
+                                       th:checked="${permission?.manualTrade == true}"
+                                       onchange="updateItemStyle(this)">
+                                <div class="permission-content">
+                                    <span class="permission-label">수동매매 권한 (Manual Trade)</span>
+                                    <div class="permission-description">
+                                        사용자가 직접 매매를 실행할 수 있는 권한입니다.
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 계좌 타입 설정 -->
+                    <div class="permission-group">
+                        <div class="permission-category">
+                            🏦 계좌 타입 설정
+                        </div>
+                        <div class="permission-items">
+                            <label class="permission-item" th:classappend="${permission?.paperOnly == true ? 'checked' : ''}">
+                                <input type="checkbox"
+                                       name="paperOnly"
+                                       th:checked="${permission?.paperOnly == true}"
+                                       onchange="updateItemStyle(this)">
+                                <div class="permission-content">
+                                    <span class="permission-label">모의투자 전용 (Paper Only)</span>
+                                    <div class="permission-description">
+                                        체크 시 모의투자만 가능하며, 체크 해제 시 실전투자가 활성화됩니다.
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">💾 권한 저장</button>
+                        <a th:href="@{/trading/accounts/{id}(id=${accountId})}" class="btn btn-secondary">← 계좌 상세로</a>
+                        <a th:href="@{/trading/accounts}" class="btn btn-secondary">계좌 목록</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="extra-js">
+        <script>
+            // 체크박스 변경 시 permission-item 스타일 업데이트
+            function updateItemStyle(checkbox) {
+                const item = checkbox.closest('.permission-item');
+                if (checkbox.checked) {
+                    item.classList.add('checked');
+                } else {
+                    item.classList.remove('checked');
+                }
+            }
+
+            // 폼 제출 확인
+            document.getElementById('permissionForm').addEventListener('submit', function(e) {
+                const isLive = /*[[${account?.environment == 'LIVE'}]]*/ false;
+                const paperOnly = document.querySelector('input[name="paperOnly"]').checked;
+
+                if (isLive && !paperOnly) {
+                    if (!confirm('⚠️ 실전투자 계좌의 권한을 변경하시겠습니까?\n\n이 작업은 실제 거래에 영향을 미칠 수 있습니다.')) {
+                        e.preventDefault();
+                    }
+                }
+            });
+        </script>
+    </th:block>
+</body>
+</html>

@@ -484,4 +484,97 @@ class TradingControllerTest {
                 .andExpect(view().name("trading/balances"))
                 .andExpect(model().attributeExists("balance"));
     }
+
+    // ==================== Account Permission Tests ====================
+
+    @Test
+    @DisplayName("계좌 권한 페이지 조회 - 성공")
+    void accountPermission_Success() throws Exception {
+        String accountId = "01KF9BPSTD82MHTFBNPNB3NDNJ";
+
+        Map<String, Object> accountResponse = new HashMap<>();
+        accountResponse.put("accountId", accountId);
+        accountResponse.put("alias", "테스트 계좌");
+        accountResponse.put("cano", "50068923");
+        accountResponse.put("acntPrdtCd", "01");
+        accountResponse.put("broker", "KIS");
+        accountResponse.put("environment", "PAPER");
+        when(tradingApiService.getAccount(accountId)).thenReturn(accountResponse);
+
+        Map<String, Object> permissionResponse = new HashMap<>();
+        permissionResponse.put("accountId", accountId);
+        permissionResponse.put("tradeBuy", true);
+        permissionResponse.put("tradeSell", true);
+        permissionResponse.put("autoTrade", false);
+        permissionResponse.put("manualTrade", true);
+        permissionResponse.put("paperOnly", true);
+        permissionResponse.put("updatedAt", "2024-01-15T14:30:45");
+        when(tradingApiService.getAccountPermission(accountId)).thenReturn(permissionResponse);
+
+        mockMvc.perform(get("/trading/accounts/" + accountId + "/permissions"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("trading/account-permission"))
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("permission"))
+                .andExpect(model().attribute("accountId", accountId));
+    }
+
+    @Test
+    @DisplayName("계좌 권한 업데이트 - 성공")
+    void updateAccountPermission_Success() throws Exception {
+        String accountId = "01KF9BPSTD82MHTFBNPNB3NDNJ";
+
+        Map<String, Object> permissionResponse = new HashMap<>();
+        permissionResponse.put("accountId", accountId);
+        permissionResponse.put("tradeBuy", true);
+        permissionResponse.put("tradeSell", true);
+        permissionResponse.put("autoTrade", true);
+        permissionResponse.put("manualTrade", true);
+        permissionResponse.put("paperOnly", false);
+        permissionResponse.put("updatedAt", "2024-01-15T14:30:45");
+        when(tradingApiService.updateAccountPermission(anyString(), any())).thenReturn(permissionResponse);
+
+        mockMvc.perform(post("/trading/accounts/" + accountId + "/permissions")
+                        .param("tradeBuy", "true")
+                        .param("tradeSell", "true")
+                        .param("autoTrade", "true")
+                        .param("manualTrade", "true")
+                        .param("paperOnly", "false"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/trading/accounts/" + accountId + "/permissions"))
+                .andExpect(flash().attributeExists("message"));
+    }
+
+    @Test
+    @DisplayName("계좌 권한 업데이트 - API 오류 처리")
+    void updateAccountPermission_ApiError() throws Exception {
+        String accountId = "01KF9BPSTD82MHTFBNPNB3NDNJ";
+
+        when(tradingApiService.updateAccountPermission(anyString(), any()))
+                .thenThrow(new RuntimeException("계좌 권한 업데이트에 실패했습니다."));
+
+        mockMvc.perform(post("/trading/accounts/" + accountId + "/permissions")
+                        .param("tradeBuy", "true")
+                        .param("tradeSell", "true")
+                        .param("autoTrade", "false")
+                        .param("manualTrade", "true")
+                        .param("paperOnly", "true"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/trading/accounts/" + accountId + "/permissions"))
+                .andExpect(flash().attributeExists("error"));
+    }
+
+    @Test
+    @DisplayName("계좌 권한 조회 - 계좌 미존재")
+    void accountPermission_AccountNotFound() throws Exception {
+        String accountId = "invalid_account_id";
+
+        when(tradingApiService.getAccount(accountId))
+                .thenThrow(new RuntimeException("계좌를 찾을 수 없습니다."));
+
+        mockMvc.perform(get("/trading/accounts/" + accountId + "/permissions"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/trading/accounts"))
+                .andExpect(flash().attributeExists("error"));
+    }
 }
