@@ -234,6 +234,168 @@
             font-size: 48px;
             margin-bottom: 10px;
         }
+
+        /* 뷰 전환 버튼 */
+        .view-toggle {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            background: var(--bg-secondary);
+            padding: 8px;
+            border-radius: 12px;
+            width: fit-content;
+        }
+
+        .view-toggle-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .view-toggle-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .view-toggle-btn:hover:not(.active) {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .view-toggle-btn.active {
+            background: #4a5568;
+        }
+
+        /* 비교 테이블 */
+        .table-section {
+            display: none;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .table-section.active {
+            display: block;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .comparison-table th {
+            background: var(--bg-tertiary);
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .comparison-table th:hover {
+            background: var(--bg-primary);
+        }
+
+        .comparison-table th .sort-icon {
+            margin-left: 4px;
+            opacity: 0.5;
+        }
+
+        .comparison-table th.sorted .sort-icon {
+            opacity: 1;
+        }
+
+        .comparison-table tbody tr:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .comparison-table td.positive {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .comparison-table td.negative {
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        .comparison-table .strategy-name-cell {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* 차트 섹션 */
+        .charts-section {
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        .charts-section.active {
+            display: block;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+
+        .chart-card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 15px 0;
+        }
+
+        .chart-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .chart-container.radar {
+            height: 350px;
+        }
+
+        /* 카드 뷰 (기본) */
+        .cards-section {
+            display: block;
+        }
+
+        .cards-section.hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -296,8 +458,83 @@
                 </div>
             </div>
 
+            <!-- 뷰 전환 버튼 -->
+            <div class="view-toggle" th:if="${strategies != null && !#lists.isEmpty(strategies)}">
+                <button type="button" class="view-toggle-btn active" data-view="cards">📊 카드 뷰</button>
+                <button type="button" class="view-toggle-btn" data-view="table">📋 테이블 뷰</button>
+                <button type="button" class="view-toggle-btn" data-view="charts">📈 차트 뷰</button>
+            </div>
+
+            <!-- 비교 테이블 섹션 -->
+            <div class="table-section" th:if="${strategies != null && !#lists.isEmpty(strategies)}">
+                <table class="comparison-table" id="comparisonTable">
+                    <thead>
+                        <tr>
+                            <th data-sort="name" class="sorted">전략명 <span class="sort-icon">▼</span></th>
+                            <th data-sort="status">상태 <span class="sort-icon">▼</span></th>
+                            <th data-sort="totalTrades">총 거래 <span class="sort-icon">▼</span></th>
+                            <th data-sort="winRate">승률 <span class="sort-icon">▼</span></th>
+                            <th data-sort="totalProfitLoss">총 손익 <span class="sort-icon">▼</span></th>
+                            <th data-sort="avgProfitLoss">평균 손익 <span class="sort-icon">▼</span></th>
+                            <th data-sort="maxProfit">최대 이익 <span class="sort-icon">▼</span></th>
+                            <th data-sort="maxLoss">최대 손실 <span class="sort-icon">▼</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="strategy : ${strategies}">
+                            <td class="strategy-name-cell" th:text="${strategy['name']}">전략명</td>
+                            <td>
+                                <span class="status-badge"
+                                      th:classappend="${strategy['status'] == 'ACTIVE'} ? 'active' : 'inactive'"
+                                      th:text="${strategy['status'] == 'ACTIVE'} ? '활성' : '비활성'">활성</span>
+                            </td>
+                            <td th:text="${strategy['totalTrades'] ?: 0}"
+                                th:data-value="${strategy['totalTrades'] ?: 0}">0</td>
+                            <td th:text="${#numbers.formatDecimal(strategy['winRate'] ?: 0, 1, 'COMMA', 2, 'POINT')} + '%'"
+                                th:data-value="${strategy['winRate'] ?: 0}">0%</td>
+                            <td th:classappend="${(strategy['totalProfitLoss'] ?: 0) >= 0} ? 'positive' : 'negative'"
+                                th:text="${#numbers.formatDecimal(strategy['totalProfitLoss'] ?: 0, 0, 'COMMA', 0, 'POINT')} + '원'"
+                                th:data-value="${strategy['totalProfitLoss'] ?: 0}">0원</td>
+                            <td th:classappend="${(strategy['avgProfitLoss'] ?: 0) >= 0} ? 'positive' : 'negative'"
+                                th:text="${#numbers.formatDecimal(strategy['avgProfitLoss'] ?: 0, 0, 'COMMA', 0, 'POINT')} + '원'"
+                                th:data-value="${strategy['avgProfitLoss'] ?: 0}">0원</td>
+                            <td class="positive"
+                                th:text="${#numbers.formatDecimal(strategy['maxProfit'] ?: 0, 0, 'COMMA', 0, 'POINT')} + '원'"
+                                th:data-value="${strategy['maxProfit'] ?: 0}">0원</td>
+                            <td class="negative"
+                                th:text="${#numbers.formatDecimal(strategy['maxLoss'] ?: 0, 0, 'COMMA', 0, 'POINT')} + '원'"
+                                th:data-value="${strategy['maxLoss'] ?: 0}">0원</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 차트 섹션 -->
+            <div class="charts-section" th:if="${strategies != null && !#lists.isEmpty(strategies)}">
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>💰 총 수익/손실 비교</h3>
+                        <div class="chart-container">
+                            <canvas id="profitLossChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>🎯 승률 비교</h3>
+                        <div class="chart-container">
+                            <canvas id="winRateChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card full-width">
+                        <h3>📊 종합 성과 레이더 (상위 5개 전략)</h3>
+                        <div class="chart-container radar">
+                            <canvas id="radarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- 전략 카드 -->
-            <div class="strategy-cards" th:if="${strategies != null && !#lists.isEmpty(strategies)}">
+            <div class="strategy-cards cards-section" th:if="${strategies != null && !#lists.isEmpty(strategies)}">
                 <div class="strategy-card" th:each="strategy : ${strategies}">
                     <div class="strategy-card-header">
                         <div class="strategy-name" th:text="${strategy['name']}">전략명</div>
@@ -362,6 +599,282 @@
                 <p>기간을 조정하거나 전략을 추가해 주세요.</p>
             </div>
         </div>
+
+        <!-- Chart.js CDN -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+        <script th:inline="javascript" th:if="${strategies != null && !#lists.isEmpty(strategies)}">
+            // 전략 데이터를 JavaScript 배열로 변환
+            const strategiesData = /*[[${strategies}]]*/ [];
+
+            // Chart.js 기본 설정
+            Chart.defaults.font.family = "'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif";
+            Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || '#6b7280';
+
+            // 색상 팔레트
+            const colors = {
+                profit: '#10b981',
+                loss: '#ef4444',
+                primary: '#667eea',
+                chartColors: ['#667eea', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
+            };
+
+            // 다크모드 감지
+            const isDarkMode = () => document.documentElement.getAttribute('data-theme') === 'dark';
+
+            // 수익/손실 차트
+            const profitLossCtx = document.getElementById('profitLossChart');
+            if (profitLossCtx) {
+                const profitLossData = strategiesData.map(s => s.totalProfitLoss);
+                const profitLossColors = profitLossData.map(v => v >= 0 ? colors.profit : colors.loss);
+
+                new Chart(profitLossCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: strategiesData.map(s => s.name),
+                        datasets: [{
+                            label: '총 손익 (원)',
+                            data: profitLossData,
+                            backgroundColor: profitLossColors,
+                            borderColor: profitLossColors,
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: (ctx) => `${ctx.parsed.y.toLocaleString()}원`
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: (value) => value.toLocaleString() + '원'
+                                },
+                                grid: {
+                                    color: isDarkMode() ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
+                                }
+                            },
+                            x: {
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 승률 차트
+            const winRateCtx = document.getElementById('winRateChart');
+            if (winRateCtx) {
+                new Chart(winRateCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: strategiesData.map(s => s.name),
+                        datasets: [{
+                            label: '승률 (%)',
+                            data: strategiesData.map(s => s.winRate),
+                            backgroundColor: colors.primary,
+                            borderColor: colors.primary,
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: (ctx) => `${ctx.parsed.y.toFixed(2)}%`
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    callback: (value) => value + '%'
+                                },
+                                grid: {
+                                    color: isDarkMode() ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
+                                }
+                            },
+                            x: {
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 레이더 차트 (상위 5개 전략)
+            const radarCtx = document.getElementById('radarChart');
+            if (radarCtx) {
+                // 총 손익 기준 상위 5개 전략 선택
+                const top5 = [...strategiesData]
+                    .sort((a, b) => b.totalProfitLoss - a.totalProfitLoss)
+                    .slice(0, 5);
+
+                // 정규화를 위한 최대값 계산
+                const maxValues = {
+                    winRate: 100,
+                    totalTrades: Math.max(...strategiesData.map(s => s.totalTrades)) || 1,
+                    totalProfitLoss: Math.max(...strategiesData.map(s => Math.abs(s.totalProfitLoss))) || 1,
+                    avgProfitLoss: Math.max(...strategiesData.map(s => Math.abs(s.avgProfitLoss))) || 1,
+                    maxProfit: Math.max(...strategiesData.map(s => s.maxProfit)) || 1
+                };
+
+                // 정규화 함수 (0-100 스케일)
+                const normalize = (value, max) => Math.min(100, Math.max(0, (value / max) * 100));
+
+                const radarDatasets = top5.map((strategy, idx) => ({
+                    label: strategy.name,
+                    data: [
+                        normalize(strategy.winRate, maxValues.winRate),
+                        normalize(strategy.totalTrades, maxValues.totalTrades),
+                        normalize(Math.max(0, strategy.totalProfitLoss), maxValues.totalProfitLoss),
+                        normalize(Math.max(0, strategy.avgProfitLoss), maxValues.avgProfitLoss),
+                        normalize(strategy.maxProfit, maxValues.maxProfit)
+                    ],
+                    fill: true,
+                    backgroundColor: colors.chartColors[idx] + '33',
+                    borderColor: colors.chartColors[idx],
+                    borderWidth: 2,
+                    pointBackgroundColor: colors.chartColors[idx]
+                }));
+
+                new Chart(radarCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['승률', '거래수', '총 손익', '평균 손익', '최대 이익'],
+                        datasets: radarDatasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { padding: 20 }
+                            }
+                        },
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    stepSize: 20,
+                                    display: false
+                                },
+                                grid: {
+                                    color: isDarkMode() ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
+                                },
+                                angleLines: {
+                                    color: isDarkMode() ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
+                                },
+                                pointLabels: {
+                                    font: { size: 12, weight: '600' }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 테이블 정렬 기능
+            const comparisonTable = document.getElementById('comparisonTable');
+            if (comparisonTable) {
+                const headers = comparisonTable.querySelectorAll('th[data-sort]');
+                let currentSort = { column: 'name', direction: 'asc' };
+
+                headers.forEach(header => {
+                    header.addEventListener('click', () => {
+                        const column = header.dataset.sort;
+                        const tbody = comparisonTable.querySelector('tbody');
+                        const rows = Array.from(tbody.querySelectorAll('tr'));
+
+                        // 정렬 방향 결정
+                        if (currentSort.column === column) {
+                            currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                        } else {
+                            currentSort.column = column;
+                            currentSort.direction = 'asc';
+                        }
+
+                        // 열 인덱스 매핑
+                        const columnIndex = {
+                            name: 0, status: 1, totalTrades: 2, winRate: 3,
+                            totalProfitLoss: 4, avgProfitLoss: 5, maxProfit: 6, maxLoss: 7
+                        }[column];
+
+                        // 정렬
+                        rows.sort((a, b) => {
+                            const cellA = a.cells[columnIndex];
+                            const cellB = b.cells[columnIndex];
+
+                            let valA, valB;
+                            if (column === 'name' || column === 'status') {
+                                valA = cellA.textContent.trim();
+                                valB = cellB.textContent.trim();
+                            } else {
+                                valA = parseFloat(cellA.dataset.value) || 0;
+                                valB = parseFloat(cellB.dataset.value) || 0;
+                            }
+
+                            let result;
+                            if (typeof valA === 'string') {
+                                result = valA.localeCompare(valB, 'ko');
+                            } else {
+                                result = valA - valB;
+                            }
+
+                            return currentSort.direction === 'asc' ? result : -result;
+                        });
+
+                        // DOM 업데이트
+                        rows.forEach(row => tbody.appendChild(row));
+
+                        // 헤더 스타일 업데이트
+                        headers.forEach(h => {
+                            h.classList.remove('sorted');
+                            h.querySelector('.sort-icon').textContent = '▼';
+                        });
+                        header.classList.add('sorted');
+                        header.querySelector('.sort-icon').textContent = currentSort.direction === 'asc' ? '▲' : '▼';
+                    });
+                });
+            }
+
+            // 뷰 전환 기능
+            const viewToggleBtns = document.querySelectorAll('.view-toggle-btn');
+            const cardsSection = document.querySelector('.strategy-cards');
+            const tableSection = document.querySelector('.table-section');
+            const chartsSection = document.querySelector('.charts-section');
+
+            viewToggleBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const view = btn.dataset.view;
+
+                    // 버튼 상태 업데이트
+                    viewToggleBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    // 섹션 표시 전환
+                    if (cardsSection) cardsSection.classList.toggle('hidden', view !== 'cards');
+                    if (tableSection) tableSection.classList.toggle('active', view === 'table');
+                    if (chartsSection) chartsSection.classList.toggle('active', view === 'charts');
+                });
+            });
+        </script>
     </div>
 </body>
 </html>
