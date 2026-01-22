@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Monte Carlo Simulation</title>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .monte-carlo-container {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 20px;
+                padding-bottom: 40px;
+            }
+
+            .page-header {
+                margin-bottom: 30px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 30px 40px;
+                border-radius: 16px;
+                color: white;
+                box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            [data-theme="dark"] .page-header {
+                background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .page-header h2 {
+                font-size: 28px;
+                font-weight: 700;
+                margin: 0;
+                color: white;
+            }
+
+            .page-header p {
+                margin: 8px 0 0 0;
+                opacity: 0.8;
+            }
+
+            .header-buttons .btn {
+                padding: 10px 20px;
+                border-radius: 8px;
+                font-weight: 600;
+                margin-left: 10px;
+            }
+
+            .btn-header-back {
+                background: rgba(255, 255, 255, 0.2);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                color: white;
+            }
+
+            .btn-header-back:hover {
+                background: rgba(255, 255, 255, 0.3);
+                color: white;
+            }
+
+            [data-theme="dark"] .btn-header-back {
+                background: var(--bg-tertiary);
+                border-color: var(--border-color);
+            }
+
+            [data-theme="dark"] .btn-header-back:hover {
+                background: #4a5568;
+            }
+
+            .breadcrumb-nav {
+                margin-bottom: 20px;
+            }
+
+            .breadcrumb-nav a {
+                color: var(--text-muted);
+                text-decoration: none;
+            }
+
+            .breadcrumb-nav a:hover {
+                color: #667eea;
+            }
+
+            .breadcrumb-nav span {
+                color: var(--text-primary);
+            }
+
+            .alert {
+                padding: 15px 20px;
+                border-radius: 12px;
+                margin-bottom: 20px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            }
+
+            .card {
+                background: var(--bg-secondary);
+                border: none;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                transition: background-color 0.3s ease;
+                margin-bottom: 20px;
+            }
+
+            .card-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border-radius: 12px 12px 0 0 !important;
+                padding: 15px 20px;
+                border: none;
+            }
+
+            [data-theme="dark"] .card-header {
+                background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+            }
+
+            .card-header h5, .card-header h6 {
+                margin: 0;
+                font-size: 16px;
+                font-weight: 600;
+                color: white;
+            }
+
+            .card-body {
+                color: var(--text-primary);
+                padding: 25px;
+            }
+
+            .form-label {
+                font-weight: 600;
+                color: var(--text-primary);
+                margin-bottom: 8px;
+            }
+
+            .form-control, .form-select {
+                background: var(--bg-primary);
+                border: 2px solid var(--border-color);
+                border-radius: 8px;
+                padding: 10px 14px;
+                color: var(--text-primary);
+                transition: border-color 0.2s, box-shadow 0.2s;
+            }
+
+            .form-control:focus, .form-select:focus {
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+                outline: none;
+                background: var(--bg-primary);
+                color: var(--text-primary);
+            }
+
+            [data-theme="dark"] .form-control, [data-theme="dark"] .form-select {
+                background: var(--bg-tertiary);
+                border-color: var(--border-color);
+            }
+
+            .form-text {
+                color: var(--text-muted);
+                font-size: 12px;
+                margin-top: 5px;
+            }
+
+            .btn-run {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-weight: 600;
+                transition: all 0.3s;
+            }
+
+            .btn-run:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                color: white;
+            }
+
+            .btn-run:disabled {
+                opacity: 0.6;
+                transform: none;
+                cursor: not-allowed;
+            }
+
+            [data-theme="dark"] .btn-run {
+                background: var(--bg-tertiary);
+            }
+
+            [data-theme="dark"] .btn-run:hover {
+                background: #4a5568;
+            }
+
+            .main-grid {
+                display: grid;
+                grid-template-columns: 1fr 2fr;
+                gap: 20px;
+            }
+
+            @media (max-width: 992px) {
+                .main-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            /* 결과 섹션 */
+            .result-section {
+                display: none;
+            }
+
+            .result-section.active {
+                display: block;
+            }
+
+            /* 메트릭 카드 그리드 */
+            .metrics-grid {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+
+            @media (max-width: 768px) {
+                .metrics-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+
+            .metric-card {
+                background: var(--bg-tertiary);
+                border-radius: 12px;
+                padding: 20px;
+                text-align: center;
+            }
+
+            .metric-card.var {
+                border-left: 4px solid #dc3545;
+            }
+
+            .metric-card.cvar {
+                border-left: 4px solid #fd7e14;
+            }
+
+            .metric-card.profit-prob {
+                border-left: 4px solid #28a745;
+            }
+
+            .metric-card.median {
+                border-left: 4px solid #667eea;
+            }
+
+            .metric-value {
+                font-size: 1.8rem;
+                font-weight: 700;
+                font-family: 'Courier New', monospace;
+            }
+
+            .metric-label {
+                font-size: 12px;
+                color: var(--text-muted);
+                margin-top: 5px;
+            }
+
+            /* 히스토그램 차트 */
+            .chart-container {
+                background: var(--bg-tertiary);
+                border-radius: 12px;
+                padding: 20px;
+                height: 350px;
+            }
+
+            /* 시나리오 테이블 */
+            .scenario-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            .scenario-table th, .scenario-table td {
+                padding: 12px;
+                text-align: left;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .scenario-table th {
+                color: var(--text-muted);
+                font-weight: 600;
+                font-size: 13px;
+            }
+
+            .scenario-table td {
+                color: var(--text-primary);
+            }
+
+            .scenario-best {
+                background: rgba(40, 167, 69, 0.1);
+            }
+
+            .scenario-worst {
+                background: rgba(220, 53, 69, 0.1);
+            }
+
+            .text-success {
+                color: #28a745 !important;
+            }
+
+            .text-danger {
+                color: #dc3545 !important;
+            }
+
+            .text-warning {
+                color: #fd7e14 !important;
+            }
+
+            .text-primary {
+                color: #667eea !important;
+            }
+
+            [data-theme="dark"] .text-primary {
+                color: #8b9df0 !important;
+            }
+
+            /* 백테스트 정보 카드 */
+            .backtest-info {
+                background: var(--bg-tertiary);
+                border-radius: 10px;
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+
+            .backtest-info-row {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 8px;
+            }
+
+            .backtest-info-row:last-child {
+                margin-bottom: 0;
+            }
+
+            .backtest-info-label {
+                color: var(--text-muted);
+                font-size: 13px;
+            }
+
+            .backtest-info-value {
+                color: var(--text-primary);
+                font-weight: 600;
+                font-size: 13px;
+            }
+
+            /* 백분위수 그리드 */
+            .percentiles-grid {
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
+                gap: 10px;
+            }
+
+            .percentile-item {
+                background: var(--bg-tertiary);
+                border-radius: 8px;
+                padding: 12px;
+                text-align: center;
+            }
+
+            .percentile-value {
+                font-size: 1.1rem;
+                font-weight: 700;
+                font-family: 'Courier New', monospace;
+            }
+
+            .percentile-label {
+                font-size: 11px;
+                color: var(--text-muted);
+                margin-top: 3px;
+            }
+
+            /* Spinner */
+            .spinner {
+                display: inline-block;
+                width: 16px;
+                height: 16px;
+                border: 2px solid currentColor;
+                border-right-color: transparent;
+                border-radius: 50%;
+                animation: spin 0.75s linear infinite;
+                margin-right: 8px;
+            }
+
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+
+            /* 로딩 오버레이 */
+            .loading-overlay-mc {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 12px;
+                z-index: 10;
+            }
+
+            .loading-content {
+                text-align: center;
+                color: white;
+            }
+
+            .loading-spinner {
+                width: 50px;
+                height: 50px;
+                border: 4px solid rgba(255, 255, 255, 0.3);
+                border-top-color: white;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 15px;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="monte-carlo-container">
+        <!-- 브레드크럼 -->
+        <div class="breadcrumb-nav">
+            <a href="/trading/backtests/admin">백테스트 관리</a>
+            <span> / </span>
+            <a th:href="@{/trading/backtests/admin/{id}(id=${backtestId})}">백테스트 상세</a>
+            <span> / Monte Carlo</span>
+        </div>
+
+        <!-- 페이지 헤더 -->
+        <div class="page-header">
+            <div>
+                <h2><i class="bi bi-dice-5 me-2"></i>Monte Carlo Simulation</h2>
+                <p>기존 백테스트 결과를 기반으로 리스크 분석 및 확률적 시나리오를 생성합니다.</p>
+            </div>
+            <div class="header-buttons">
+                <a th:href="@{/trading/backtests/admin/{id}(id=${backtestId})}" class="btn btn-header-back">
+                    <i class="bi bi-arrow-left me-1"></i>백테스트로
+                </a>
+            </div>
+        </div>
+
+        <!-- 알림 메시지 -->
+        <div id="alertMessage" class="alert" style="display: none;" role="alert"></div>
+        <div th:if="${error}" class="alert alert-warning" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${error}"></span>
+        </div>
+
+        <div class="main-grid">
+            <!-- 설정 패널 -->
+            <div>
+                <!-- 백테스트 정보 -->
+                <div class="card" th:if="${backtest != null}">
+                    <div class="card-header">
+                        <h6><i class="bi bi-info-circle me-2"></i>백테스트 정보</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="backtest-info">
+                            <div class="backtest-info-row">
+                                <span class="backtest-info-label">전략 ID</span>
+                                <span class="backtest-info-value" th:text="${backtest['strategyId']}"></span>
+                            </div>
+                            <div class="backtest-info-row">
+                                <span class="backtest-info-label">기간</span>
+                                <span class="backtest-info-value">
+                                    <span th:text="${backtest['startDate']}"></span> ~ <span th:text="${backtest['endDate']}"></span>
+                                </span>
+                            </div>
+                            <div class="backtest-info-row">
+                                <span class="backtest-info-label">총 수익률</span>
+                                <span class="backtest-info-value"
+                                      th:classappend="${backtest['totalReturn'] != null and backtest['totalReturn'] >= 0} ? 'text-success' : 'text-danger'"
+                                      th:text="${backtest['totalReturn'] != null} ? ${#numbers.formatDecimal(backtest['totalReturn'], 1, 2)} + '%' : '-'">
+                                </span>
+                            </div>
+                            <div class="backtest-info-row">
+                                <span class="backtest-info-label">총 거래 수</span>
+                                <span class="backtest-info-value" th:text="${backtest['totalTrades']}"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 시뮬레이션 설정 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h6><i class="bi bi-sliders me-2"></i>시뮬레이션 설정</h6>
+                    </div>
+                    <div class="card-body">
+                        <form id="mcForm">
+                            <div style="margin-bottom: 20px;">
+                                <label class="form-label">시뮬레이션 횟수</label>
+                                <select name="numSimulations" id="numSimulations" class="form-select">
+                                    <option value="100">100회</option>
+                                    <option value="500">500회</option>
+                                    <option value="1000" selected>1,000회</option>
+                                    <option value="5000">5,000회</option>
+                                    <option value="10000">10,000회</option>
+                                </select>
+                                <div class="form-text">많을수록 정확하지만 시간이 오래 걸립니다</div>
+                            </div>
+
+                            <div style="margin-bottom: 20px;">
+                                <label class="form-label">시뮬레이션 방법</label>
+                                <select name="method" id="method" class="form-select">
+                                    <option value="BOOTSTRAP" selected>Bootstrap (복원추출)</option>
+                                    <option value="SHUFFLE">Shuffle (비복원추출)</option>
+                                    <option value="PARAMETRIC">Parametric (정규분포)</option>
+                                </select>
+                                <div class="form-text">거래 수익률 리샘플링 방법</div>
+                            </div>
+
+                            <div style="margin-bottom: 25px;">
+                                <label class="form-label">신뢰수준 (%)</label>
+                                <select name="confidenceLevel" id="confidenceLevel" class="form-select">
+                                    <option value="90">90%</option>
+                                    <option value="95" selected>95%</option>
+                                    <option value="99">99%</option>
+                                </select>
+                                <div class="form-text">VaR/CVaR 계산에 사용</div>
+                            </div>
+
+                            <button type="submit" id="runBtn" class="btn-run" style="width: 100%;">
+                                <i class="bi bi-play-fill me-1"></i>시뮬레이션 실행
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 결과 패널 -->
+            <div>
+                <div id="resultSection" class="result-section">
+                    <!-- 리스크 메트릭 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-shield-exclamation me-2"></i>리스크 메트릭</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="metrics-grid">
+                                <div class="metric-card var">
+                                    <div id="varValue" class="metric-value text-danger">-</div>
+                                    <div class="metric-label">VaR (<span id="confLabel">95</span>%)</div>
+                                </div>
+                                <div class="metric-card cvar">
+                                    <div id="cvarValue" class="metric-value text-warning">-</div>
+                                    <div class="metric-label">CVaR (ES)</div>
+                                </div>
+                                <div class="metric-card profit-prob">
+                                    <div id="profitProbValue" class="metric-value text-success">-</div>
+                                    <div class="metric-label">수익 확률</div>
+                                </div>
+                                <div class="metric-card median">
+                                    <div id="medianReturn" class="metric-value text-primary">-</div>
+                                    <div class="metric-label">중앙값 수익률</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 수익률 분포 히스토그램 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-bar-chart me-2"></i>수익률 분포</h5>
+                        </div>
+                        <div class="card-body" style="position: relative;">
+                            <div id="chartLoading" class="loading-overlay-mc" style="display: none;">
+                                <div class="loading-content">
+                                    <div class="loading-spinner"></div>
+                                    <div>차트 생성 중...</div>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="distributionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 백분위수 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-percent me-2"></i>백분위수 분포</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="percentiles-grid">
+                                <div class="percentile-item">
+                                    <div id="p5" class="percentile-value text-danger">-</div>
+                                    <div class="percentile-label">5th</div>
+                                </div>
+                                <div class="percentile-item">
+                                    <div id="p25" class="percentile-value">-</div>
+                                    <div class="percentile-label">25th</div>
+                                </div>
+                                <div class="percentile-item">
+                                    <div id="p50" class="percentile-value text-primary">-</div>
+                                    <div class="percentile-label">50th (Median)</div>
+                                </div>
+                                <div class="percentile-item">
+                                    <div id="p75" class="percentile-value">-</div>
+                                    <div class="percentile-label">75th</div>
+                                </div>
+                                <div class="percentile-item">
+                                    <div id="p95" class="percentile-value text-success">-</div>
+                                    <div class="percentile-label">95th</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 시나리오 테이블 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-list-columns me-2"></i>시나리오 분석</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="scenario-table">
+                                <thead>
+                                    <tr>
+                                        <th>시나리오</th>
+                                        <th>총 수익률</th>
+                                        <th>최대 낙폭</th>
+                                        <th>Sharpe Ratio</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="scenario-best">
+                                        <td><strong>Best Case</strong></td>
+                                        <td id="bestReturn" class="text-success">-</td>
+                                        <td id="bestMdd">-</td>
+                                        <td id="bestSharpe">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Median Case</strong></td>
+                                        <td id="medianReturnTable">-</td>
+                                        <td id="medianMdd">-</td>
+                                        <td id="medianSharpe">-</td>
+                                    </tr>
+                                    <tr class="scenario-worst">
+                                        <td><strong>Worst Case</strong></td>
+                                        <td id="worstReturn" class="text-danger">-</td>
+                                        <td id="worstMdd" class="text-danger">-</td>
+                                        <td id="worstSharpe">-</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 초기 안내 메시지 -->
+                <div id="initialMessage" class="card">
+                    <div class="card-body" style="text-align: center; padding: 60px;">
+                        <i class="bi bi-dice-5" style="font-size: 4rem; color: var(--text-muted);"></i>
+                        <h4 style="margin-top: 20px; color: var(--text-primary);">Monte Carlo Simulation</h4>
+                        <p style="color: var(--text-muted);">
+                            왼쪽 설정 패널에서 파라미터를 조정한 후<br>
+                            <strong>시뮬레이션 실행</strong> 버튼을 클릭하세요.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script th:inline="javascript">
+        (function() {
+            const backtestId = [[${backtestId}]];
+            const form = document.getElementById('mcForm');
+            const runBtn = document.getElementById('runBtn');
+            const resultSection = document.getElementById('resultSection');
+            const initialMessage = document.getElementById('initialMessage');
+            const alertMessage = document.getElementById('alertMessage');
+            const chartLoading = document.getElementById('chartLoading');
+
+            let chart = null;
+
+            // 알림 표시
+            function showAlert(message, type) {
+                alertMessage.className = `alert alert-${type}`;
+                alertMessage.innerHTML = `<i class="bi bi-${type === 'danger' ? 'exclamation-triangle' : 'check-circle'} me-2"></i>${message}`;
+                alertMessage.style.display = 'block';
+                setTimeout(() => { alertMessage.style.display = 'none'; }, 5000);
+            }
+
+            // 숫자 포맷
+            function formatNumber(value, decimals = 2) {
+                if (value === null || value === undefined) return '-';
+                return value.toFixed(decimals);
+            }
+
+            // 결과 업데이트
+            function updateResults(data) {
+                // 리스크 메트릭
+                document.getElementById('confLabel').textContent = document.getElementById('confidenceLevel').value;
+                document.getElementById('varValue').textContent = formatNumber(data.var) + '%';
+                document.getElementById('cvarValue').textContent = formatNumber(data.cvar) + '%';
+                document.getElementById('profitProbValue').textContent = formatNumber(data.profitProbability) + '%';
+                document.getElementById('medianReturn').textContent = formatNumber(data.medianReturn) + '%';
+
+                // 백분위수
+                const percentiles = data.percentiles || {};
+                document.getElementById('p5').textContent = formatNumber(percentiles['5']) + '%';
+                document.getElementById('p25').textContent = formatNumber(percentiles['25']) + '%';
+                document.getElementById('p50').textContent = formatNumber(percentiles['50']) + '%';
+                document.getElementById('p75').textContent = formatNumber(percentiles['75']) + '%';
+                document.getElementById('p95').textContent = formatNumber(percentiles['95']) + '%';
+
+                // 시나리오 테이블
+                const scenarios = data.scenarios || {};
+                const best = scenarios.best || {};
+                const median = scenarios.median || {};
+                const worst = scenarios.worst || {};
+
+                document.getElementById('bestReturn').textContent = formatNumber(best.totalReturn) + '%';
+                document.getElementById('bestMdd').textContent = formatNumber(best.maxDrawdown) + '%';
+                document.getElementById('bestSharpe').textContent = formatNumber(best.sharpeRatio);
+
+                document.getElementById('medianReturnTable').textContent = formatNumber(median.totalReturn) + '%';
+                document.getElementById('medianMdd').textContent = formatNumber(median.maxDrawdown) + '%';
+                document.getElementById('medianSharpe').textContent = formatNumber(median.sharpeRatio);
+
+                document.getElementById('worstReturn').textContent = formatNumber(worst.totalReturn) + '%';
+                document.getElementById('worstMdd').textContent = formatNumber(worst.maxDrawdown) + '%';
+                document.getElementById('worstSharpe').textContent = formatNumber(worst.sharpeRatio);
+
+                // 히스토그램 차트
+                updateChart(data.distribution);
+            }
+
+            // 차트 업데이트
+            function updateChart(distribution) {
+                chartLoading.style.display = 'flex';
+
+                const ctx = document.getElementById('distributionChart').getContext('2d');
+
+                if (chart) {
+                    chart.destroy();
+                }
+
+                // 분포 데이터 처리
+                const bins = distribution.bins || [];
+                const counts = distribution.counts || [];
+
+                const labels = bins.map((b, i) => {
+                    if (i < bins.length - 1) {
+                        return `${b.toFixed(1)}% ~ ${bins[i+1].toFixed(1)}%`;
+                    }
+                    return `${b.toFixed(1)}%+`;
+                });
+
+                // 색상 결정 (음수: 빨강, 양수: 초록)
+                const colors = bins.map(b => b < 0 ? 'rgba(220, 53, 69, 0.7)' : 'rgba(40, 167, 69, 0.7)');
+                const borderColors = bins.map(b => b < 0 ? 'rgb(220, 53, 69)' : 'rgb(40, 167, 69)');
+
+                chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: '빈도',
+                            data: counts,
+                            backgroundColor: colors,
+                            borderColor: borderColors,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const total = counts.reduce((a, b) => a + b, 0);
+                                        const percentage = ((context.raw / total) * 100).toFixed(1);
+                                        return `빈도: ${context.raw} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: '빈도'
+                                },
+                                grid: {
+                                    color: 'rgba(128, 128, 128, 0.2)'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: '수익률 구간'
+                                },
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        }
+                    }
+                });
+
+                chartLoading.style.display = 'none';
+            }
+
+            // 폼 제출
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                runBtn.disabled = true;
+                runBtn.innerHTML = '<span class="spinner"></span>실행 중...';
+
+                const formData = new FormData(form);
+
+                try {
+                    const response = await fetch(`/trading/backtests/admin/${backtestId}/monte-carlo`, {
+                        method: 'POST',
+                        body: new URLSearchParams(formData)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success === false || result.error) {
+                        showAlert(result.error || '시뮬레이션 실행에 실패했습니다.', 'danger');
+                        runBtn.disabled = false;
+                        runBtn.innerHTML = '<i class="bi bi-play-fill me-1"></i>시뮬레이션 실행';
+                        return;
+                    }
+
+                    // 결과 표시
+                    initialMessage.style.display = 'none';
+                    resultSection.classList.add('active');
+                    updateResults(result);
+
+                    showAlert('시뮬레이션이 완료되었습니다!', 'success');
+
+                } catch (error) {
+                    console.error('MC simulation error:', error);
+                    showAlert('시뮬레이션 실행 중 오류가 발생했습니다.', 'danger');
+                } finally {
+                    runBtn.disabled = false;
+                    runBtn.innerHTML = '<i class="bi bi-play-fill me-1"></i>시뮬레이션 실행';
+                }
+            });
+        })();
+    </script>
+</div>
+</body>
+</html>

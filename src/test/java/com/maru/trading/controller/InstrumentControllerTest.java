@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @WebMvcTest
 @ContextConfiguration(classes = TestConfig.class)
@@ -147,5 +148,64 @@ class InstrumentControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("trading/instruments"))
                 .andExpect(model().attributeExists("error"));
+    }
+
+    @Test
+    @DisplayName("종목 상세 조회 API - 성공")
+    void getInstrumentApi_Success() throws Exception {
+        Map<String, Object> instrument = new HashMap<>();
+        instrument.put("symbol", "005930");
+        instrument.put("nameKr", "삼성전자");
+        instrument.put("nameEn", "Samsung Electronics");
+        instrument.put("market", "KOSPI");
+        instrument.put("status", "LISTED");
+        instrument.put("tradable", true);
+
+        when(tradingApiService.getInstrument("005930")).thenReturn(instrument);
+
+        mockMvc.perform(get("/trading/instruments/api/005930"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.symbol").value("005930"))
+                .andExpect(jsonPath("$.nameKr").value("삼성전자"))
+                .andExpect(jsonPath("$.market").value("KOSPI"));
+    }
+
+    @Test
+    @DisplayName("종목 상세 조회 API - 오류 응답")
+    void getInstrumentApi_Error() throws Exception {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("error", "Instrument not found");
+
+        when(tradingApiService.getInstrument("INVALID")).thenReturn(errorResponse);
+
+        mockMvc.perform(get("/trading/instruments/api/INVALID"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.error").value("Instrument not found"));
+    }
+
+    @Test
+    @DisplayName("종목 검색 API - 성공")
+    void searchInstrumentsApi_Success() throws Exception {
+        when(tradingApiService.getInstruments(any(), any(), any(), any()))
+                .thenReturn(createMockInstrumentsResponse());
+
+        mockMvc.perform(get("/trading/instruments/api/search")
+                        .param("search", "삼성"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items").isArray())
+                .andExpect(jsonPath("$.total").value(1));
+    }
+
+    @Test
+    @DisplayName("종목 검색 API - 시장 필터")
+    void searchInstrumentsApi_WithMarketFilter() throws Exception {
+        when(tradingApiService.getInstruments("KOSPI", "LISTED", true, "삼성"))
+                .thenReturn(createMockInstrumentsResponse());
+
+        mockMvc.perform(get("/trading/instruments/api/search")
+                        .param("market", "KOSPI")
+                        .param("search", "삼성"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items[0].market").value("KOSPI"));
     }
 }

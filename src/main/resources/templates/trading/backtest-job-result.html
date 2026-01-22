@@ -3,10 +3,10 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/main}">
 <head>
-    <title>백테스트 상세</title>
+    <title>백테스트 작업 결과</title>
     <th:block layout:fragment="extra-css">
         <style>
-            .backtest-detail-container {
+            .job-result-container {
                 max-width: 1400px;
                 margin: 0 auto;
                 padding: 20px;
@@ -37,12 +37,13 @@
                 color: white;
             }
 
-            .page-header .strategy-badge {
+            .page-header .job-badge {
                 background: rgba(255, 255, 255, 0.2);
                 color: white;
                 padding: 6px 14px;
                 border-radius: 20px;
-                font-size: 14px;
+                font-size: 12px;
+                font-family: 'Courier New', monospace;
                 margin-left: 15px;
             }
 
@@ -51,17 +52,6 @@
                 border-radius: 8px;
                 font-weight: 600;
                 margin-left: 10px;
-            }
-
-            .btn-header-danger {
-                background: rgba(220, 53, 69, 0.3);
-                border: 1px solid rgba(255, 255, 255, 0.3);
-                color: white;
-            }
-
-            .btn-header-danger:hover {
-                background: #dc3545;
-                color: white;
             }
 
             .btn-header-back {
@@ -84,18 +74,6 @@
             .btn-header-mc:hover {
                 background: rgba(40, 167, 69, 0.5);
                 color: white;
-            }
-
-            [data-theme="dark"] .btn-header-mc {
-                background: rgba(40, 167, 69, 0.4);
-            }
-
-            [data-theme="dark"] .btn-header-mc:hover {
-                background: rgba(40, 167, 69, 0.6);
-            }
-
-            [data-theme="dark"] .btn-header-danger {
-                background: rgba(220, 53, 69, 0.4);
             }
 
             [data-theme="dark"] .btn-header-back {
@@ -224,9 +202,47 @@
                 margin-bottom: 20px;
             }
 
+            /* 작업 메타데이터 카드 */
+            .job-meta-card {
+                background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                color: white;
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+
+            [data-theme="dark"] .job-meta-card {
+                background: linear-gradient(135deg, #1e4620 0%, #134530 100%);
+            }
+
+            .job-meta-grid {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 20px;
+            }
+
+            .job-meta-item {
+                text-align: center;
+            }
+
+            .job-meta-value {
+                font-size: 1.5rem;
+                font-weight: 700;
+                font-family: 'Courier New', monospace;
+            }
+
+            .job-meta-label {
+                font-size: 12px;
+                opacity: 0.8;
+                margin-top: 5px;
+            }
+
             @media (max-width: 768px) {
                 .cards-row {
                     grid-template-columns: 1fr;
+                }
+                .job-meta-grid {
+                    grid-template-columns: repeat(2, 1fr);
                 }
                 .page-header {
                     flex-direction: column;
@@ -239,21 +255,22 @@
 </head>
 <body>
 <div layout:fragment="content">
-    <div class="backtest-detail-container">
+    <div class="job-result-container">
         <!-- 페이지 헤더 -->
         <div class="page-header">
             <h2>
-                <i class="bi bi-bar-chart-line me-2"></i>백테스트 결과
-                <span class="strategy-badge" th:text="${backtest['strategyId']}"></span>
+                <i class="bi bi-check-circle me-2"></i>백테스트 완료
+                <span class="job-badge" th:text="${jobId}"></span>
             </h2>
             <div class="header-buttons">
-                <a th:href="@{/trading/backtests/admin/{id}/monte-carlo(id=${backtest['backtestId']})}"
+                <a th:if="${result != null and result['backtestId'] != null}"
+                   th:href="@{/trading/backtests/admin/{id}/monte-carlo(id=${result['backtestId']})}"
                    class="btn btn-header-mc">
-                    <i class="bi bi-dice-5 me-1"></i>Monte Carlo
+                    <i class="bi bi-graph-up me-1"></i>Monte Carlo
                 </a>
-                <button type="button" class="btn btn-header-danger" onclick="confirmDelete()">
-                    <i class="bi bi-trash me-1"></i>삭제
-                </button>
+                <a href="/trading/backtests/admin/async" class="btn btn-header-back">
+                    <i class="bi bi-lightning-charge me-1"></i>새 백테스트
+                </a>
                 <a href="/trading/backtests/admin" class="btn btn-header-back">
                     <i class="bi bi-arrow-left me-1"></i>목록으로
                 </a>
@@ -264,7 +281,29 @@
             <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${error}"></span>
         </div>
 
-        <div th:if="${backtest != null and backtest['backtestId'] != null}">
+        <div th:if="${result != null}">
+            <!-- 작업 메타데이터 -->
+            <div class="job-meta-card">
+                <div class="job-meta-grid">
+                    <div class="job-meta-item">
+                        <div class="job-meta-value" th:text="${result['status'] ?: 'COMPLETED'}"></div>
+                        <div class="job-meta-label">작업 상태</div>
+                    </div>
+                    <div class="job-meta-item">
+                        <div class="job-meta-value" th:text="${result['durationMs'] != null ? result['durationMs'] + 'ms' : '-'}"></div>
+                        <div class="job-meta-label">실행 시간</div>
+                    </div>
+                    <div class="job-meta-item">
+                        <div class="job-meta-value" th:text="${result['totalBars'] ?: '-'}"></div>
+                        <div class="job-meta-label">처리 바 수</div>
+                    </div>
+                    <div class="job-meta-item">
+                        <div class="job-meta-value" th:text="${result['completedAt'] ?: '-'}"></div>
+                        <div class="job-meta-label">완료 시간</div>
+                    </div>
+                </div>
+            </div>
+
             <!-- 첫 번째 행: 기본 정보 + 성과 지표 -->
             <div class="cards-row">
                 <!-- 기본 정보 -->
@@ -276,16 +315,16 @@
                         <table class="table table-borderless">
                             <tr>
                                 <th style="width: 40%">백테스트 ID</th>
-                                <td th:text="${backtest['backtestId']}" class="font-monospace small"></td>
+                                <td th:text="${result['backtestId']}" class="font-monospace small"></td>
                             </tr>
                             <tr>
                                 <th>전략 ID</th>
-                                <td th:text="${backtest['strategyId']}" class="fw-bold"></td>
+                                <td th:text="${result['strategyId']}" class="fw-bold"></td>
                             </tr>
                             <tr>
                                 <th>종목</th>
                                 <td>
-                                    <span th:each="symbol, iter : ${backtest['symbols']}">
+                                    <span th:each="symbol, iter : ${result['symbols']}">
                                         <span class="badge bg-secondary" th:text="${symbol}"></span>
                                     </span>
                                 </td>
@@ -293,17 +332,17 @@
                             <tr>
                                 <th>기간</th>
                                 <td>
-                                    <span th:text="${backtest['startDate']}"></span> ~
-                                    <span th:text="${backtest['endDate']}"></span>
+                                    <span th:text="${result['startDate']}"></span> ~
+                                    <span th:text="${result['endDate']}"></span>
                                 </td>
                             </tr>
                             <tr>
                                 <th>타임프레임</th>
-                                <td th:text="${backtest['timeframe']}"></td>
+                                <td th:text="${result['timeframe']}"></td>
                             </tr>
                             <tr>
                                 <th>초기 자본</th>
-                                <td th:text="${#numbers.formatInteger(backtest['initialCapital'], 3, 'COMMA')} + '원'"></td>
+                                <td th:text="${result['initialCapital'] != null ? #numbers.formatInteger(result['initialCapital'], 3, 'COMMA') + '원' : '-'}"></td>
                             </tr>
                         </table>
                     </div>
@@ -318,26 +357,26 @@
                         <div class="metrics-grid">
                             <div class="metric-item">
                                 <div class="metric-value"
-                                     th:classappend="${backtest['totalReturn'] != null and backtest['totalReturn'] >= 0} ? 'text-success' : 'text-danger'"
-                                     th:text="${backtest['totalReturn'] != null} ? ${#numbers.formatDecimal(backtest['totalReturn'], 1, 2)} + '%' : '-'">
+                                     th:classappend="${result['totalReturn'] != null and result['totalReturn'] >= 0} ? 'text-success' : 'text-danger'"
+                                     th:text="${result['totalReturn'] != null} ? ${#numbers.formatDecimal(result['totalReturn'], 1, 2)} + '%' : '-'">
                                 </div>
                                 <div class="metric-label">총 수익률</div>
                             </div>
                             <div class="metric-item">
                                 <div class="metric-value text-primary"
-                                     th:text="${backtest['sharpeRatio'] != null} ? ${#numbers.formatDecimal(backtest['sharpeRatio'], 1, 2)} : '-'">
+                                     th:text="${result['sharpeRatio'] != null} ? ${#numbers.formatDecimal(result['sharpeRatio'], 1, 2)} : '-'">
                                 </div>
                                 <div class="metric-label">Sharpe Ratio</div>
                             </div>
                             <div class="metric-item">
                                 <div class="metric-value text-danger"
-                                     th:text="${backtest['maxDrawdown'] != null} ? ${#numbers.formatDecimal(backtest['maxDrawdown'], 1, 2)} + '%' : '-'">
+                                     th:text="${result['maxDrawdown'] != null} ? ${#numbers.formatDecimal(result['maxDrawdown'], 1, 2)} + '%' : '-'">
                                 </div>
                                 <div class="metric-label">최대 낙폭 (MDD)</div>
                             </div>
                             <div class="metric-item">
                                 <div class="metric-value"
-                                     th:text="${backtest['winRate'] != null} ? ${#numbers.formatDecimal(backtest['winRate'], 1, 1)} + '%' : '-'">
+                                     th:text="${result['winRate'] != null} ? ${#numbers.formatDecimal(result['winRate'], 1, 1)} + '%' : '-'">
                                 </div>
                                 <div class="metric-label">승률</div>
                             </div>
@@ -357,23 +396,23 @@
                         <table class="table table-borderless">
                             <tr>
                                 <th>총 거래 수</th>
-                                <td th:text="${backtest['totalTrades']}"></td>
+                                <td th:text="${result['totalTrades']}"></td>
                             </tr>
                             <tr>
                                 <th>승리 거래</th>
-                                <td th:text="${backtest['winningTrades']}" class="text-success"></td>
+                                <td th:text="${result['winningTrades']}" class="text-success"></td>
                             </tr>
                             <tr>
                                 <th>패배 거래</th>
-                                <td th:text="${backtest['losingTrades']}" class="text-danger"></td>
+                                <td th:text="${result['losingTrades']}" class="text-danger"></td>
                             </tr>
                             <tr>
                                 <th>평균 수익</th>
-                                <td th:text="${backtest['avgProfit'] != null} ? ${#numbers.formatDecimal(backtest['avgProfit'], 1, 2)} + '%' : '-'"></td>
+                                <td th:text="${result['avgProfit'] != null} ? ${#numbers.formatDecimal(result['avgProfit'], 1, 2)} + '%' : '-'"></td>
                             </tr>
                             <tr>
                                 <th>Profit Factor</th>
-                                <td th:text="${backtest['profitFactor'] != null} ? ${#numbers.formatDecimal(backtest['profitFactor'], 1, 2)} : '-'"></td>
+                                <td th:text="${result['profitFactor'] != null} ? ${#numbers.formatDecimal(result['profitFactor'], 1, 2)} : '-'"></td>
                             </tr>
                         </table>
                     </div>
@@ -388,19 +427,19 @@
                         <table class="table table-borderless">
                             <tr>
                                 <th>수수료</th>
-                                <td th:text="${backtest['commission'] != null} ? ${#numbers.formatDecimal(backtest['commission'] * 100, 1, 4)} + '%' : '-'"></td>
+                                <td th:text="${result['commission'] != null} ? ${#numbers.formatDecimal(result['commission'] * 100, 1, 4)} + '%' : '-'"></td>
                             </tr>
                             <tr>
                                 <th>슬리피지</th>
-                                <td th:text="${backtest['slippage'] != null} ? ${#numbers.formatDecimal(backtest['slippage'] * 100, 1, 4)} + '%' : '-'"></td>
+                                <td th:text="${result['slippage'] != null} ? ${#numbers.formatDecimal(result['slippage'] * 100, 1, 4)} + '%' : '-'"></td>
                             </tr>
                             <tr>
-                                <th>실행 시간</th>
-                                <td th:text="${backtest['durationMs'] != null} ? ${backtest['durationMs']} + 'ms' : '-'"></td>
+                                <th>Job ID</th>
+                                <td class="font-monospace small" th:text="${jobId}"></td>
                             </tr>
                             <tr>
                                 <th>생성일시</th>
-                                <td th:text="${backtest['createdAt']}"></td>
+                                <td th:text="${result['createdAt']}"></td>
                             </tr>
                         </table>
                     </div>
@@ -408,20 +447,6 @@
             </div>
         </div>
     </div>
-
-    <!-- 삭제 확인 폼 -->
-    <form id="deleteForm" th:action="@{/trading/backtests/admin/{id}/delete(id=${backtest['backtestId']})}"
-          method="post" style="display: none;">
-    </form>
-
-    <script th:inline="javascript">
-    function confirmDelete() {
-        const backtestId = [[${backtest['backtestId']}]];
-        if (confirm('이 백테스트를 삭제하시겠습니까?\nID: ' + backtestId)) {
-            document.getElementById('deleteForm').submit();
-        }
-    }
-    </script>
 </div>
 </body>
 </html>

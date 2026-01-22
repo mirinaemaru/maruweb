@@ -7,6 +7,7 @@
     <title layout:title-pattern="$CONTENT_TITLE - $LAYOUT_TITLE">Maru Web</title>
     <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/trading.css}">
     <th:block th:replace="~{fragments/notifications :: notification-styles}"></th:block>
     <th:block layout:fragment="extra-css"></th:block>
     <!-- HTMX Library for smooth partial page updates -->
@@ -116,8 +117,11 @@
                             <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/risk-rules')} ? 'active' : ''">
                                 <a th:href="@{/trading/risk-rules}">리스크 룰</a>
                             </li>
-                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/performance')} ? 'active' : ''">
+                            <li th:classappend="${#httpServletRequest.requestURI == '/trading/performance'} ? 'active' : ''">
                                 <a th:href="@{/trading/performance}">성과 분석</a>
+                            </li>
+                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/performance/calendar')} ? 'active' : ''">
+                                <a th:href="@{/trading/performance/calendar}">성과 캘린더</a>
                             </li>
                             <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/performance/strategies')} ? 'active' : ''">
                                 <a th:href="@{/trading/performance/strategies}">전략별 통계</a>
@@ -140,8 +144,11 @@
                             <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/backtests/advanced/portfolio')} ? 'active' : ''">
                                 <a th:href="@{/trading/backtests/advanced/portfolio}">Portfolio Test</a>
                             </li>
-                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/backtests/admin')} ? 'active' : ''">
+                            <li th:classappend="${#httpServletRequest.requestURI == '/trading/backtests/admin'} ? 'active' : ''">
                                 <a th:href="@{/trading/backtests/admin}">백테스트 관리</a>
+                            </li>
+                            <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/backtests/admin/async')} ? 'active' : ''">
+                                <a th:href="@{/trading/backtests/admin/async}">비동기 백테스트</a>
                             </li>
                             <li th:classappend="${#strings.startsWith(#httpServletRequest.requestURI, '/trading/optimization')} ? 'active' : ''">
                                 <a th:href="@{/trading/optimization}">파라미터 최적화</a>
@@ -398,6 +405,7 @@
                 '/trading/kill-switch': { name: 'Kill Switch', icon: '⚡' },
                 '/trading/risk-rules': { name: '리스크 룰', icon: '⚙️' },
                 '/trading/performance': { name: '성과 분석', icon: '📊' },
+                '/trading/performance/calendar': { name: '성과 캘린더', icon: '📅' },
                 '/trading/backtests': { name: '백테스팅', icon: '📈' },
                 '/trading/market-data': { name: '구독 종목 관리', icon: '📡' },
                 '/trading/scheduler': { name: '스케줄러 관리', icon: '⏰' },

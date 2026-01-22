@@ -5,436 +5,186 @@
 <head>
     <title>계좌 관리</title>
     <th:block layout:fragment="extra-css">
-        <style>
-                .accounts-page {
-                    padding: 30px;
-                    max-width: 1600px;
-                    margin: 0 auto;
-                }
-                .page-header {
-                    margin-bottom: 40px;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    padding: 40px;
-                    border-radius: 16px;
-                    color: white;
-                    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
-                }
-                [data-theme="dark"] .page-header {
-                    background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
-                    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-                    border: 1px solid rgba(255, 255, 255, 0.1);
-                }
-                .page-header h1 {
-                    font-size: 36px;
-                    font-weight: 700;
-                    margin-bottom: 10px;
-                    display: flex;
-                    align-items: center;
-                    gap: 15px;
-                }
-                .page-header p {
-                    font-size: 16px;
-                    opacity: 0.95;
-                }
-                .accounts-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-                    gap: 25px;
-                }
-                .account-card {
-                    background: var(--bg-secondary);
-                    border-radius: 16px;
-                    padding: 28px;
-                    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    border: 1px solid var(--border-color);
-                    cursor: pointer;
-                }
-                .account-card:hover {
-                    box-shadow: 0 12px 40px rgba(0,0,0,0.12);
-                    transform: translateY(-5px);
-                }
-                .account-card-link {
-                    text-decoration: none;
-                    color: inherit;
-                    display: block;
-                }
-                .account-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 20px;
-                    padding-bottom: 18px;
-                    border-bottom: 2px solid var(--border-color);
-                }
-                .account-name {
-                    font-size: 22px;
-                    font-weight: 700;
-                    color: var(--text-primary);
-                    letter-spacing: -0.3px;
-                }
-                .account-info {
-                    margin-bottom: 10px;
-                }
-                .info-row {
-                    display: flex;
-                    justify-content: space-between;
-                    padding: 8px 0;
-                    border-bottom: 1px solid var(--border-color);
-                }
-                .info-row:last-child {
-                    border-bottom: none;
-                }
-                .info-label {
-                    color: var(--text-secondary);
-                    font-size: 14px;
-                }
-                .info-value {
-                    color: var(--text-primary);
-                    font-weight: 600;
-                    font-size: 14px;
-                }
-                .badge {
-                    display: inline-block;
-                    font-size: 12px;
-                    font-weight: 400;
-                    color: var(--text-primary);
-                }
-                .empty-state {
-                    text-align: center;
-                    padding: 60px 20px;
-                    background: var(--bg-secondary);
-                    border-radius: 8px;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                    transition: background-color 0.3s ease;
-                }
-                .empty-icon {
-                    font-size: 64px;
-                    margin-bottom: 20px;
-                }
-                .empty-message {
-                    color: var(--text-secondary);
-                    font-size: 18px;
-                }
-                .alert {
-                    padding: 20px 28px;
-                    border-radius: 12px;
-                    margin-bottom: 30px;
-                    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-                    animation: slideDown 0.3s ease-out;
-                }
-                @keyframes slideDown {
-                    from {
-                        opacity: 0;
-                        transform: translateY(-10px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
-                .alert-error {
-                    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
-                    border: 1px solid #f5c6cb;
-                }
-                .alert-title {
-                    font-size: 20px;
-                    font-weight: 700;
-                    color: #721c24;
-                    margin-bottom: 10px;
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                }
-                .alert-message {
-                    color: #721c24;
-                    font-size: 15px;
-                    line-height: 1.6;
-                    margin-bottom: 12px;
-                }
-                .alert-detail {
-                    background: rgba(255,255,255,0.6);
-                    padding: 12px 16px;
-                    border-radius: 8px;
-                    font-family: monospace;
-                    font-size: 13px;
-                    color: #721c24;
-                    margin-top: 12px;
-                    word-break: break-all;
-                }
-                .alert-help {
-                    background: var(--bg-tertiary);
-                    border: 1px solid var(--border-color);
-                    padding: 18px;
-                    border-radius: 10px;
-                    margin-top: 15px;
-                    transition: background-color 0.3s ease;
-                }
-                .alert-help h4 {
-                    color: var(--text-primary);
-                    font-size: 16px;
-                    margin: 0 0 12px 0;
-                }
-                .alert-help ol {
-                    color: var(--text-primary);
-                    margin: 0;
-                    padding-left: 20px;
-                    line-height: 1.8;
-                }
-                .alert-help pre {
-                    background: var(--bg-secondary);
-                    padding: 10px;
-                    border-radius: 6px;
-                    margin: 8px 0;
-                    font-size: 12px;
-                    overflow-x: auto;
-                    color: var(--text-primary);
-                    transition: background-color 0.3s ease;
-                }
-                .action-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 25px;
-                }
-                .btn {
-                    padding: 12px 24px;
-                    border: none;
-                    border-radius: 10px;
-                    font-size: 14px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    text-decoration: none;
-                    display: inline-block;
-                }
-                .btn-primary {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    color: white;
-                    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-                }
-                .btn-primary:hover {
-                    transform: translateY(-3px);
-                    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-                }
-                [data-theme="dark"] .btn-primary {
-                    background: #6c757d;
-                    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
-                }
-                [data-theme="dark"] .btn-primary:hover {
-                    background: #5a6268;
-                    transform: translateY(-2px);
-                }
-                .btn-secondary {
-                    background: #6c757d;
-                    color: white;
-                    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
-                }
-                .btn-secondary:hover {
-                    background: #5a6268;
-                    transform: translateY(-2px);
-                }
-                .btn-danger {
-                    background: #dc3545;
-                    color: white;
-                    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
-                }
-                .btn-danger:hover {
-                    background: #c82333;
-                    transform: translateY(-2px);
-                }
-                [data-theme="dark"] .btn-danger {
-                    background: #6c757d;
-                    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
-                }
-                [data-theme="dark"] .btn-danger:hover {
-                    background: #5a6268;
-                }
-                .btn-sm {
-                    padding: 8px 16px;
-                    font-size: 13px;
-                }
-                .btn-success {
-                    background: #28a745;
-                    color: white;
-                    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-                }
-                .btn-success:hover {
-                    background: #218838;
-                    transform: translateY(-2px);
-                }
-                [data-theme="dark"] .btn-success {
-                    background: #6c757d;
-                    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
-                }
-                [data-theme="dark"] .btn-success:hover {
-                    background: #5a6268;
-                }
-                .btn-warning {
-                    background: #ffc107;
-                    color: #212529;
-                    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
-                }
-                .btn-warning:hover {
-                    background: #e0a800;
-                    transform: translateY(-2px);
-                }
-                [data-theme="dark"] .btn-warning {
-                    background: #6c757d;
-                    color: white;
-                    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
-                }
-                [data-theme="dark"] .btn-warning:hover {
-                    background: #5a6268;
-                }
-                .account-actions {
-                    display: flex;
-                    gap: 10px;
-                    margin-top: 20px;
-                    padding-top: 15px;
-                    border-top: 2px solid #f5f5f5;
-                    flex-wrap: wrap;
-                }
-                .alert-success {
-                    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-                    color: #155724;
-                    border: 1px solid #c3e6cb;
-                    padding: 16px 24px;
-                    border-radius: 12px;
-                    margin-bottom: 25px;
-                    font-weight: 500;
-                    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-                    animation: slideDown 0.3s ease-out;
-                }
-                @keyframes slideDown {
-                    from {
-                        opacity: 0;
-                        transform: translateY(-10px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
-                .delete-form {
-                    display: inline-block;
-                    margin: 0;
-                }
-                .delete-form button {
-                    margin: 0;
-                }
-            </style>
+        <link rel="stylesheet" th:href="@{/css/trading.css}"/>
     </th:block>
 </head>
 <body>
     <div layout:fragment="content">
-        <div class="accounts-page">
-                        <div class="page-header">
-                            <h1>💼 계좌 관리</h1>
-                            <p>Trading System에 등록된 계좌 정보를 확인할 수 있습니다.</p>
-                        </div>
-        
-                        <!-- Flash Messages -->
-                        <div th:if="${message}" class="alert-success" th:text="${message}">
-                            성공 메시지
-                        </div>
-        
-                        <!-- API Connection Error Alert -->
-                        <div th:if="${error}" class="alert alert-error">
-                            <div class="alert-title">⚠️ API 연결 오류</div>
-                            <div class="alert-message" th:text="${error}">
-                                Trading System API에 연결할 수 없습니다.
-                            </div>
-                            <div th:if="${errorDetail}" class="alert-detail">
-                                <strong>상세 정보:</strong><br>
-                                <span th:text="${errorDetail}">Error details</span>
-                            </div>
-                            <div class="alert-help">
-                                <h4>해결 방법</h4>
-                                <ol>
-                                    <li>Trading System API 서버가 실행 중인지 확인하세요 (포트 8099)</li>
-                                    <li>터미널에서 다음 명령어를 실행하세요:
-                                        <pre>cd /Users/changsupark/projects/cautostock
-        ./run-with-env.sh</pre>
-                                    </li>
-                                    <li>Health Check 확인: <a href="http://localhost:8099/health" target="_blank" style="color: #007bff;">http://localhost:8099/health</a></li>
-                                </ol>
-                            </div>
-                        </div>
-        
-                        <!-- Action Header -->
-                        <div class="action-header">
-                            <h2 style="font-size: 20px; color: #2c3e50; margin: 0;">계좌 목록</h2>
-                            <a th:href="@{/trading/accounts/new}" class="btn btn-primary">+ 계좌 등록</a>
-                        </div>
-        
-                        <div th:if="${accounts != null && !accounts.isEmpty()}" class="accounts-grid">
-                            <div th:each="account : ${accounts}" class="account-card"
-                                 th:data-account-id="${account.accountId}"
-                                 onclick="window.location.href='/trading/accounts/' + this.getAttribute('data-account-id')">
-                                <div class="account-header">
-                                    <div class="account-name" th:text="${account.alias}">Account Name</div>
-                                    <div>
-                                        <span class="badge"
-                                              th:classappend="${account.environment == 'PAPER'} ? 'badge-paper' : 'badge-real'"
-                                              th:text="${account.environment}">PAPER</span>
-                                    </div>
-                                </div>
-                                <div class="account-info">
-                                    <div class="info-row">
-                                        <span class="info-label">계좌번호</span>
-                                        <span class="info-value" th:text="${account.accountId}">Account ID</span>
-                                    </div>
-                                    <div class="info-row">
-                                        <span class="info-label">상태</span>
-                                        <span class="badge"
-                                              th:classappend="${account.status == 'ACTIVE'} ? 'badge-active' : 'badge-inactive'"
-                                              th:text="${account.status}">ACTIVE</span>
-                                    </div>
-                                    <div class="info-row" th:if="${account.createdAt}">
-                                        <span class="info-label">등록일</span>
-                                        <span class="info-value" th:text="${#strings.substring(account.createdAt, 0, 16)}">2024-01-01</span>
-                                    </div>
-                                </div>
+        <!-- Skip Link for Accessibility -->
+        <a href="#accounts-list" class="skip-link">계좌 목록으로 바로가기</a>
 
-                                <!-- Account Actions -->
-                                <div class="account-actions" onclick="event.stopPropagation()">
-                                    <a th:href="@{/trading/accounts/{id}(id=${account.accountId})}" class="btn btn-primary btn-sm">상세보기</a>
-                                    <a th:href="@{/trading/accounts/{id}/edit(id=${account.accountId})}" class="btn btn-secondary btn-sm">수정</a>
-                                    <a th:href="@{/trading/accounts/{id}/permissions(id=${account.accountId})}" class="btn btn-warning btn-sm">🔐 권한 관리</a>
+        <!-- Live Region for Dynamic Updates -->
+        <div id="live-region" aria-live="polite" aria-atomic="true" class="sr-only"></div>
 
-                                    <!-- Status Toggle Buttons -->
-                                    <form th:if="${account.status == 'INACTIVE'}" class="delete-form"
-                                          th:action="@{/trading/accounts/{id}/status(id=${account.accountId})}"
-                                          method="post">
-                                        <input type="hidden" name="status" value="ACTIVE"/>
-                                        <button type="submit" class="btn btn-success btn-sm">활성화</button>
-                                    </form>
+        <main class="accounts-page" role="main">
+            <header class="page-header">
+                <h1>
+                    <span aria-hidden="true">💼</span>
+                    <span>계좌 관리</span>
+                </h1>
+                <p>Trading System에 등록된 계좌 정보를 확인할 수 있습니다.</p>
+            </header>
 
-                                    <form th:if="${account.status == 'ACTIVE'}" class="delete-form"
-                                          th:action="@{/trading/accounts/{id}/status(id=${account.accountId})}"
-                                          method="post"
-                                          onsubmit="return confirm('이 계좌를 비활성화하시겠습니까?');">
-                                        <input type="hidden" name="status" value="INACTIVE"/>
-                                        <button type="submit" class="btn btn-warning btn-sm">비활성화</button>
-                                    </form>
+            <!-- Flash Messages -->
+            <div th:if="${message}"
+                 class="alert-success"
+                 role="alert"
+                 aria-live="polite"
+                 th:text="${message}">
+                성공 메시지
+            </div>
 
-                                    <!-- Delete Button -->
-                                    <form class="delete-form"
-                                          th:action="@{/trading/accounts/{id}/delete(id=${account.accountId})}"
-                                          method="post"
-                                          onsubmit="return confirm('정말로 이 계좌를 삭제하시겠습니까?');">
-                                        <button type="submit" class="btn btn-danger btn-sm">삭제</button>
-                                    </form>
-                                </div>
-                            </div>
+            <!-- API Connection Error Alert -->
+            <div th:if="${error}" class="alert alert-error" role="alert" aria-live="assertive">
+                <div class="alert-title">
+                    <span aria-hidden="true">⚠️</span>
+                    <span>API 연결 오류</span>
+                </div>
+                <div class="alert-message" th:text="${error}">
+                    Trading System API에 연결할 수 없습니다.
+                </div>
+                <div th:if="${errorDetail}" class="alert-detail">
+                    <strong>상세 정보:</strong><br>
+                    <span th:text="${errorDetail}">Error details</span>
+                </div>
+                <div class="alert-help">
+                    <h4>해결 방법</h4>
+                    <ol>
+                        <li>Trading System API 서버가 실행 중인지 확인하세요 (포트 8099)</li>
+                        <li>터미널에서 다음 명령어를 실행하세요:
+                            <pre>cd /Users/changsupark/projects/cautostock
+./run-with-env.sh</pre>
+                        </li>
+                        <li>Health Check 확인:
+                            <a href="http://localhost:8099/health"
+                               target="_blank"
+                               rel="noopener noreferrer">
+                                http://localhost:8099/health
+                                <span class="sr-only">(새 창에서 열림)</span>
+                            </a>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Action Header -->
+            <div class="action-header">
+                <h2 id="accounts-list-heading">계좌 목록</h2>
+                <a th:href="@{/trading/accounts/new}"
+                   class="btn btn-primary"
+                   aria-label="새 계좌 등록">
+                    <span aria-hidden="true">+</span> 계좌 등록
+                </a>
+            </div>
+
+            <!-- Accounts Grid -->
+            <section id="accounts-list"
+                     aria-labelledby="accounts-list-heading"
+                     th:if="${accounts != null && !accounts.isEmpty()}"
+                     class="accounts-grid">
+                <article th:each="account : ${accounts}"
+                         class="account-card"
+                         th:data-account-id="${account.accountId}"
+                         th:aria-label="${account.alias + ' 계좌 정보'}"
+                         tabindex="0"
+                         onclick="window.location.href='/trading/accounts/' + this.getAttribute('data-account-id')"
+                         onkeydown="if(event.key==='Enter') window.location.href='/trading/accounts/' + this.getAttribute('data-account-id')">
+                    <header class="account-header">
+                        <h3 class="account-name" th:text="${account.alias}">Account Name</h3>
+                        <div>
+                            <span class="badge"
+                                  role="status"
+                                  th:classappend="${account.environment == 'PAPER'} ? 'badge-paper' : 'badge-real'"
+                                  th:aria-label="${account.environment == 'PAPER'} ? '모의투자 환경' : '실거래 환경'"
+                                  th:text="${account.environment}">PAPER</span>
                         </div>
-        
-                        <div th:if="${accounts == null || accounts.isEmpty()}" class="empty-state">
-                            <div class="empty-icon">📭</div>
-                            <div class="empty-message">등록된 계좌가 없습니다.</div>
+                    </header>
+                    <dl class="account-info">
+                        <div class="info-row">
+                            <dt class="info-label">계좌번호</dt>
+                            <dd class="info-value" th:text="${account.accountId}">Account ID</dd>
                         </div>
-                    </div>
+                        <div class="info-row">
+                            <dt class="info-label">상태</dt>
+                            <dd>
+                                <span class="badge"
+                                      role="status"
+                                      th:classappend="${account.status == 'ACTIVE'} ? 'badge-active' : 'badge-inactive'"
+                                      th:aria-label="${account.status == 'ACTIVE'} ? '활성 상태' : '비활성 상태'"
+                                      th:text="${account.status}">ACTIVE</span>
+                            </dd>
+                        </div>
+                        <div class="info-row" th:if="${account.createdAt}">
+                            <dt class="info-label">등록일</dt>
+                            <dd class="info-value" th:text="${#strings.substring(account.createdAt, 0, 16)}">2024-01-01</dd>
+                        </div>
+                    </dl>
+
+                    <!-- Account Actions -->
+                    <nav class="account-actions"
+                         aria-label="계좌 관리 작업"
+                         onclick="event.stopPropagation()"
+                         onkeydown="event.stopPropagation()">
+                        <a th:href="@{/trading/accounts/{id}(id=${account.accountId})}"
+                           class="btn btn-primary btn-sm"
+                           th:aria-label="${account.alias + ' 상세보기'}">상세보기</a>
+                        <a th:href="@{/trading/accounts/{id}/edit(id=${account.accountId})}"
+                           class="btn btn-secondary btn-sm"
+                           th:aria-label="${account.alias + ' 수정'}">수정</a>
+                        <a th:href="@{/trading/accounts/{id}/permissions(id=${account.accountId})}"
+                           class="btn btn-warning btn-sm"
+                           th:aria-label="${account.alias + ' 권한 관리'}">
+                            <span aria-hidden="true">🔐</span> 권한 관리
+                        </a>
+
+                        <!-- Status Toggle Buttons -->
+                        <form th:if="${account.status == 'INACTIVE'}"
+                              class="delete-form"
+                              th:action="@{/trading/accounts/{id}/status(id=${account.accountId})}"
+                              method="post">
+                            <input type="hidden" name="status" value="ACTIVE"/>
+                            <button type="submit"
+                                    class="btn btn-success btn-sm"
+                                    th:aria-label="${account.alias + ' 활성화'}">활성화</button>
+                        </form>
+
+                        <form th:if="${account.status == 'ACTIVE'}"
+                              class="delete-form"
+                              th:action="@{/trading/accounts/{id}/status(id=${account.accountId})}"
+                              method="post"
+                              onsubmit="return confirm('이 계좌를 비활성화하시겠습니까?');">
+                            <input type="hidden" name="status" value="INACTIVE"/>
+                            <button type="submit"
+                                    class="btn btn-warning btn-sm"
+                                    th:aria-label="${account.alias + ' 비활성화'}">비활성화</button>
+                        </form>
+
+                        <!-- Delete Button -->
+                        <form class="delete-form"
+                              th:action="@{/trading/accounts/{id}/delete(id=${account.accountId})}"
+                              method="post"
+                              onsubmit="return confirm('정말로 이 계좌를 삭제하시겠습니까?');">
+                            <button type="submit"
+                                    class="btn btn-danger btn-sm"
+                                    th:aria-label="${account.alias + ' 삭제'}">삭제</button>
+                        </form>
+                    </nav>
+                </article>
+            </section>
+
+            <!-- Empty State -->
+            <div th:if="${accounts == null || accounts.isEmpty()}"
+                 class="trading-empty"
+                 role="status"
+                 aria-label="등록된 계좌가 없습니다">
+                <div class="trading-empty-icon" aria-hidden="true">📭</div>
+                <h3 class="trading-empty-title">등록된 계좌가 없습니다</h3>
+                <p class="trading-empty-description">새 계좌를 등록하여 트레이딩을 시작하세요.</p>
+                <a th:href="@{/trading/accounts/new}"
+                   class="btn btn-primary"
+                   aria-label="새 계좌 등록하기">계좌 등록하기</a>
+            </div>
+        </main>
     </div>
 </body>
 </html>

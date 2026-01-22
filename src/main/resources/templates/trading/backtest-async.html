@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>비동기 백테스트</title>
+    <th:block layout:fragment="extra-css">
+        <style>
+            .backtest-async-container {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 20px;
+                padding-bottom: 40px;
+            }
+
+            .page-header {
+                margin-bottom: 30px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 30px 40px;
+                border-radius: 16px;
+                color: white;
+                box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+            }
+            [data-theme="dark"] .page-header {
+                background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .page-header h2 {
+                font-size: 28px;
+                font-weight: 700;
+                margin: 0;
+                color: white;
+            }
+
+            .page-header p {
+                margin: 10px 0 0 0;
+                opacity: 0.8;
+            }
+
+            .breadcrumb-nav {
+                margin-bottom: 20px;
+            }
+
+            .breadcrumb-nav a {
+                color: var(--text-muted);
+                text-decoration: none;
+            }
+
+            .breadcrumb-nav a:hover {
+                color: #667eea;
+            }
+
+            [data-theme="dark"] .breadcrumb-nav a:hover {
+                color: #8b9df0;
+            }
+
+            .breadcrumb-nav span {
+                color: var(--text-primary);
+            }
+
+            .alert {
+                padding: 15px 20px;
+                border-radius: 12px;
+                margin-bottom: 20px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            }
+
+            .card {
+                background: var(--bg-secondary);
+                border: none;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                transition: background-color 0.3s ease;
+                margin-bottom: 20px;
+            }
+
+            .card-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border-radius: 12px 12px 0 0 !important;
+                padding: 15px 20px;
+                border: none;
+            }
+
+            [data-theme="dark"] .card-header {
+                background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+            }
+
+            .card-header h5, .card-header h6 {
+                margin: 0;
+                font-size: 16px;
+                font-weight: 600;
+                color: white;
+            }
+
+            .card-body {
+                color: var(--text-primary);
+                padding: 25px;
+            }
+
+            .form-label {
+                font-weight: 600;
+                color: var(--text-primary);
+                margin-bottom: 8px;
+            }
+
+            .form-control, .form-select {
+                background: var(--bg-primary);
+                border: 2px solid var(--border-color);
+                border-radius: 8px;
+                padding: 10px 14px;
+                color: var(--text-primary);
+                transition: border-color 0.2s, box-shadow 0.2s;
+            }
+
+            .form-control:focus, .form-select:focus {
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+                outline: none;
+                background: var(--bg-primary);
+                color: var(--text-primary);
+            }
+
+            [data-theme="dark"] .form-control, [data-theme="dark"] .form-select {
+                background: var(--bg-tertiary);
+                border-color: var(--border-color);
+            }
+
+            [data-theme="dark"] .form-control:focus, [data-theme="dark"] .form-select:focus {
+                background: var(--bg-tertiary);
+                border-color: #8b9df0;
+            }
+
+            .form-text {
+                color: var(--text-muted);
+                font-size: 12px;
+                margin-top: 5px;
+            }
+
+            .input-group-text {
+                background: var(--bg-tertiary);
+                border: 2px solid var(--border-color);
+                border-left: none;
+                color: var(--text-primary);
+            }
+
+            .input-group .form-control {
+                border-right: none;
+            }
+
+            .text-danger {
+                color: #dc3545 !important;
+            }
+
+            .btn-run {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-weight: 600;
+                transition: all 0.3s;
+            }
+
+            .btn-run:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                color: white;
+            }
+
+            .btn-run:disabled {
+                opacity: 0.6;
+                transform: none;
+                cursor: not-allowed;
+            }
+
+            [data-theme="dark"] .btn-run {
+                background: var(--bg-tertiary);
+            }
+
+            [data-theme="dark"] .btn-run:hover {
+                background: #4a5568;
+            }
+
+            .btn-cancel-job {
+                background: #dc3545;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 8px;
+                font-weight: 600;
+                transition: all 0.3s;
+            }
+
+            .btn-cancel-job:hover {
+                background: #c82333;
+                color: white;
+            }
+
+            .btn-back {
+                background: var(--bg-tertiary);
+                color: var(--text-primary);
+                border: 2px solid var(--border-color);
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-weight: 600;
+                text-decoration: none;
+                transition: all 0.3s;
+            }
+
+            .btn-back:hover {
+                background: var(--bg-primary);
+                color: var(--text-primary);
+            }
+
+            .row-form {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+
+            .row-form-3 {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+            }
+
+            @media (max-width: 768px) {
+                .row-form, .row-form-3 {
+                    grid-template-columns: 1fr;
+                }
+                .main-grid {
+                    grid-template-columns: 1fr !important;
+                }
+            }
+
+            .main-grid {
+                display: grid;
+                grid-template-columns: 2fr 1fr;
+                gap: 20px;
+            }
+
+            /* 진행률 표시 섹션 */
+            .progress-section {
+                display: none;
+            }
+
+            .progress-section.active {
+                display: block;
+            }
+
+            .progress-container {
+                background: var(--bg-tertiary);
+                border-radius: 12px;
+                padding: 25px;
+            }
+
+            .progress-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+            }
+
+            .progress-header h4 {
+                margin: 0;
+                color: var(--text-primary);
+                font-weight: 600;
+            }
+
+            .job-status {
+                padding: 6px 14px;
+                border-radius: 20px;
+                font-size: 13px;
+                font-weight: 600;
+            }
+
+            .job-status.PENDING {
+                background: rgba(255, 193, 7, 0.2);
+                color: #ffc107;
+            }
+
+            .job-status.RUNNING {
+                background: rgba(0, 123, 255, 0.2);
+                color: #007bff;
+            }
+
+            .job-status.COMPLETED {
+                background: rgba(40, 167, 69, 0.2);
+                color: #28a745;
+            }
+
+            .job-status.FAILED {
+                background: rgba(220, 53, 69, 0.2);
+                color: #dc3545;
+            }
+
+            .job-status.CANCELLED {
+                background: rgba(108, 117, 125, 0.2);
+                color: #6c757d;
+            }
+
+            .progress-bar-container {
+                background: var(--bg-primary);
+                border-radius: 10px;
+                height: 24px;
+                overflow: hidden;
+                margin-bottom: 15px;
+            }
+
+            .progress-fill {
+                background: linear-gradient(90deg, #667eea, #764ba2);
+                height: 100%;
+                border-radius: 10px;
+                transition: width 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: 600;
+                font-size: 12px;
+                min-width: 40px;
+            }
+
+            .progress-info {
+                display: flex;
+                justify-content: space-between;
+                color: var(--text-muted);
+                font-size: 13px;
+            }
+
+            .progress-message {
+                color: var(--text-secondary);
+            }
+
+            .progress-time {
+                font-family: 'Courier New', monospace;
+            }
+
+            .progress-actions {
+                margin-top: 20px;
+                display: flex;
+                gap: 12px;
+            }
+
+            .btn-view-result {
+                background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 8px;
+                font-weight: 600;
+                text-decoration: none;
+                transition: all 0.3s;
+            }
+
+            .btn-view-result:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+                color: white;
+            }
+
+            .help-card {
+                background: var(--bg-tertiary);
+            }
+
+            .help-card .card-body h6 {
+                color: var(--text-primary);
+                font-weight: 600;
+                margin-bottom: 10px;
+            }
+
+            .help-card ul {
+                padding-left: 20px;
+                margin-bottom: 0;
+            }
+
+            .help-card li {
+                color: var(--text-secondary);
+                margin-bottom: 5px;
+            }
+
+            .help-card code {
+                background: var(--bg-secondary);
+                padding: 2px 6px;
+                border-radius: 4px;
+                color: #667eea;
+            }
+
+            [data-theme="dark"] .help-card code {
+                color: #8b9df0;
+            }
+
+            .job-id-display {
+                font-family: 'Courier New', monospace;
+                background: var(--bg-primary);
+                padding: 8px 12px;
+                border-radius: 6px;
+                font-size: 12px;
+                color: var(--text-muted);
+                margin-top: 10px;
+            }
+
+            /* Spinner Animation */
+            .spinner {
+                display: inline-block;
+                width: 16px;
+                height: 16px;
+                border: 2px solid currentColor;
+                border-right-color: transparent;
+                border-radius: 50%;
+                animation: spin 0.75s linear infinite;
+                margin-right: 8px;
+            }
+
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="backtest-async-container">
+        <!-- 브레드크럼 -->
+        <div class="breadcrumb-nav">
+            <a href="/trading/backtests/admin">백테스트 관리</a>
+            <span> / 비동기 백테스트</span>
+        </div>
+
+        <!-- 페이지 헤더 -->
+        <div class="page-header">
+            <h2><i class="bi bi-lightning-charge me-2"></i>비동기 백테스트</h2>
+            <p>대용량 데이터 백테스트를 비동기로 실행하고 진행률을 실시간 모니터링합니다.</p>
+        </div>
+
+        <!-- 알림 메시지 -->
+        <div id="alertMessage" class="alert" style="display: none;" role="alert"></div>
+
+        <div class="main-grid">
+            <!-- 설정 폼 -->
+            <div id="formSection">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-gear me-2"></i>백테스트 설정</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="backtestForm">
+                            <div class="row-form" style="margin-bottom: 20px;">
+                                <!-- 전략 ID -->
+                                <div>
+                                    <label class="form-label">전략 ID <span class="text-danger">*</span></label>
+                                    <input type="text" name="strategyId" id="strategyId" class="form-control" required
+                                           placeholder="예: MA_CROSS_5_20">
+                                    <div class="form-text">백테스트할 전략 식별자</div>
+                                </div>
+
+                                <!-- 종목 -->
+                                <div>
+                                    <label class="form-label">종목 코드 <span class="text-danger">*</span></label>
+                                    <input type="text" name="symbols" id="symbols" class="form-control" required
+                                           placeholder="005930,000660">
+                                    <div class="form-text">쉼표로 구분하여 여러 종목 입력 가능</div>
+                                </div>
+                            </div>
+
+                            <div class="row-form" style="margin-bottom: 20px;">
+                                <!-- 기간 -->
+                                <div>
+                                    <label class="form-label">시작일 <span class="text-danger">*</span></label>
+                                    <input type="date" name="startDate" id="startDate" class="form-control" required>
+                                </div>
+                                <div>
+                                    <label class="form-label">종료일 <span class="text-danger">*</span></label>
+                                    <input type="date" name="endDate" id="endDate" class="form-control" required>
+                                </div>
+                            </div>
+
+                            <div class="row-form-3" style="margin-bottom: 20px;">
+                                <!-- 타임프레임 -->
+                                <div>
+                                    <label class="form-label">타임프레임</label>
+                                    <select name="timeframe" id="timeframe" class="form-select">
+                                        <option value="1m">1분</option>
+                                        <option value="5m">5분</option>
+                                        <option value="15m">15분</option>
+                                        <option value="1h">1시간</option>
+                                        <option value="1d" selected>일봉</option>
+                                        <option value="1w">주봉</option>
+                                    </select>
+                                </div>
+
+                                <!-- 초기 자본 -->
+                                <div>
+                                    <label class="form-label">초기 자본</label>
+                                    <div class="input-group">
+                                        <input type="number" name="initialCapital" id="initialCapital" class="form-control"
+                                               value="10000000" min="1000000" step="1000000">
+                                        <span class="input-group-text">원</span>
+                                    </div>
+                                </div>
+
+                                <!-- 수수료 -->
+                                <div>
+                                    <label class="form-label">수수료</label>
+                                    <div class="input-group">
+                                        <input type="number" name="commission" id="commission" class="form-control"
+                                               value="0.0015" min="0" max="0.1" step="0.0001">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row-form-3" style="margin-bottom: 30px;">
+                                <!-- 슬리피지 -->
+                                <div>
+                                    <label class="form-label">슬리피지</label>
+                                    <div class="input-group">
+                                        <input type="number" name="slippage" id="slippage" class="form-control"
+                                               value="0.0005" min="0" max="0.1" step="0.0001">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
+                                <div></div>
+                                <div></div>
+                            </div>
+
+                            <div style="display: flex; gap: 12px;">
+                                <button type="submit" id="submitBtn" class="btn-run">
+                                    <i class="bi bi-lightning-charge me-1"></i>비동기 실행
+                                </button>
+                                <a href="/trading/backtests/admin" class="btn-back">
+                                    취소
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 진행률 표시 섹션 -->
+                <div id="progressSection" class="progress-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-hourglass-split me-2"></i>실행 진행률</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="progress-container">
+                                <div class="progress-header">
+                                    <h4>백테스트 진행 중...</h4>
+                                    <span id="jobStatusBadge" class="job-status PENDING">PENDING</span>
+                                </div>
+
+                                <div class="progress-bar-container">
+                                    <div id="progressBar" class="progress-fill" style="width: 0%">0%</div>
+                                </div>
+
+                                <div class="progress-info">
+                                    <span id="progressMessage" class="progress-message">시작 대기 중...</span>
+                                    <span id="progressTime" class="progress-time">00:00</span>
+                                </div>
+
+                                <div id="jobIdDisplay" class="job-id-display" style="display: none;">
+                                    Job ID: <span id="jobIdValue"></span>
+                                </div>
+
+                                <div class="progress-actions">
+                                    <button type="button" id="cancelBtn" class="btn-cancel-job" style="display: none;">
+                                        <i class="bi bi-x-circle me-1"></i>취소
+                                    </button>
+                                    <a id="viewResultBtn" href="#" class="btn-view-result" style="display: none;">
+                                        <i class="bi bi-eye me-1"></i>결과 보기
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 도움말 -->
+            <div class="card help-card">
+                <div class="card-header">
+                    <h6><i class="bi bi-info-circle me-2"></i>비동기 백테스트 도움말</h6>
+                </div>
+                <div class="card-body">
+                    <h6>비동기 백테스트란?</h6>
+                    <ul>
+                        <li>대용량 데이터 처리에 최적화</li>
+                        <li>실시간 진행률 모니터링</li>
+                        <li>작업 취소 가능</li>
+                        <li>백그라운드 실행 지원</li>
+                    </ul>
+
+                    <h6 style="margin-top: 20px;">사용 시나리오</h6>
+                    <ul>
+                        <li>장기간 데이터 (1년 이상)</li>
+                        <li>분봉/틱 단위 백테스트</li>
+                        <li>다중 종목 동시 테스트</li>
+                    </ul>
+
+                    <h6 style="margin-top: 20px;">작업 상태</h6>
+                    <ul>
+                        <li><strong>PENDING</strong>: 대기 중</li>
+                        <li><strong>RUNNING</strong>: 실행 중</li>
+                        <li><strong>COMPLETED</strong>: 완료</li>
+                        <li><strong>FAILED</strong>: 실패</li>
+                        <li><strong>CANCELLED</strong>: 취소됨</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const form = document.getElementById('backtestForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const progressSection = document.getElementById('progressSection');
+            const progressBar = document.getElementById('progressBar');
+            const progressMessage = document.getElementById('progressMessage');
+            const progressTime = document.getElementById('progressTime');
+            const jobStatusBadge = document.getElementById('jobStatusBadge');
+            const jobIdDisplay = document.getElementById('jobIdDisplay');
+            const jobIdValue = document.getElementById('jobIdValue');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const viewResultBtn = document.getElementById('viewResultBtn');
+            const alertMessage = document.getElementById('alertMessage');
+
+            let eventSource = null;
+            let currentJobId = null;
+            let startTime = null;
+            let timerInterval = null;
+
+            // 알림 표시
+            function showAlert(message, type) {
+                alertMessage.className = `alert alert-${type}`;
+                alertMessage.innerHTML = `<i class="bi bi-${type === 'danger' ? 'exclamation-triangle' : 'check-circle'} me-2"></i>${message}`;
+                alertMessage.style.display = 'block';
+            }
+
+            // 타이머 시작
+            function startTimer() {
+                startTime = Date.now();
+                timerInterval = setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                    const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                    const seconds = (elapsed % 60).toString().padStart(2, '0');
+                    progressTime.textContent = `${minutes}:${seconds}`;
+                }, 1000);
+            }
+
+            // 타이머 정지
+            function stopTimer() {
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+            }
+
+            // 상태 업데이트
+            function updateProgress(data) {
+                const status = data.status || 'PENDING';
+                const progress = data.progress || 0;
+                const message = data.message || '처리 중...';
+
+                // 상태 배지 업데이트
+                jobStatusBadge.textContent = status;
+                jobStatusBadge.className = `job-status ${status}`;
+
+                // 진행률 바 업데이트
+                progressBar.style.width = `${progress}%`;
+                progressBar.textContent = `${progress}%`;
+
+                // 메시지 업데이트
+                progressMessage.textContent = message;
+
+                // 완료/실패/취소 시 처리
+                if (status === 'COMPLETED') {
+                    stopTimer();
+                    cancelBtn.style.display = 'none';
+                    viewResultBtn.style.display = 'inline-flex';
+                    viewResultBtn.href = `/trading/backtests/admin/jobs/${currentJobId}/result`;
+                    showAlert('백테스트가 완료되었습니다!', 'success');
+                } else if (status === 'FAILED') {
+                    stopTimer();
+                    cancelBtn.style.display = 'none';
+                    showAlert(`백테스트 실패: ${data.error || '알 수 없는 오류'}`, 'danger');
+                } else if (status === 'CANCELLED') {
+                    stopTimer();
+                    cancelBtn.style.display = 'none';
+                    showAlert('백테스트가 취소되었습니다.', 'warning');
+                }
+            }
+
+            // SSE 연결
+            function connectSSE(jobId) {
+                if (eventSource) {
+                    eventSource.close();
+                }
+
+                eventSource = new EventSource(`/trading/backtests/admin/jobs/${jobId}/progress`);
+
+                eventSource.addEventListener('progress', function(event) {
+                    const data = JSON.parse(event.data);
+                    updateProgress(data);
+                });
+
+                eventSource.onerror = function(error) {
+                    console.error('SSE error:', error);
+                    // 연결이 끊어지면 폴링으로 대체
+                    eventSource.close();
+                    pollStatus(jobId);
+                };
+            }
+
+            // 폴링 (SSE 실패 시 대체)
+            function pollStatus(jobId) {
+                const poll = async () => {
+                    try {
+                        const response = await fetch(`/trading/backtests/admin/jobs/${jobId}/status`);
+                        const data = await response.json();
+                        updateProgress(data);
+
+                        const status = data.status;
+                        if (status !== 'COMPLETED' && status !== 'FAILED' && status !== 'CANCELLED') {
+                            setTimeout(poll, 2000);
+                        }
+                    } catch (error) {
+                        console.error('Polling error:', error);
+                        setTimeout(poll, 5000);
+                    }
+                };
+                poll();
+            }
+
+            // 폼 제출
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner"></span>제출 중...';
+
+                const formData = new FormData(form);
+
+                try {
+                    const response = await fetch('/trading/backtests/admin/async', {
+                        method: 'POST',
+                        body: new URLSearchParams(formData)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success === false || result.error) {
+                        showAlert(result.error || '백테스트 제출에 실패했습니다.', 'danger');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="bi bi-lightning-charge me-1"></i>비동기 실행';
+                        return;
+                    }
+
+                    currentJobId = result.jobId;
+
+                    // 진행률 섹션 표시
+                    progressSection.classList.add('active');
+                    jobIdDisplay.style.display = 'block';
+                    jobIdValue.textContent = currentJobId;
+                    cancelBtn.style.display = 'inline-flex';
+
+                    // 타이머 시작
+                    startTimer();
+
+                    // SSE 연결
+                    connectSSE(currentJobId);
+
+                } catch (error) {
+                    console.error('Submit error:', error);
+                    showAlert('백테스트 제출 중 오류가 발생했습니다.', 'danger');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="bi bi-lightning-charge me-1"></i>비동기 실행';
+                }
+            });
+
+            // 취소 버튼
+            cancelBtn.addEventListener('click', async function() {
+                if (!currentJobId) return;
+
+                if (!confirm('백테스트를 취소하시겠습니까?')) return;
+
+                try {
+                    const response = await fetch(`/trading/backtests/admin/jobs/${currentJobId}/cancel`, {
+                        method: 'POST'
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success === false) {
+                        showAlert(result.error || '취소에 실패했습니다.', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Cancel error:', error);
+                    showAlert('취소 요청 중 오류가 발생했습니다.', 'danger');
+                }
+            });
+
+            // 페이지 언로드 시 SSE 연결 종료
+            window.addEventListener('beforeunload', function() {
+                if (eventSource) {
+                    eventSource.close();
+                }
+            });
+        })();
+    </script>
+</div>
+</body>
+</html>

@@ -128,4 +128,14 @@ public class InstrumentController {
         log.info("API Search instruments: market={}, search={}", market, search);
         return tradingApiService.getInstruments(market, "LISTED", true, search);
     }
+
+    /**
+     * 종목 상세 조회 API (JSON 응답) - 종목코드로 직접 조회
+     */
+    @GetMapping("/api/{symbol}")
+    @ResponseBody
+    public Map<String, Object> getInstrumentApi(@PathVariable String symbol) {
+        log.info("API Get instrument: symbol={}", symbol);
+        return tradingApiService.getInstrument(symbol);
+    }
 }

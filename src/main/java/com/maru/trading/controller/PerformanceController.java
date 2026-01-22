@@ -102,6 +102,68 @@ public class PerformanceController {
     }
 
     /**
+     * 성과 캘린더 페이지
+     */
+    @GetMapping("/calendar")
+    public String performanceCalendar(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) String strategyId,
+            Model model) {
+
+        try {
+            // 기본값: 현재 년/월
+            if (year == null) year = LocalDate.now().getYear();
+            if (month == null) month = LocalDate.now().getMonthValue();
+
+            log.info("Loading performance calendar: year={}, month={}, strategyId={}", year, month, strategyId);
+
+            // 월별 일일 성과 데이터 조회
+            Map<String, Object> result = tradingApiService.getMonthlyDailyPerformance(year, month, strategyId);
+
+            // 전략 목록 조회 (필터용)
+            Map<String, Object> strategiesResult = tradingApiService.getStrategies();
+
+            model.addAttribute("year", year);
+            model.addAttribute("month", month);
+            model.addAttribute("strategyId", strategyId);
+            model.addAttribute("calendarData", result);
+            model.addAttribute("strategies", strategiesResult.get("strategies"));
+
+            return "trading/performance-calendar";
+
+        } catch (Exception e) {
+            log.error("Failed to load performance calendar", e);
+            model.addAttribute("error", "성과 캘린더를 불러오는데 실패했습니다: " + e.getMessage());
+            model.addAttribute("year", year != null ? year : LocalDate.now().getYear());
+            model.addAttribute("month", month != null ? month : LocalDate.now().getMonthValue());
+            return "trading/performance-calendar";
+        }
+    }
+
+    /**
+     * 캘린더 데이터 API (AJAX용)
+     */
+    @GetMapping("/api/calendar/data")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getCalendarData(
+            @RequestParam int year,
+            @RequestParam int month,
+            @RequestParam(required = false) String strategyId) {
+
+        try {
+            log.info("API: Loading calendar data: year={}, month={}, strategyId={}", year, month, strategyId);
+            Map<String, Object> result = tradingApiService.getMonthlyDailyPerformance(year, month, strategyId);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Failed to get calendar data", e);
+            Map<String, Object> errorResult = new java.util.HashMap<>();
+            errorResult.put("error", e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResult);
+        }
+    }
+
+    /**
      * Excel 리포트 생성 및 다운로드
      */
     @GetMapping("/export")

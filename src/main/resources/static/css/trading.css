@@ -1,0 +1,1346 @@
+/**
+ * Trading Module Styles
+ * - 다크모드 완전 지원
+ * - 반응형 디자인
+ * - 접근성 개선
+ */
+
+/* ==================== CSS Variables Override for Trading ==================== */
+:root {
+    /* Trading 전용 색상 */
+    --trading-profit: #10b981;
+    --trading-loss: #ef4444;
+    --trading-neutral: #6b7280;
+    --trading-active: #3b82f6;
+    --trading-inactive: #9ca3af;
+
+    /* 상태 배지 색상 */
+    --status-active-bg: #d1fae5;
+    --status-active-text: #065f46;
+    --status-inactive-bg: #f3f4f6;
+    --status-inactive-text: #6b7280;
+    --status-error-bg: #fee2e2;
+    --status-error-text: #991b1b;
+    --status-pending-bg: #fef3c7;
+    --status-pending-text: #92400e;
+    --status-synced-bg: #dbeafe;
+    --status-synced-text: #1e40af;
+}
+
+[data-theme="dark"] {
+    --trading-profit: #34d399;
+    --trading-loss: #f87171;
+    --trading-neutral: #9ca3af;
+    --trading-active: #60a5fa;
+    --trading-inactive: #6b7280;
+
+    --status-active-bg: #064e3b;
+    --status-active-text: #a7f3d0;
+    --status-inactive-bg: #374151;
+    --status-inactive-text: #9ca3af;
+    --status-error-bg: #7f1d1d;
+    --status-error-text: #fca5a5;
+    --status-pending-bg: #78350f;
+    --status-pending-text: #fde68a;
+    --status-synced-bg: #1e3a8a;
+    --status-synced-text: #93c5fd;
+}
+
+/* ==================== Common Trading Styles ==================== */
+.trading-container {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.trading-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.trading-header h2 {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.trading-header h3 {
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* ==================== Trading Buttons - Dark Mode Override ==================== */
+.trading-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.trading-btn:focus {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+}
+
+.trading-btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.trading-btn-success {
+    background: var(--trading-profit);
+    color: white;
+}
+
+.trading-btn-danger {
+    background: var(--trading-loss);
+    color: white;
+}
+
+.trading-btn-warning {
+    background: #f59e0b;
+    color: white;
+}
+
+.trading-btn-info {
+    background: var(--trading-active);
+    color: white;
+}
+
+/* Dark Mode Buttons - All Gray */
+[data-theme="dark"] .trading-btn-primary,
+[data-theme="dark"] .trading-btn-success,
+[data-theme="dark"] .trading-btn-danger,
+[data-theme="dark"] .trading-btn-warning,
+[data-theme="dark"] .trading-btn-info {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .trading-btn-primary:hover,
+[data-theme="dark"] .trading-btn-success:hover,
+[data-theme="dark"] .trading-btn-danger:hover,
+[data-theme="dark"] .trading-btn-warning:hover,
+[data-theme="dark"] .trading-btn-info:hover {
+    background: #4a5568;
+}
+
+/* ==================== Status Badges ==================== */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-badge-active {
+    background: var(--status-active-bg);
+    color: var(--status-active-text);
+}
+
+.status-badge-inactive {
+    background: var(--status-inactive-bg);
+    color: var(--status-inactive-text);
+}
+
+.status-badge-error {
+    background: var(--status-error-bg);
+    color: var(--status-error-text);
+}
+
+.status-badge-pending {
+    background: var(--status-pending-bg);
+    color: var(--status-pending-text);
+}
+
+.status-badge-synced {
+    background: var(--status-synced-bg);
+    color: var(--status-synced-text);
+}
+
+/* ==================== Trading Tables ==================== */
+.trading-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-secondary);
+}
+
+.trading-table th,
+.trading-table td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.trading-table th {
+    background: var(--bg-tertiary);
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+}
+
+.trading-table tbody tr:hover {
+    background: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .trading-table th {
+    background: #1f2937;
+}
+
+[data-theme="dark"] .trading-table tbody tr:hover {
+    background: #374151;
+}
+
+/* ==================== Filter Buttons - Dark Mode ==================== */
+.filter-btn {
+    padding: 8px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+    background: var(--bg-tertiary);
+}
+
+.filter-btn.active {
+    background: var(--accent-primary);
+    color: white;
+    border-color: var(--accent-primary);
+}
+
+[data-theme="dark"] .filter-btn {
+    background: var(--bg-tertiary);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .filter-btn:hover {
+    background: #4a5568;
+}
+
+[data-theme="dark"] .filter-btn.active {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+}
+
+/* ==================== Trading Cards ==================== */
+.trading-card {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+}
+
+.trading-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.trading-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.trading-card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.trading-card-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.trading-card-value.profit {
+    color: var(--trading-profit);
+}
+
+.trading-card-value.loss {
+    color: var(--trading-loss);
+}
+
+/* ==================== Form Styles ==================== */
+.trading-form-group {
+    margin-bottom: 20px;
+}
+
+.trading-form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.trading-form-input,
+.trading-form-select,
+.trading-form-textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.trading-form-input:focus,
+.trading-form-select:focus,
+.trading-form-textarea:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+[data-theme="dark"] .trading-form-input,
+[data-theme="dark"] .trading-form-select,
+[data-theme="dark"] .trading-form-textarea {
+    background: var(--bg-tertiary);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .trading-form-input:focus,
+[data-theme="dark"] .trading-form-select:focus,
+[data-theme="dark"] .trading-form-textarea:focus {
+    box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
+}
+
+/* ==================== Dropdown Menus ==================== */
+.trading-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.trading-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    min-width: 180px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow-md);
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+}
+
+.trading-dropdown:hover .trading-dropdown-menu,
+.trading-dropdown.open .trading-dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.trading-dropdown-item {
+    display: block;
+    padding: 10px 16px;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+
+.trading-dropdown-item:hover {
+    background: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .trading-dropdown-menu {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+}
+
+/* ==================== Charts Container ==================== */
+.chart-container {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.chart-container canvas {
+    max-width: 100%;
+}
+
+/* ==================== Stats Grid ==================== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+}
+
+.stat-card-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+}
+
+.stat-card-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.stat-card-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ==================== Responsive Design ==================== */
+@media (max-width: 1024px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .trading-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .trading-container {
+        padding: 16px;
+    }
+
+    .trading-table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .filter-btn-group {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 480px) {
+    .trading-btn {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+
+    .trading-card-value {
+        font-size: 20px;
+    }
+}
+
+/* ==================== Accessibility Improvements ==================== */
+/* Focus styles */
+*:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+}
+
+/* Skip link */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--accent-primary);
+    color: white;
+    padding: 8px 16px;
+    z-index: 9999;
+    transition: top 0.3s;
+}
+
+.skip-link:focus {
+    top: 0;
+}
+
+/* Screen reader only */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .trading-btn,
+    .filter-btn,
+    .status-badge {
+        border: 2px solid currentColor;
+    }
+
+    .trading-table th,
+    .trading-table td {
+        border: 1px solid var(--text-primary);
+    }
+}
+
+/* ==================== Loading States ==================== */
+.trading-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+.trading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--accent-primary);
+    border-radius: 50%;
+    animation: trading-spin 0.8s linear infinite;
+}
+
+@keyframes trading-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ==================== Empty State ==================== */
+.trading-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+}
+
+.trading-empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.trading-empty-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.trading-empty-description {
+    font-size: 14px;
+    margin-bottom: 24px;
+}
+
+/* ==================== Notifications ==================== */
+.trading-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 9999;
+    animation: trading-toast-in 0.3s ease;
+}
+
+.trading-toast.success {
+    border-left: 4px solid var(--trading-profit);
+}
+
+.trading-toast.error {
+    border-left: 4px solid var(--trading-loss);
+}
+
+.trading-toast.warning {
+    border-left: 4px solid #f59e0b;
+}
+
+@keyframes trading-toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==================== Accounts Page Styles ==================== */
+.accounts-page {
+    padding: 30px;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.accounts-page .page-header {
+    margin-bottom: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 40px;
+    border-radius: 16px;
+    color: white;
+    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+}
+
+[data-theme="dark"] .accounts-page .page-header {
+    background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.accounts-page .page-header h1 {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.accounts-page .page-header p {
+    font-size: 16px;
+    opacity: 0.95;
+}
+
+.accounts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 25px;
+}
+
+@media (max-width: 480px) {
+    .accounts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.account-card {
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+}
+
+.account-card:hover {
+    box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+    transform: translateY(-5px);
+}
+
+.account-card:focus-within {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+}
+
+.account-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.account-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 18px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.account-name {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+}
+
+.account-info {
+    margin-bottom: 10px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.info-value {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* Account Badge Styles */
+.badge {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 6px;
+    color: var(--text-primary);
+}
+
+.badge-paper {
+    background: var(--status-pending-bg);
+    color: var(--status-pending-text);
+}
+
+.badge-real {
+    background: var(--status-active-bg);
+    color: var(--status-active-text);
+}
+
+.badge-active {
+    background: var(--status-active-bg);
+    color: var(--status-active-text);
+}
+
+.badge-inactive {
+    background: var(--status-inactive-bg);
+    color: var(--status-inactive-text);
+}
+
+.account-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 2px solid var(--border-color);
+    flex-wrap: wrap;
+}
+
+.delete-form {
+    display: inline-block;
+    margin: 0;
+}
+
+.delete-form button {
+    margin: 0;
+}
+
+/* Account Page Alert Styles */
+.accounts-page .alert {
+    padding: 20px 28px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.accounts-page .alert-error {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    border: 1px solid #f5c6cb;
+}
+
+[data-theme="dark"] .accounts-page .alert-error {
+    background: linear-gradient(135deg, #4a2020 0%, #3d1919 100%);
+    border-color: #6b2c2c;
+}
+
+.accounts-page .alert-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #721c24;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+[data-theme="dark"] .accounts-page .alert-title {
+    color: #fca5a5;
+}
+
+.accounts-page .alert-message {
+    color: #721c24;
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 12px;
+}
+
+[data-theme="dark"] .accounts-page .alert-message {
+    color: #fca5a5;
+}
+
+.accounts-page .alert-detail {
+    background: rgba(255,255,255,0.6);
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 13px;
+    color: #721c24;
+    margin-top: 12px;
+    word-break: break-all;
+}
+
+[data-theme="dark"] .accounts-page .alert-detail {
+    background: rgba(0,0,0,0.3);
+    color: #fca5a5;
+}
+
+.accounts-page .alert-help {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    padding: 18px;
+    border-radius: 10px;
+    margin-top: 15px;
+}
+
+.accounts-page .alert-help h4 {
+    color: var(--text-primary);
+    font-size: 16px;
+    margin: 0 0 12px 0;
+}
+
+.accounts-page .alert-help ol {
+    color: var(--text-primary);
+    margin: 0;
+    padding-left: 20px;
+    line-height: 1.8;
+}
+
+.accounts-page .alert-help pre {
+    background: var(--bg-secondary);
+    padding: 10px;
+    border-radius: 6px;
+    margin: 8px 0;
+    font-size: 12px;
+    overflow-x: auto;
+    color: var(--text-primary);
+}
+
+.accounts-page .alert-success {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    padding: 16px 24px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    font-weight: 500;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    animation: slideDown 0.3s ease-out;
+}
+
+[data-theme="dark"] .accounts-page .alert-success {
+    background: linear-gradient(135deg, #1a4731 0%, #14532d 100%);
+    color: #86efac;
+    border-color: #166534;
+}
+
+.accounts-page .action-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.accounts-page .action-header h2 {
+    font-size: 20px;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+/* Account Page Buttons */
+.accounts-page .btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    display: inline-block;
+}
+
+.accounts-page .btn:focus {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+}
+
+.accounts-page .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.accounts-page .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+[data-theme="dark"] .accounts-page .btn-primary {
+    background: #6c757d;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+[data-theme="dark"] .accounts-page .btn-primary:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+}
+
+.accounts-page .btn-secondary {
+    background: #6c757d;
+    color: white;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+.accounts-page .btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+}
+
+.accounts-page .btn-danger {
+    background: #dc3545;
+    color: white;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+.accounts-page .btn-danger:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+}
+
+[data-theme="dark"] .accounts-page .btn-danger {
+    background: #6c757d;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+[data-theme="dark"] .accounts-page .btn-danger:hover {
+    background: #5a6268;
+}
+
+.accounts-page .btn-sm {
+    padding: 8px 16px;
+    font-size: 13px;
+}
+
+.accounts-page .btn-success {
+    background: #28a745;
+    color: white;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.accounts-page .btn-success:hover {
+    background: #218838;
+    transform: translateY(-2px);
+}
+
+[data-theme="dark"] .accounts-page .btn-success {
+    background: #6c757d;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+[data-theme="dark"] .accounts-page .btn-success:hover {
+    background: #5a6268;
+}
+
+.accounts-page .btn-warning {
+    background: #ffc107;
+    color: #212529;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+}
+
+.accounts-page .btn-warning:hover {
+    background: #e0a800;
+    transform: translateY(-2px);
+}
+
+[data-theme="dark"] .accounts-page .btn-warning {
+    background: #6c757d;
+    color: white;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+[data-theme="dark"] .accounts-page .btn-warning:hover {
+    background: #5a6268;
+}
+
+/* ==================== Instruments Page Styles ==================== */
+.instruments-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    padding-bottom: 40px;
+}
+
+.instruments-container .page-header {
+    margin-bottom: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 40px;
+    border-radius: 16px;
+    color: white;
+    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+}
+
+[data-theme="dark"] .instruments-container .page-header {
+    background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.instruments-container .page-header h2 {
+    font-size: 36px;
+    font-weight: 700;
+    margin: 0;
+    color: white;
+}
+
+.instruments-container .badge.bg-secondary {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    position: relative;
+    top: -2px;
+}
+
+/* Instruments Card Styles */
+.instruments-container .card {
+    background: var(--bg-secondary);
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+.instruments-container .card:last-child {
+    margin-bottom: 0;
+}
+
+.instruments-container .card-body {
+    color: var(--text-primary);
+    padding: 20px;
+}
+
+.instruments-container .card-body.table-card {
+    padding: 0;
+}
+
+/* Filter Form Styles */
+.filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+}
+
+.filter-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filter-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+}
+
+@media (max-width: 768px) {
+    .filter-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .filter-buttons {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+}
+
+.instruments-container .form-label {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 0;
+    white-space: nowrap;
+}
+
+.instruments-container .form-select,
+.instruments-container .form-control {
+    background: var(--bg-tertiary);
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 10px 12px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.instruments-container .form-select:focus,
+.instruments-container .form-control:focus {
+    background: var(--bg-tertiary);
+    border-color: #667eea;
+    color: var(--text-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Instruments Table Styles */
+.instruments-container .table-responsive {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.table-scroll-container {
+    max-height: calc(100vh - 380px);
+    overflow-y: auto;
+}
+
+.instruments-container .table {
+    color: var(--text-primary);
+    margin-bottom: 0;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.instruments-container .table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+[data-theme="dark"] .instruments-container .table thead {
+    background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+}
+
+.instruments-container .table thead th {
+    padding: 15px 12px;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    border: none;
+    white-space: nowrap;
+}
+
+.instruments-container .table thead th:first-child {
+    border-radius: 12px 0 0 0;
+}
+
+.instruments-container .table thead th:last-child {
+    border-radius: 0 12px 0 0;
+}
+
+/* Table Column Widths */
+.col-symbol { width: 90px; }
+.col-name-kr { width: auto; }
+.col-name-en { width: 150px; }
+.col-market { width: 70px; }
+.col-industry { width: 100px; }
+.col-status { width: 70px; }
+.col-tradable { width: 70px; }
+.col-halted { width: 70px; }
+.col-listing { width: 90px; }
+.col-action { width: 60px; }
+
+.instruments-container .table tbody tr {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s;
+}
+
+.instruments-container .table tbody tr:hover {
+    background: var(--bg-tertiary);
+}
+
+.instruments-container .table tbody td {
+    padding: 15px 12px;
+    border: none;
+    vertical-align: middle;
+}
+
+.symbol-link {
+    color: var(--text-primary);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.symbol-link:hover {
+    color: #667eea;
+    text-decoration: underline;
+}
+
+[data-theme="dark"] .symbol-link:hover {
+    color: #8b9df0;
+}
+
+.detail-link {
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 12px;
+}
+
+.detail-link:hover {
+    color: #667eea;
+    text-decoration: underline;
+}
+
+/* Instruments Badges */
+.instruments-container .badge {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.instruments-container .badge.bg-primary {
+    background: #667eea !important;
+}
+
+.instruments-container .badge.bg-success {
+    background: #28a745 !important;
+}
+
+.instruments-container .badge.bg-warning {
+    background: #ffc107 !important;
+}
+
+.instruments-container .badge.bg-danger {
+    background: #dc3545 !important;
+}
+
+[data-theme="dark"] .instruments-container .badge.bg-primary,
+[data-theme="dark"] .instruments-container .badge.bg-success,
+[data-theme="dark"] .instruments-container .badge.bg-warning,
+[data-theme="dark"] .instruments-container .badge.bg-danger {
+    background: #6c757d !important;
+    color: white !important;
+}
+
+/* Instruments Buttons */
+.instruments-container .btn {
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.instruments-container .btn:focus {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+}
+
+.instruments-container .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.instruments-container .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+[data-theme="dark"] .instruments-container .btn-primary {
+    background: #6c757d;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+[data-theme="dark"] .instruments-container .btn-primary:hover {
+    background: #5a6268;
+}
+
+.instruments-container .btn-outline-secondary {
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
+    background: transparent;
+}
+
+.instruments-container .btn-outline-secondary:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+}

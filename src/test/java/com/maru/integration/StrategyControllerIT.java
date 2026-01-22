@@ -293,7 +293,7 @@ class StrategyControllerIT {
         orders.put("items", Collections.emptyList());
 
         when(tradingApiService.getStrategy("strategy-1")).thenReturn(strategy);
-        when(tradingApiService.getOrders("account-1")).thenReturn(orders);
+        when(tradingApiService.getOrdersByStrategyId("strategy-1")).thenReturn(orders);
 
         // When & Then
         mockMvc.perform(get("/trading/strategies/strategy-1"))

@@ -1,7 +1,11 @@
 package com.maru.trading.service;
 
+import com.maru.config.CacheConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -28,34 +32,23 @@ import java.util.Map;
 public class TradingApiService {
 
     private final RestTemplate tradingApiRestTemplate;
+    private final TradingApiHelper apiHelper;
 
     /**
      * Health Check - 시스템 상태 조회
      */
+    @Cacheable(value = CacheConfig.CACHE_HEALTH, cacheManager = "shortTtlCacheManager")
     public Map<String, Object> getHealthStatus() {
-        String url = "/health";
-        try {
-            log.debug("Calling Trading API: {}", url);
-            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<Map<String, Object>>() {}
-            );
-            return response.getBody();
-        } catch (RestClientException e) {
-            log.error("Failed to get health status from Trading System", e);
-            // Return error status
-            Map<String, Object> errorStatus = new HashMap<>();
-            errorStatus.put("status", "DOWN");
-            errorStatus.put("error", "Trading System API is unavailable");
-            return errorStatus;
-        }
+        Map<String, Object> defaultStatus = new HashMap<>();
+        defaultStatus.put("status", "DOWN");
+        defaultStatus.put("error", "Trading System API is unavailable");
+        return apiHelper.getWithDefault("/health", defaultStatus);
     }
 
     /**
      * 계좌 목록 조회
      */
+    @Cacheable(value = CacheConfig.CACHE_ACCOUNTS)
     public Map<String, Object> getAccounts() {
         String url = "/api/v1/admin/accounts";
         try {
@@ -76,6 +69,7 @@ public class TradingApiService {
     /**
      * 계좌 상세 조회
      */
+    @Cacheable(value = CacheConfig.CACHE_ACCOUNTS, key = "#accountId")
     public Map<String, Object> getAccount(String accountId) {
         String url = "/api/v1/admin/accounts/" + accountId;
         try {
@@ -96,6 +90,7 @@ public class TradingApiService {
     /**
      * 계좌 등록
      */
+    @CacheEvict(value = CacheConfig.CACHE_ACCOUNTS, allEntries = true)
     public Map<String, Object> createAccount(Map<String, Object> accountData) {
         String url = "/api/v1/admin/accounts";
         try {
@@ -120,6 +115,7 @@ public class TradingApiService {
     /**
      * 계좌 수정
      */
+    @CacheEvict(value = CacheConfig.CACHE_ACCOUNTS, allEntries = true)
     public Map<String, Object> updateAccount(String accountId, Map<String, Object> accountData) {
         String url = "/api/v1/admin/accounts/" + accountId;
         try {
@@ -144,6 +140,7 @@ public class TradingApiService {
     /**
      * 계좌 삭제
      */
+    @CacheEvict(value = CacheConfig.CACHE_ACCOUNTS, allEntries = true)
     public void deleteAccount(String accountId) {
         String url = "/api/v1/admin/accounts/" + accountId;
         try {
@@ -163,29 +160,18 @@ public class TradingApiService {
     /**
      * Kill Switch 상태 조회
      */
+    @Cacheable(value = "killSwitch", cacheManager = "shortTtlCacheManager")
     public Map<String, Object> getKillSwitchStatus() {
-        String url = "/api/v1/admin/kill-switch";
-        try {
-            log.debug("Calling Trading API: {}", url);
-            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<Map<String, Object>>() {}
-            );
-            return response.getBody();
-        } catch (RestClientException e) {
-            log.error("Failed to get kill switch status from Trading System", e);
-            Map<String, Object> errorStatus = new HashMap<>();
-            errorStatus.put("status", "UNKNOWN");
-            errorStatus.put("error", "Unable to fetch kill switch status");
-            return errorStatus;
-        }
+        Map<String, Object> defaultStatus = new HashMap<>();
+        defaultStatus.put("status", "UNKNOWN");
+        defaultStatus.put("error", "Unable to fetch kill switch status");
+        return apiHelper.getWithDefault("/api/v1/admin/kill-switch", defaultStatus);
     }
 
     /**
      * Kill Switch 토글 (ON/OFF)
      */
+    @CacheEvict(value = "killSwitch", allEntries = true)
     public Map<String, Object> toggleKillSwitch(String status, String reason, String accountId) {
         String url = "/api/v1/admin/kill-switch";
         try {
@@ -220,6 +206,7 @@ public class TradingApiService {
     /**
      * 전략 목록 조회
      */
+    @Cacheable(value = CacheConfig.CACHE_STRATEGIES)
     public Map<String, Object> getStrategies() {
         String url = "/api/v1/admin/strategies";
         try {
@@ -285,11 +272,24 @@ public class TradingApiService {
      */
     public Map<String, Object> getOrdersWithFilters(String accountId, String startDate, String endDate,
                                                      String status, String symbol, String side) {
+        return getOrdersWithFilters(accountId, startDate, endDate, status, symbol, side, null);
+    }
+
+    /**
+     * 주문 목록 조회 (고급 필터링 + strategyId)
+     */
+    public Map<String, Object> getOrdersWithFilters(String accountId, String startDate, String endDate,
+                                                     String status, String symbol, String side, String strategyId) {
         StringBuilder url = new StringBuilder("/api/v1/query/orders?");
         boolean hasParam = false;
 
         if (accountId != null && !accountId.isEmpty()) {
             url.append("accountId=").append(accountId);
+            hasParam = true;
+        }
+        if (strategyId != null && !strategyId.isEmpty()) {
+            if (hasParam) url.append("&");
+            url.append("strategyId=").append(strategyId);
             hasParam = true;
         }
         if (startDate != null && !startDate.isEmpty()) {
@@ -330,6 +330,13 @@ public class TradingApiService {
             log.error("Failed to get filtered orders from Trading System", e);
             throw new RuntimeException("주문 목록을 가져올 수 없습니다.", e);
         }
+    }
+
+    /**
+     * 전략별 주문 목록 조회
+     */
+    public Map<String, Object> getOrdersByStrategyId(String strategyId) {
+        return getOrdersWithFilters(null, null, null, null, null, null, strategyId);
     }
 
     /**
@@ -395,6 +402,7 @@ public class TradingApiService {
     /**
      * 전략 상세 조회
      */
+    @Cacheable(value = CacheConfig.CACHE_STRATEGIES, key = "#strategyId")
     public Map<String, Object> getStrategy(String strategyId) {
         String url = "/api/v1/admin/strategies/" + strategyId;
         try {
@@ -415,6 +423,7 @@ public class TradingApiService {
     /**
      * 전략 등록
      */
+    @CacheEvict(value = CacheConfig.CACHE_STRATEGIES, allEntries = true)
     public Map<String, Object> createStrategy(Map<String, Object> strategyData) {
         String url = "/api/v1/admin/strategies";
         try {
@@ -439,6 +448,7 @@ public class TradingApiService {
     /**
      * 전략 수정
      */
+    @CacheEvict(value = CacheConfig.CACHE_STRATEGIES, allEntries = true)
     public Map<String, Object> updateStrategy(String strategyId, Map<String, Object> strategyData) {
         String url = "/api/v1/admin/strategies/" + strategyId;
         try {
@@ -501,6 +511,7 @@ public class TradingApiService {
     /**
      * 전략 삭제
      */
+    @CacheEvict(value = CacheConfig.CACHE_STRATEGIES, allEntries = true)
     public void deleteStrategy(String strategyId) {
         String url = "/api/v1/admin/strategies/" + strategyId;
         try {
@@ -520,6 +531,7 @@ public class TradingApiService {
     /**
      * 전략 상태 변경
      */
+    @CacheEvict(value = CacheConfig.CACHE_STRATEGIES, allEntries = true)
     public Map<String, Object> updateStrategyStatus(String strategyId, String status) {
         String url = "/api/v1/admin/strategies/" + strategyId + "/status";
         try {
@@ -1133,7 +1145,7 @@ public class TradingApiService {
      * 백테스팅 결과 목록 조회
      */
     public Map<String, Object> getBacktestResults(String strategyId, String startDate, String endDate) {
-        StringBuilder url = new StringBuilder("/api/v1/query/backtests?");
+        StringBuilder url = new StringBuilder("/api/v1/admin/backtests?");
 
         if (strategyId != null && !strategyId.isEmpty()) {
             url.append("strategyId=").append(strategyId).append("&");
@@ -1155,7 +1167,18 @@ public class TradingApiService {
                     null,
                     new ParameterizedTypeReference<Map<String, Object>>() {}
             );
-            return response.getBody();
+
+            Map<String, Object> body = response.getBody();
+            if (body != null && body.containsKey("content")) {
+                // API 응답의 "content" 키를 "backtests"로 매핑
+                Map<String, Object> result = new HashMap<>();
+                result.put("backtests", body.get("content"));
+                result.put("totalElements", body.get("totalElements"));
+                result.put("page", body.get("page"));
+                result.put("totalPages", body.get("totalPages"));
+                return result;
+            }
+            return body != null ? body : new HashMap<>();
         } catch (RestClientException e) {
             log.error("Failed to get backtest results from Trading System", e);
             Map<String, Object> emptyResult = new HashMap<>();
@@ -1341,6 +1364,33 @@ public class TradingApiService {
     }
 
     /**
+     * 월별 일일 성과 데이터 조회 (캘린더용)
+     */
+    public Map<String, Object> getMonthlyDailyPerformance(int year, int month, String strategyId) {
+        StringBuilder url = new StringBuilder("/api/v1/query/performance/monthly-daily?");
+        url.append("year=").append(year);
+        url.append("&month=").append(month);
+        if (strategyId != null && !strategyId.isEmpty()) {
+            url.append("&strategyId=").append(strategyId);
+        }
+
+        try {
+            log.debug("Calling Trading API for monthly daily performance: {}", url);
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                url.toString(), HttpMethod.GET, null,
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to get monthly daily performance", e);
+            Map<String, Object> errorResult = new HashMap<>();
+            errorResult.put("error", "월별 일일 성과 조회에 실패했습니다.");
+            errorResult.put("dailyData", new java.util.ArrayList<>());
+            return errorResult;
+        }
+    }
+
+    /**
      * 전략별 통계 조회
      */
     public Map<String, Object> getStrategyStatistics(String startDate, String endDate) {
@@ -1474,62 +1524,38 @@ public class TradingApiService {
     /**
      * 종목 목록 조회
      */
+    @Cacheable(value = CacheConfig.CACHE_INSTRUMENTS, cacheManager = "longTtlCacheManager",
+               key = "T(java.util.Objects).hash(#market, #status, #tradable, #search)")
     public Map<String, Object> getInstruments(String market, String status, Boolean tradable, String search) {
-        StringBuilder url = new StringBuilder("/api/v1/admin/instruments?");
-        if (market != null && !market.isEmpty()) {
-            url.append("market=").append(market).append("&");
-        }
-        if (status != null && !status.isEmpty()) {
-            url.append("status=").append(status).append("&");
-        }
-        if (tradable != null) {
-            url.append("tradable=").append(tradable).append("&");
-        }
-        if (search != null && !search.isEmpty()) {
-            url.append("search=").append(search).append("&");
-        }
-        String finalUrl = url.toString().replaceAll("[&?]$", "");
+        Map<String, String> params = new HashMap<>();
+        if (market != null && !market.isEmpty()) params.put("market", market);
+        if (status != null && !status.isEmpty()) params.put("status", status);
+        if (tradable != null) params.put("tradable", tradable.toString());
+        if (search != null && !search.isEmpty()) params.put("search", search);
 
-        try {
-            log.debug("Calling Trading API for instruments: {}", finalUrl);
-            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
-                finalUrl, HttpMethod.GET, null,
-                new ParameterizedTypeReference<Map<String, Object>>() {}
-            );
-            return response.getBody();
-        } catch (RestClientException e) {
-            log.error("Failed to get instruments", e);
-            Map<String, Object> errorResult = new HashMap<>();
-            errorResult.put("items", new java.util.ArrayList<>());
-            errorResult.put("total", 0);
-            errorResult.put("error", "종목 목록을 가져올 수 없습니다.");
-            return errorResult;
-        }
+        String url = apiHelper.buildUrl("/api/v1/admin/instruments", params);
+
+        Map<String, Object> defaultResult = new HashMap<>();
+        defaultResult.put("items", new java.util.ArrayList<>());
+        defaultResult.put("total", 0);
+        defaultResult.put("error", "종목 목록을 가져올 수 없습니다.");
+        return apiHelper.getWithDefault(url, defaultResult);
     }
 
     /**
      * 종목 상세 조회
      */
+    @Cacheable(value = CacheConfig.CACHE_INSTRUMENTS, cacheManager = "longTtlCacheManager", key = "#symbol")
     public Map<String, Object> getInstrument(String symbol) {
-        String url = "/api/v1/admin/instruments/" + symbol;
-        try {
-            log.debug("Calling Trading API for instrument: {}", url);
-            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
-                url, HttpMethod.GET, null,
-                new ParameterizedTypeReference<Map<String, Object>>() {}
-            );
-            return response.getBody();
-        } catch (RestClientException e) {
-            log.error("Failed to get instrument: {}", symbol, e);
-            Map<String, Object> errorResult = new HashMap<>();
-            errorResult.put("error", "종목 정보를 가져올 수 없습니다.");
-            return errorResult;
-        }
+        Map<String, Object> defaultResult = new HashMap<>();
+        defaultResult.put("error", "종목 정보를 가져올 수 없습니다.");
+        return apiHelper.getWithDefault("/api/v1/admin/instruments/" + symbol, defaultResult);
     }
 
     /**
      * 종목 상태 업데이트
      */
+    @CacheEvict(value = CacheConfig.CACHE_INSTRUMENTS, allEntries = true)
     public Map<String, Object> updateInstrumentStatus(String symbol, String status, Boolean tradable, Boolean halted) {
         String url = "/api/v1/admin/instruments/" + symbol + "/status";
         try {
@@ -1598,7 +1624,15 @@ public class TradingApiService {
             if (body instanceof java.util.List) {
                 result.put("backtests", body);
             } else if (body instanceof Map) {
-                result = (Map<String, Object>) body;
+                @SuppressWarnings("unchecked")
+                Map<String, Object> bodyMap = (Map<String, Object>) body;
+                // API 응답의 "content" 키를 "backtests"로 매핑
+                if (bodyMap.containsKey("content")) {
+                    result.put("backtests", bodyMap.get("content"));
+                    result.put("totalElements", bodyMap.get("totalElements"));
+                } else {
+                    result = bodyMap;
+                }
             }
             return result;
         } catch (RestClientException e) {
@@ -1877,6 +1911,122 @@ public class TradingApiService {
         } catch (RestClientException e) {
             log.error("Failed to update account permission in Trading System", e);
             throw new RuntimeException("계좌 권한 업데이트에 실패했습니다.", e);
+        }
+    }
+
+    // ==================== 비동기 백테스트 (Async Backtest) ====================
+
+    /**
+     * 비동기 백테스트 제출
+     */
+    public Map<String, Object> submitAsyncBacktest(Map<String, Object> request) {
+        String url = "/api/v1/admin/backtests/async";
+        try {
+            log.info("Submitting async backtest: {}", request);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
+
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                url, HttpMethod.POST, entity,
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to submit async backtest", e);
+            Map<String, Object> errorResult = new HashMap<>();
+            errorResult.put("success", false);
+            errorResult.put("error", "비동기 백테스트 제출에 실패했습니다: " + e.getMessage());
+            return errorResult;
+        }
+    }
+
+    /**
+     * 비동기 백테스트 작업 상태 조회
+     */
+    public Map<String, Object> getAsyncBacktestStatus(String jobId) {
+        String url = "/api/v1/admin/backtests/jobs/" + jobId + "/status";
+        try {
+            log.debug("Calling Trading API for async backtest status: {}", url);
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                url, HttpMethod.GET, null,
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to get async backtest status", e);
+            Map<String, Object> errorResult = new HashMap<>();
+            errorResult.put("error", "백테스트 작업 상태를 가져올 수 없습니다.");
+            errorResult.put("status", "UNKNOWN");
+            return errorResult;
+        }
+    }
+
+    /**
+     * 비동기 백테스트 작업 결과 조회
+     */
+    public Map<String, Object> getAsyncBacktestResult(String jobId) {
+        String url = "/api/v1/admin/backtests/jobs/" + jobId + "/result";
+        try {
+            log.debug("Calling Trading API for async backtest result: {}", url);
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                url, HttpMethod.GET, null,
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to get async backtest result", e);
+            Map<String, Object> errorResult = new HashMap<>();
+            errorResult.put("error", "백테스트 결과를 가져올 수 없습니다.");
+            return errorResult;
+        }
+    }
+
+    /**
+     * 비동기 백테스트 작업 취소
+     */
+    public Map<String, Object> cancelAsyncBacktest(String jobId) {
+        String url = "/api/v1/admin/backtests/jobs/" + jobId + "/cancel";
+        try {
+            log.info("Cancelling async backtest job: {}", jobId);
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                url, HttpMethod.POST, null,
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to cancel async backtest", e);
+            Map<String, Object> errorResult = new HashMap<>();
+            errorResult.put("success", false);
+            errorResult.put("error", "백테스트 취소에 실패했습니다: " + e.getMessage());
+            return errorResult;
+        }
+    }
+
+    // ==================== 몬테카를로 시뮬레이션 (Monte Carlo Simulation) ====================
+
+    /**
+     * 몬테카를로 시뮬레이션 실행
+     */
+    public Map<String, Object> runMonteCarloSimulation(Map<String, Object> request) {
+        String url = "/api/v1/admin/backtests/monte-carlo";
+        try {
+            log.info("Running Monte Carlo simulation: {}", request);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
+
+            ResponseEntity<Map<String, Object>> response = tradingApiRestTemplate.exchange(
+                url, HttpMethod.POST, entity,
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("Failed to run Monte Carlo simulation", e);
+            Map<String, Object> errorResult = new HashMap<>();
+            errorResult.put("success", false);
+            errorResult.put("error", "몬테카를로 시뮬레이션 실행에 실패했습니다: " + e.getMessage());
+            return errorResult;
         }
     }
 }

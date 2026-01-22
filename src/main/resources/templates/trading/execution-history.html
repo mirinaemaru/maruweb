@@ -320,9 +320,10 @@
                             <select name="strategyId">
                                 <option value="">전체 전략</option>
                                 <option th:each="strategy : ${strategies}"
-                                        th:value="${strategy.id}"
-                                        th:text="${strategy.title}"
-                                        th:selected="${strategyId != null && strategyId == strategy.id.toString()}">
+                                        th:if="${strategy['id'] != null}"
+                                        th:value="${strategy['id']}"
+                                        th:text="${strategy['title'] ?: strategy['name'] ?: '전략 ' + strategy['id']}"
+                                        th:selected="${strategyId != null && strategy['id'] != null && strategyId.toString() == strategy['id'].toString()}">
                                     Strategy
                                 </option>
                             </select>
@@ -375,29 +376,32 @@
                             </td>
                         </tr>
                         <tr th:each="exec : ${executions}">
-                            <td th:text="${#temporals.format(exec.executedAt, 'yyyy-MM-dd HH:mm:ss')}">2024-01-01 10:00:00</td>
-                            <td th:text="${exec.strategyName}">Strategy Name</td>
-                            <td th:text="${exec.symbol}">005930</td>
+                            <td th:text="${exec['executedAt'] != null ? exec['executedAt'] : '-'}">2024-01-01 10:00:00</td>
+                            <td th:text="${exec['strategyName'] ?: exec['strategyTitle'] ?: '-'}">Strategy Name</td>
+                            <td th:text="${exec['symbol'] ?: '-'}">005930</td>
                             <td>
-                                <span th:if="${exec.side == 'BUY'}" style="color: #28a745; font-weight: 600;">매수</span>
-                                <span th:if="${exec.side == 'SELL'}" style="color: #dc3545; font-weight: 600;">매도</span>
+                                <span th:if="${exec['side'] == 'BUY'}" style="color: #28a745; font-weight: 600;">매수</span>
+                                <span th:if="${exec['side'] == 'SELL'}" style="color: #dc3545; font-weight: 600;">매도</span>
+                                <span th:if="${exec['side'] != 'BUY' && exec['side'] != 'SELL'}" th:text="${exec['side'] ?: '-'}">-</span>
                             </td>
-                            <td th:text="${#numbers.formatInteger(exec.quantity, 0, 'COMMA')}">100</td>
-                            <td th:text="${#numbers.formatInteger(exec.price, 0, 'COMMA')}">75,000</td>
+                            <td th:text="${exec['quantity'] != null ? #numbers.formatInteger(exec['quantity'], 0, 'COMMA') : '-'}">100</td>
+                            <td th:text="${exec['price'] != null ? #numbers.formatInteger(exec['price'], 0, 'COMMA') : '-'}">75,000</td>
                             <td>
-                                <span th:classappend="${exec.profitLoss >= 0 ? 'profit-positive' : 'profit-negative'}"
-                                      th:text="${#numbers.formatInteger(exec.profitLoss, 0, 'COMMA')}">
+                                <span th:if="${exec['profitLoss'] != null}"
+                                      th:classappend="${exec['profitLoss'] >= 0 ? 'profit-positive' : 'profit-negative'}"
+                                      th:text="${#numbers.formatInteger(exec['profitLoss'], 0, 'COMMA')}">
                                     +50,000
                                 </span>
+                                <span th:unless="${exec['profitLoss'] != null}">-</span>
                             </td>
                             <td>
                                 <span class="status-badge"
-                                      th:classappend="${exec.status == 'SUCCESS' ? 'status-success' : (exec.status == 'FAILED' ? 'status-failed' : 'status-pending')}"
-                                      th:text="${exec.status == 'SUCCESS' ? '성공' : (exec.status == 'FAILED' ? '실패' : '대기중')}">
+                                      th:classappend="${exec['status'] == 'SUCCESS' ? 'status-success' : (exec['status'] == 'FAILED' ? 'status-failed' : 'status-pending')}"
+                                      th:text="${exec['status'] == 'SUCCESS' ? '성공' : (exec['status'] == 'FAILED' ? '실패' : '대기중')}">
                                     성공
                                 </span>
                             </td>
-                            <td th:text="${exec.message}">실행 완료</td>
+                            <td th:text="${exec['message'] ?: '-'}">실행 완료</td>
                         </tr>
                     </tbody>
                 </table>

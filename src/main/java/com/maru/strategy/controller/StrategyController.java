@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Collections;
@@ -107,6 +108,58 @@ public class StrategyController {
         model.addAttribute("keyword", keyword);
 
         return "strategy/list";
+    }
+
+    /**
+     * 전략 목록 API (JSON 응답)
+     * 백테스트 설정 등에서 전략 검색/선택에 사용됩니다.
+     */
+    @GetMapping("/api/list")
+    @ResponseBody
+    public Map<String, Object> listStrategiesApi(
+            @RequestParam(required = false) String search) {
+
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            Map<String, Object> strategiesData = tradingApiService.getStrategies();
+            List<?> strategies = (List<?>) strategiesData.get("items");
+
+            if (strategies == null) {
+                strategies = Collections.emptyList();
+            }
+
+            // 검색어 필터 적용
+            if (search != null && !search.isEmpty()) {
+                final String filterKeyword = search.toLowerCase();
+                strategies = strategies.stream()
+                        .filter(s -> {
+                            if (s instanceof Map) {
+                                Map<?, ?> strategyMap = (Map<?, ?>) s;
+                                String name = (String) strategyMap.get("name");
+                                String strategyId = strategyMap.get("strategyId") != null ?
+                                        strategyMap.get("strategyId").toString() : "";
+                                String description = (String) strategyMap.get("description");
+                                return (name != null && name.toLowerCase().contains(filterKeyword)) ||
+                                       (strategyId.toLowerCase().contains(filterKeyword)) ||
+                                       (description != null && description.toLowerCase().contains(filterKeyword));
+                            }
+                            return false;
+                        })
+                        .collect(Collectors.toList());
+            }
+
+            response.put("items", strategies);
+            response.put("total", strategies.size());
+
+        } catch (Exception e) {
+            log.error("Failed to load strategies from Trading System API", e);
+            response.put("error", "Trading System에서 전략 목록을 가져올 수 없습니다: " + e.getMessage());
+            response.put("items", Collections.emptyList());
+            response.put("total", 0);
+        }
+
+        return response;
     }
 
     /**
@@ -321,17 +374,12 @@ public class StrategyController {
 
             model.addAttribute("strategy", strategy);
 
-            // 최근 주문 내역 조회
-            String accountId = (String) strategy.get("accountId");
-            if (accountId != null && !accountId.isEmpty()) {
-                try {
-                    Map<String, Object> orders = tradingApiService.getOrders(accountId);
-                    model.addAttribute("recentOrders", orders.get("items"));
-                } catch (Exception e) {
-                    log.warn("Failed to load orders for account: {}", accountId, e);
-                    model.addAttribute("recentOrders", Collections.emptyList());
-                }
-            } else {
+            // 최근 주문 내역 조회 (전략 ID로 필터링)
+            try {
+                Map<String, Object> orders = tradingApiService.getOrdersByStrategyId(id);
+                model.addAttribute("recentOrders", orders.get("items"));
+            } catch (Exception e) {
+                log.warn("Failed to load orders for strategy: {}", id, e);
                 model.addAttribute("recentOrders", Collections.emptyList());
             }
 

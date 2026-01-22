@@ -279,36 +279,47 @@
                 <div th:each="backtest : ${backtests}" class="backtest-card">
                     <div class="backtest-header">
                         <div>
-                            <div class="backtest-name" th:text="${backtest.strategyName}">Strategy Name</div>
-                            <div class="backtest-date" th:text="${backtest.startDate} + ' ~ ' + ${backtest.endDate}">2024-01-01 ~ 2024-12-31</div>
+                            <div class="backtest-name" th:text="${backtest.strategyId}">Strategy Name</div>
+                            <div class="backtest-date">
+                                <span th:text="${#strings.substring(backtest.startDate, 0, 10)}">2024-01-01</span>
+                                ~
+                                <span th:text="${#strings.substring(backtest.endDate, 0, 10)}">2024-12-31</span>
+                            </div>
+                        </div>
+                        <div>
+                            <span th:if="${backtest.status == 'COMPLETED'}" style="color: #28a745; font-weight: 600;">✅ 완료</span>
+                            <span th:if="${backtest.status == 'FAILED'}" style="color: #dc3545; font-weight: 600;">❌ 실패</span>
+                            <span th:if="${backtest.status == 'RUNNING'}" style="color: #ffc107; font-weight: 600;">⏳ 실행중</span>
                         </div>
                     </div>
 
                     <div class="metric-grid">
                         <div class="metric">
-                            <div class="metric-label">총 손익</div>
-                            <div class="metric-value"
-                                 th:classappend="${backtest.totalProfitLoss >= 0 ? 'positive' : 'negative'}"
-                                 th:text="${#numbers.formatInteger(backtest.totalProfitLoss, 0, 'COMMA')}">0</div>
+                            <div class="metric-label">초기 자본</div>
+                            <div class="metric-value" th:text="${backtest.initialCapital != null ? #numbers.formatInteger(backtest.initialCapital, 0, 'COMMA') : '-'}">10,000,000</div>
                         </div>
 
                         <div class="metric">
-                            <div class="metric-label">승률</div>
-                            <div class="metric-value" th:text="${#numbers.formatDecimal(backtest.winRate, 1, 1)} + '%'">0.0%</div>
+                            <div class="metric-label">최종 자본</div>
+                            <div class="metric-value"
+                                 th:classappend="${backtest.finalCapital != null && backtest.finalCapital >= backtest.initialCapital ? 'positive' : 'negative'}"
+                                 th:text="${backtest.finalCapital != null ? #numbers.formatInteger(backtest.finalCapital, 0, 'COMMA') : '-'}">10,065,445</div>
+                        </div>
+
+                        <div class="metric">
+                            <div class="metric-label">수익률</div>
+                            <div class="metric-value"
+                                 th:classappend="${backtest.totalReturn != null && backtest.totalReturn >= 0 ? 'positive' : 'negative'}"
+                                 th:text="${backtest.totalReturn != null ? #numbers.formatDecimal(backtest.totalReturn, 1, 2) + '%' : '-'}">0.65%</div>
                         </div>
 
                         <div class="metric">
                             <div class="metric-label">총 거래</div>
-                            <div class="metric-value" th:text="${backtest.totalTrades}">0</div>
-                        </div>
-
-                        <div class="metric">
-                            <div class="metric-label">샤프 비율</div>
-                            <div class="metric-value" th:text="${#numbers.formatDecimal(backtest.sharpeRatio, 2, 2)}">0.00</div>
+                            <div class="metric-value" th:text="${backtest.totalTrades != null ? backtest.totalTrades : 0}">0</div>
                         </div>
                     </div>
 
-                    <a th:href="@{/trading/backtests/{id}(id=${backtest.id})}" class="view-detail-btn">
+                    <a th:href="@{/trading/backtests/admin/{id}(id=${backtest.backtestId})}" class="view-detail-btn">
                         📈 상세 보기
                     </a>
                 </div>

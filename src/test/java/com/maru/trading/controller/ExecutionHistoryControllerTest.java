@@ -129,4 +129,64 @@ class ExecutionHistoryControllerTest {
                 .andExpect(model().attributeExists("warning"))
                 .andExpect(model().attribute("strategies", Collections.emptyList()));
     }
+
+    @Test
+    @DisplayName("실행 히스토리 - 조회 버튼 클릭 (날짜/상태 필터)")
+    void history_SearchButtonClick() throws Exception {
+        when(tradingApiService.getStrategies()).thenReturn(createMockStrategiesResponse());
+        when(tradingApiService.getExecutionHistory(any(), any(), any(), any()))
+                .thenReturn(createMockHistoryResponse());
+
+        mockMvc.perform(get("/trading/execution-history")
+                        .param("strategyId", "")
+                        .param("startDate", "2025-12-23")
+                        .param("endDate", "2026-01-22")
+                        .param("status", ""))
+                .andExpect(status().isOk())
+                .andExpect(view().name("trading/execution-history"))
+                .andExpect(model().attributeExists("executions"))
+                .andExpect(model().attributeExists("totalExecutions"))
+                .andExpect(model().attribute("startDate", "2025-12-23"))
+                .andExpect(model().attribute("endDate", "2026-01-22"));
+    }
+
+    @Test
+    @DisplayName("실행 히스토리 - 상태 필터 (SUCCESS)")
+    void history_WithStatusFilter() throws Exception {
+        when(tradingApiService.getStrategies()).thenReturn(createMockStrategiesResponse());
+        when(tradingApiService.getExecutionHistory(any(), any(), any(), any()))
+                .thenReturn(createMockHistoryResponse());
+
+        mockMvc.perform(get("/trading/execution-history")
+                        .param("status", "SUCCESS"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("trading/execution-history"))
+                .andExpect(model().attribute("status", "SUCCESS"));
+    }
+
+    @Test
+    @DisplayName("실행 히스토리 - null id를 가진 전략 처리")
+    void history_WithNullStrategyId() throws Exception {
+        // 일부 전략에 id가 null인 경우를 시뮬레이션
+        Map<String, Object> strategyWithNullId = new HashMap<>();
+        strategyWithNullId.put("id", null);
+        strategyWithNullId.put("title", "테스트 전략");
+
+        Map<String, Object> strategyWithId = new HashMap<>();
+        strategyWithId.put("id", "strategy-001");
+        strategyWithId.put("title", "정상 전략");
+
+        Map<String, Object> strategiesResponse = new HashMap<>();
+        strategiesResponse.put("items", Arrays.asList(strategyWithNullId, strategyWithId));
+        when(tradingApiService.getStrategies()).thenReturn(strategiesResponse);
+
+        when(tradingApiService.getExecutionHistory(any(), any(), any(), any()))
+                .thenReturn(createMockHistoryResponse());
+
+        // null id를 가진 전략이 있어도 페이지가 정상적으로 렌더링되어야 함
+        mockMvc.perform(get("/trading/execution-history"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("trading/execution-history"))
+                .andExpect(model().attributeExists("strategies"));
+    }
 }

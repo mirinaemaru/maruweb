@@ -1,5 +1,11 @@
 package com.maru.trading.service;
 
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.retry.Retry;
+import io.github.resilience4j.retry.RetryConfig;
+import io.github.resilience4j.retry.RetryRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +22,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,10 +42,26 @@ class TradingApiServiceTest {
     private RestTemplate restTemplate;
 
     private TradingApiService tradingApiService;
+    private TradingApiHelper apiHelper;
 
     @BeforeEach
     void setUp() {
-        tradingApiService = new TradingApiService(restTemplate);
+        // 테스트용 Resilience4j 설정
+        RetryConfig retryConfig = RetryConfig.custom()
+                .maxAttempts(1)
+                .waitDuration(Duration.ofMillis(10))
+                .build();
+        Retry retry = RetryRegistry.of(retryConfig).retry("testRetry");
+
+        CircuitBreakerConfig cbConfig = CircuitBreakerConfig.custom()
+                .failureRateThreshold(50)
+                .slidingWindowSize(5)
+                .minimumNumberOfCalls(3)
+                .build();
+        CircuitBreaker cb = CircuitBreakerRegistry.of(cbConfig).circuitBreaker("testCB");
+
+        apiHelper = new TradingApiHelper(restTemplate, retry, cb);
+        tradingApiService = new TradingApiService(restTemplate, apiHelper);
     }
 
     // ==================== Health Status Tests ====================
@@ -5559,5 +5582,88 @@ class TradingApiServiceTest {
         assertThat(result.get("autoTrade")).isEqualTo(false);
         assertThat(result.get("manualTrade")).isEqualTo(false);
         assertThat(result.get("paperOnly")).isEqualTo(true);
+    }
+
+    // ========== strategyId 필터 테스트 ==========
+
+    @Test
+    @DisplayName("getOrdersWithFilters - strategyId 파라미터만 있을 때")
+    void getOrdersWithFilters_OnlyStrategyId() {
+        // given
+        Map<String, Object> response = new HashMap<>();
+        response.put("orders", new java.util.ArrayList<>());
+
+        when(restTemplate.exchange(
+                eq("/api/v1/query/orders?strategyId=strategy-001"),
+                eq(HttpMethod.GET),
+                any(),
+                any(ParameterizedTypeReference.class)
+        )).thenReturn(new ResponseEntity<>(response, HttpStatus.OK));
+
+        // when
+        Map<String, Object> result = tradingApiService.getOrdersWithFilters(null, null, null, null, null, null, "strategy-001");
+
+        // then
+        assertThat(result).isNotNull();
+    }
+
+    @Test
+    @DisplayName("getOrdersWithFilters - accountId와 strategyId 모두 있을 때")
+    void getOrdersWithFilters_AccountIdAndStrategyId() {
+        // given
+        Map<String, Object> response = new HashMap<>();
+        response.put("orders", new java.util.ArrayList<>());
+
+        when(restTemplate.exchange(
+                eq("/api/v1/query/orders?accountId=account-001&strategyId=strategy-001"),
+                eq(HttpMethod.GET),
+                any(),
+                any(ParameterizedTypeReference.class)
+        )).thenReturn(new ResponseEntity<>(response, HttpStatus.OK));
+
+        // when
+        Map<String, Object> result = tradingApiService.getOrdersWithFilters("account-001", null, null, null, null, null, "strategy-001");
+
+        // then
+        assertThat(result).isNotNull();
+    }
+
+    @Test
+    @DisplayName("getOrdersByStrategyId - 성공")
+    void getOrdersByStrategyId_Success() {
+        // given
+        Map<String, Object> response = new HashMap<>();
+        response.put("items", new java.util.ArrayList<>());
+
+        when(restTemplate.exchange(
+                eq("/api/v1/query/orders?strategyId=strategy-001"),
+                eq(HttpMethod.GET),
+                any(),
+                any(ParameterizedTypeReference.class)
+        )).thenReturn(new ResponseEntity<>(response, HttpStatus.OK));
+
+        // when
+        Map<String, Object> result = tradingApiService.getOrdersByStrategyId("strategy-001");
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.get("items")).isNotNull();
+    }
+
+    @Test
+    @DisplayName("getOrdersByStrategyId - API 실패 시 예외 발생")
+    void getOrdersByStrategyId_ApiFailure_ThrowsException() {
+        // given
+        when(restTemplate.exchange(
+                eq("/api/v1/query/orders?strategyId=strategy-001"),
+                eq(HttpMethod.GET),
+                any(),
+                any(ParameterizedTypeReference.class)
+        )).thenThrow(new RestClientException("Connection refused"));
+
+        // when & then
+        assertThatThrownBy(() -> tradingApiService.getOrdersByStrategyId("strategy-001"))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("주문 목록을 가져올 수 없습니다");
     }
 }

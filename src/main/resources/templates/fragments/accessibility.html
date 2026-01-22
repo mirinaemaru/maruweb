@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+  접근성 공통 Fragment
+  - 스킵 링크
+  - 스크린 리더 전용 텍스트
+  - ARIA Live Region
+-->
+
+<!-- Skip Navigation Link -->
+<th:block th:fragment="skip-link">
+    <a href="#main-content" class="skip-link">본문 바로가기</a>
+</th:block>
+
+<!-- Screen Reader Only Text -->
+<th:block th:fragment="sr-only(text)">
+    <span class="sr-only" th:text="${text}"></span>
+</th:block>
+
+<!-- ARIA Live Region for Dynamic Updates -->
+<th:block th:fragment="live-region">
+    <div id="live-region"
+         aria-live="polite"
+         aria-atomic="true"
+         class="sr-only">
+    </div>
+</th:block>
+
+<!-- Accessible Icon with Label -->
+<th:block th:fragment="icon-with-label(icon, label)">
+    <span th:text="${icon}" aria-hidden="true"></span>
+    <span class="sr-only" th:text="${label}"></span>
+</th:block>
+
+<!-- Accessible Button -->
+<th:block th:fragment="accessible-button(type, label, icon)">
+    <button th:class="${'trading-btn trading-btn-' + type}"
+            th:aria-label="${label}">
+        <span th:if="${icon}" th:text="${icon}" aria-hidden="true"></span>
+        <span th:text="${label}"></span>
+    </button>
+</th:block>
+
+<!-- Accessible Link Button -->
+<th:block th:fragment="accessible-link-button(href, type, label, icon)">
+    <a th:href="${href}"
+       th:class="${'trading-btn trading-btn-' + type}"
+       th:aria-label="${label}"
+       role="button">
+        <span th:if="${icon}" th:text="${icon}" aria-hidden="true"></span>
+        <span th:text="${label}"></span>
+    </a>
+</th:block>
+
+<!-- Status Badge with ARIA -->
+<th:block th:fragment="status-badge(status, label)">
+    <span th:class="${'status-badge status-badge-' + status}"
+          role="status"
+          th:aria-label="${label + ' 상태'}">
+        <span th:text="${label}"></span>
+    </span>
+</th:block>
+
+<!-- Loading Indicator -->
+<th:block th:fragment="loading-indicator">
+    <div class="trading-loading" role="status" aria-label="로딩 중">
+        <div class="trading-spinner"></div>
+        <span class="sr-only">데이터를 불러오는 중입니다...</span>
+    </div>
+</th:block>
+
+<!-- Empty State -->
+<th:block th:fragment="empty-state(icon, title, description)">
+    <div class="trading-empty" role="status">
+        <div class="trading-empty-icon" aria-hidden="true" th:text="${icon}"></div>
+        <h3 class="trading-empty-title" th:text="${title}"></h3>
+        <p class="trading-empty-description" th:text="${description}"></p>
+    </div>
+</th:block>
+
+<!-- Accessible Table -->
+<th:block th:fragment="table-caption(caption)">
+    <caption class="sr-only" th:text="${caption}"></caption>
+</th:block>
+
+<!-- Form Field with Label -->
+<th:block th:fragment="form-field(id, label, required)">
+    <div class="trading-form-group">
+        <label th:for="${id}" class="trading-form-label">
+            <span th:text="${label}"></span>
+            <span th:if="${required}" class="required" aria-hidden="true">*</span>
+            <span th:if="${required}" class="sr-only">(필수)</span>
+        </label>
+        <th:block th:replace="~{::content}"/>
+    </div>
+</th:block>
+
+<!-- Alert with ARIA -->
+<th:block th:fragment="alert(type, title, message)">
+    <div th:class="${'alert alert-' + type}"
+         role="alert"
+         th:aria-live="${type == 'error' ? 'assertive' : 'polite'}">
+        <div class="alert-title">
+            <span th:switch="${type}">
+                <span th:case="'error'" aria-hidden="true">⚠️</span>
+                <span th:case="'success'" aria-hidden="true">✅</span>
+                <span th:case="'warning'" aria-hidden="true">⚡</span>
+                <span th:case="'info'" aria-hidden="true">ℹ️</span>
+            </span>
+            <span th:text="${title}"></span>
+        </div>
+        <p class="alert-message" th:text="${message}"></p>
+    </div>
+</th:block>
+
+<!-- Breadcrumb Navigation -->
+<th:block th:fragment="breadcrumb(items)">
+    <nav aria-label="현재 위치">
+        <ol class="breadcrumb" role="list">
+            <li th:each="item, stat : ${items}"
+                th:aria-current="${stat.last ? 'page' : null}">
+                <a th:if="${!stat.last}" th:href="${item.url}" th:text="${item.label}"></a>
+                <span th:if="${stat.last}" th:text="${item.label}"></span>
+            </li>
+        </ol>
+    </nav>
+</th:block>
+
+<!-- Pagination with ARIA -->
+<th:block th:fragment="pagination(currentPage, totalPages, baseUrl)">
+    <nav aria-label="페이지 네비게이션" class="pagination-nav">
+        <ul class="pagination" role="list">
+            <li th:if="${currentPage > 1}">
+                <a th:href="${baseUrl + '?page=' + (currentPage - 1)}"
+                   aria-label="이전 페이지">&laquo;</a>
+            </li>
+            <li th:each="page : ${#numbers.sequence(1, totalPages)}"
+                th:class="${page == currentPage ? 'active' : ''}">
+                <a th:href="${baseUrl + '?page=' + page}"
+                   th:text="${page}"
+                   th:aria-label="${'페이지 ' + page}"
+                   th:aria-current="${page == currentPage ? 'page' : null}"></a>
+            </li>
+            <li th:if="${currentPage < totalPages}">
+                <a th:href="${baseUrl + '?page=' + (currentPage + 1)}"
+                   aria-label="다음 페이지">&raquo;</a>
+            </li>
+        </ul>
+    </nav>
+</th:block>
+
+</html>

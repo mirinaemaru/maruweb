@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>성과 캘린더</title>
+    <style>
+        .calendar-container {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .calendar-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        [data-theme="dark"] .calendar-header {
+            background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .calendar-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+        }
+
+        .filter-section {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .month-nav {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-left: auto;
+        }
+
+        .month-nav button {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .month-nav button:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        [data-theme="dark"] .month-nav button:hover {
+            background: #4a5568;
+            border-color: #4a5568;
+        }
+
+        .current-month {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .summary-card h3 {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin: 0 0 8px 0;
+            font-weight: 600;
+        }
+
+        .summary-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .summary-value.positive { color: #10b981; }
+        .summary-value.negative { color: #ef4444; }
+
+        .calendar-wrapper {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-bottom: 2px;
+        }
+
+        .weekday {
+            background: var(--bg-tertiary);
+            padding: 12px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .weekday:first-child { color: #ef4444; }
+        .weekday:last-child { color: #3b82f6; }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+        }
+
+        .calendar-day {
+            min-height: 100px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px;
+            background: var(--bg-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        .calendar-day.other-month {
+            opacity: 0.4;
+        }
+
+        .calendar-day.profit {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
+            border-color: #10b981;
+        }
+
+        .calendar-day.loss {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.1) 100%);
+            border-color: #ef4444;
+        }
+
+        .calendar-day.no-trade {
+            background: var(--bg-tertiary);
+        }
+
+        [data-theme="dark"] .calendar-day {
+            border-color: #444;
+        }
+
+        [data-theme="dark"] .calendar-day.no-trade {
+            background: #2d2d2d;
+        }
+
+        .day-number {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .calendar-day:nth-child(7n+1) .day-number { color: #ef4444; }
+        .calendar-day:nth-child(7n) .day-number { color: #3b82f6; }
+
+        .day-content {
+            font-size: 12px;
+        }
+
+        .day-pnl {
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .day-pnl.positive { color: #10b981; }
+        .day-pnl.negative { color: #ef4444; }
+
+        .day-trades {
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        .day-winrate {
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #fecaca;
+        }
+
+        [data-theme="dark"] .error-message {
+            background: #3d1c1c;
+            border-color: #5c2727;
+            color: #fca5a5;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 0;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            color: var(--text-primary);
+        }
+
+        .modal-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-stat:last-child {
+            border-bottom: none;
+        }
+
+        .modal-stat-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .modal-stat-value {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .legend-color.profit {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.5) 0%, rgba(16, 185, 129, 0.3) 100%);
+            border: 1px solid #10b981;
+        }
+
+        .legend-color.loss {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.5) 0%, rgba(239, 68, 68, 0.3) 100%);
+            border: 1px solid #ef4444;
+        }
+
+        .legend-color.no-trade {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .calendar-day {
+                min-height: 70px;
+                padding: 5px;
+            }
+
+            .day-number {
+                font-size: 12px;
+            }
+
+            .day-pnl {
+                font-size: 11px;
+            }
+
+            .day-trades, .day-winrate {
+                display: none;
+            }
+
+            .summary-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .month-nav {
+                margin-left: 0;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <h1>📅 성과 캘린더</h1>
+                <p>일별 거래 손익을 캘린더 형태로 확인합니다</p>
+            </div>
+
+            <div th:if="${error}" class="error-message">
+                <span th:text="${error}">오류 메시지</span>
+            </div>
+
+            <!-- 필터 섹션 -->
+            <div class="filter-section">
+                <div class="filter-group">
+                    <label>전략 필터</label>
+                    <select id="strategyFilter" onchange="onStrategyChange()">
+                        <option value="">전체 전략</option>
+                        <option th:each="strategy : ${strategies}"
+                                th:value="${strategy.id}"
+                                th:text="${strategy.name}"
+                                th:selected="${strategy.id == strategyId}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="month-nav">
+                    <button onclick="navigateMonth(-1)">◀ 이전</button>
+                    <span class="current-month" id="currentMonth" th:text="${year + '년 ' + month + '월'}">2026년 1월</span>
+                    <button onclick="navigateMonth(1)">다음 ▶</button>
+                </div>
+            </div>
+
+            <!-- 월별 요약 카드 -->
+            <div class="summary-cards" id="summaryCards">
+                <div class="summary-card">
+                    <h3>총 손익</h3>
+                    <div class="summary-value" id="totalPnL">0원</div>
+                </div>
+                <div class="summary-card">
+                    <h3>거래일 수</h3>
+                    <div class="summary-value" id="tradingDays">0일</div>
+                </div>
+                <div class="summary-card">
+                    <h3>평균 일 손익</h3>
+                    <div class="summary-value" id="avgDailyPnL">0원</div>
+                </div>
+                <div class="summary-card">
+                    <h3>승률</h3>
+                    <div class="summary-value" id="winRate">0%</div>
+                </div>
+                <div class="summary-card">
+                    <h3>최대 이익일</h3>
+                    <div class="summary-value positive" id="maxProfitDay">0원</div>
+                </div>
+                <div class="summary-card">
+                    <h3>최대 손실일</h3>
+                    <div class="summary-value negative" id="maxLossDay">0원</div>
+                </div>
+            </div>
+
+            <!-- 캘린더 -->
+            <div class="calendar-wrapper">
+                <div class="calendar-weekdays">
+                    <div class="weekday">일</div>
+                    <div class="weekday">월</div>
+                    <div class="weekday">화</div>
+                    <div class="weekday">수</div>
+                    <div class="weekday">목</div>
+                    <div class="weekday">금</div>
+                    <div class="weekday">토</div>
+                </div>
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- 캘린더 날짜가 JavaScript로 렌더링됩니다 -->
+                </div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color profit"></div>
+                        <span>이익</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color loss"></div>
+                        <span>손실</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color no-trade"></div>
+                        <span>거래 없음</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 날짜 상세 모달 -->
+        <div class="modal-overlay" id="dayModal" onclick="closeDayModal(event)">
+            <div class="modal-content" onclick="event.stopPropagation()">
+                <div class="modal-header">
+                    <h2 id="modalDate">2026년 1월 21일</h2>
+                    <button class="modal-close" onclick="closeDayModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-stat">
+                        <span class="modal-stat-label">총 손익</span>
+                        <span class="modal-stat-value" id="modalPnL">+150,000원</span>
+                    </div>
+                    <div class="modal-stat">
+                        <span class="modal-stat-label">거래 횟수</span>
+                        <span class="modal-stat-value" id="modalTrades">5회</span>
+                    </div>
+                    <div class="modal-stat">
+                        <span class="modal-stat-label">승률</span>
+                        <span class="modal-stat-value" id="modalWinRate">80%</span>
+                    </div>
+                    <div class="modal-stat">
+                        <span class="modal-stat-label">최대 이익</span>
+                        <span class="modal-stat-value positive" id="modalMaxProfit">+80,000원</span>
+                    </div>
+                    <div class="modal-stat">
+                        <span class="modal-stat-label">최대 손실</span>
+                        <span class="modal-stat-value negative" id="modalMaxLoss">-20,000원</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="extra-scripts">
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            let currentYear = /*[[${year}]]*/ 2026;
+            let currentMonth = /*[[${month}]]*/ 1;
+            let currentStrategyId = /*[[${strategyId}]]*/ '';
+            let calendarData = /*[[${calendarData}]]*/ {};
+
+            // 페이지 로드 시 캘린더 렌더링
+            document.addEventListener('DOMContentLoaded', function() {
+                updateSummary();
+                renderCalendar();
+            });
+
+            // 월 네비게이션
+            function navigateMonth(delta) {
+                currentMonth += delta;
+                if (currentMonth > 12) {
+                    currentMonth = 1;
+                    currentYear++;
+                } else if (currentMonth < 1) {
+                    currentMonth = 12;
+                    currentYear--;
+                }
+                loadCalendarData();
+            }
+
+            // 전략 필터 변경
+            function onStrategyChange() {
+                currentStrategyId = document.getElementById('strategyFilter').value;
+                loadCalendarData();
+            }
+
+            // AJAX로 데이터 로드
+            function loadCalendarData() {
+                const url = `/trading/performance/api/calendar/data?year=${currentYear}&month=${currentMonth}` +
+                    (currentStrategyId ? `&strategyId=${currentStrategyId}` : '');
+
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        calendarData = data;
+                        updateSummary();
+                        renderCalendar();
+                        updateMonthDisplay();
+                    })
+                    .catch(error => {
+                        console.error('Failed to load calendar data:', error);
+                    });
+            }
+
+            // 요약 업데이트
+            function updateSummary() {
+                const summary = calendarData?.summary || {};
+
+                const totalPnL = summary.totalProfitLoss || 0;
+                const totalPnLEl = document.getElementById('totalPnL');
+                totalPnLEl.textContent = formatNumber(totalPnL) + '원';
+                totalPnLEl.className = 'summary-value ' + (totalPnL >= 0 ? 'positive' : 'negative');
+
+                document.getElementById('tradingDays').textContent = (summary.tradingDays || 0) + '일';
+
+                const avgDailyPnL = summary.avgDailyProfitLoss || 0;
+                const avgDailyPnLEl = document.getElementById('avgDailyPnL');
+                avgDailyPnLEl.textContent = formatNumber(avgDailyPnL) + '원';
+                avgDailyPnLEl.className = 'summary-value ' + (avgDailyPnL >= 0 ? 'positive' : 'negative');
+
+                document.getElementById('winRate').textContent = (summary.winRate || 0).toFixed(1) + '%';
+                document.getElementById('maxProfitDay').textContent = formatNumber(summary.maxProfit || 0) + '원';
+                document.getElementById('maxLossDay').textContent = formatNumber(summary.maxLoss || 0) + '원';
+            }
+
+            // 월 표시 업데이트
+            function updateMonthDisplay() {
+                document.getElementById('currentMonth').textContent = currentYear + '년 ' + currentMonth + '월';
+            }
+
+            // 캘린더 렌더링
+            function renderCalendar() {
+                const grid = document.getElementById('calendarGrid');
+                grid.innerHTML = '';
+
+                const dailyData = calendarData?.dailyData || [];
+                const dailyMap = {};
+                dailyData.forEach(d => {
+                    dailyMap[d.date] = d;
+                });
+
+                // 해당 월의 첫째 날과 마지막 날
+                const firstDay = new Date(currentYear, currentMonth - 1, 1);
+                const lastDay = new Date(currentYear, currentMonth, 0);
+                const daysInMonth = lastDay.getDate();
+                const startDayOfWeek = firstDay.getDay();
+
+                // 이전 달 날짜 채우기
+                const prevMonthLastDay = new Date(currentYear, currentMonth - 1, 0).getDate();
+                for (let i = startDayOfWeek - 1; i >= 0; i--) {
+                    const dayNum = prevMonthLastDay - i;
+                    const dayEl = createDayElement(dayNum, null, true);
+                    grid.appendChild(dayEl);
+                }
+
+                // 현재 달 날짜
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dateStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const dayData = dailyMap[dateStr] || null;
+                    const dayEl = createDayElement(day, dayData, false, dateStr);
+                    grid.appendChild(dayEl);
+                }
+
+                // 다음 달 날짜 채우기
+                const totalCells = grid.children.length;
+                const remainingCells = 42 - totalCells; // 6주 기준
+                for (let i = 1; i <= remainingCells; i++) {
+                    const dayEl = createDayElement(i, null, true);
+                    grid.appendChild(dayEl);
+                }
+            }
+
+            // 날짜 셀 생성
+            function createDayElement(dayNum, dayData, isOtherMonth, dateStr) {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day';
+
+                if (isOtherMonth) {
+                    dayEl.classList.add('other-month');
+                } else if (dayData) {
+                    if (dayData.profitLoss > 0) {
+                        dayEl.classList.add('profit');
+                    } else if (dayData.profitLoss < 0) {
+                        dayEl.classList.add('loss');
+                    } else {
+                        dayEl.classList.add('no-trade');
+                    }
+                    dayEl.onclick = () => openDayModal(dateStr, dayData);
+                } else {
+                    dayEl.classList.add('no-trade');
+                }
+
+                const dayNumEl = document.createElement('div');
+                dayNumEl.className = 'day-number';
+                dayNumEl.textContent = dayNum;
+                dayEl.appendChild(dayNumEl);
+
+                if (!isOtherMonth && dayData && dayData.trades > 0) {
+                    const contentEl = document.createElement('div');
+                    contentEl.className = 'day-content';
+
+                    const pnlEl = document.createElement('div');
+                    pnlEl.className = 'day-pnl ' + (dayData.profitLoss >= 0 ? 'positive' : 'negative');
+                    pnlEl.textContent = formatNumber(dayData.profitLoss) + '원';
+                    contentEl.appendChild(pnlEl);
+
+                    const tradesEl = document.createElement('div');
+                    tradesEl.className = 'day-trades';
+                    tradesEl.textContent = dayData.trades + '회';
+                    contentEl.appendChild(tradesEl);
+
+                    const winRateEl = document.createElement('div');
+                    winRateEl.className = 'day-winrate';
+                    winRateEl.textContent = (dayData.winRate || 0).toFixed(0) + '%';
+                    contentEl.appendChild(winRateEl);
+
+                    dayEl.appendChild(contentEl);
+                }
+
+                return dayEl;
+            }
+
+            // 날짜 상세 모달 열기
+            function openDayModal(dateStr, dayData) {
+                const date = new Date(dateStr);
+                const formattedDate = `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+
+                document.getElementById('modalDate').textContent = formattedDate;
+
+                const pnlEl = document.getElementById('modalPnL');
+                pnlEl.textContent = formatNumber(dayData.profitLoss) + '원';
+                pnlEl.className = 'modal-stat-value ' + (dayData.profitLoss >= 0 ? 'positive' : 'negative');
+
+                document.getElementById('modalTrades').textContent = dayData.trades + '회';
+                document.getElementById('modalWinRate').textContent = (dayData.winRate || 0).toFixed(1) + '%';
+                document.getElementById('modalMaxProfit').textContent = '+' + formatNumber(dayData.maxProfit || 0) + '원';
+                document.getElementById('modalMaxLoss').textContent = formatNumber(dayData.maxLoss || 0) + '원';
+
+                document.getElementById('dayModal').classList.add('active');
+            }
+
+            // 모달 닫기
+            function closeDayModal(event) {
+                if (!event || event.target === document.getElementById('dayModal')) {
+                    document.getElementById('dayModal').classList.remove('active');
+                }
+            }
+
+            // 숫자 포맷팅
+            function formatNumber(num) {
+                if (num === null || num === undefined) return '0';
+                const absNum = Math.abs(num);
+                const formatted = absNum.toLocaleString('ko-KR');
+                return num < 0 ? '-' + formatted : (num > 0 ? '+' + formatted : formatted);
+            }
+
+            // ESC 키로 모달 닫기
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeDayModal();
+                }
+            });
+            /*]]>*/
+        </script>
+    </th:block>
+</body>
+</html>

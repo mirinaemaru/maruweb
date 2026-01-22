@@ -5,364 +5,79 @@
 <head>
     <title>종목 관리</title>
     <th:block layout:fragment="extra-css">
-        <style>
-            .instruments-container {
-                max-width: 1400px;
-                margin: 0 auto;
-                padding: 20px;
-                padding-bottom: 40px;
-            }
-
-            .page-header {
-                margin-bottom: 40px;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                padding: 40px;
-                border-radius: 16px;
-                color: white;
-                box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
-            }
-            [data-theme="dark"] .page-header {
-                background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
-                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-            }
-
-            .page-header h2 {
-                font-size: 36px;
-                font-weight: 700;
-                margin: 0;
-                color: white;
-            }
-
-            .badge.bg-secondary {
-                background: rgba(255, 255, 255, 0.2) !important;
-                color: white !important;
-                padding: 8px 16px;
-                border-radius: 20px;
-                font-size: 14px;
-                position: relative;
-                top: -2px;
-            }
-
-            .alert {
-                padding: 20px 28px;
-                border-radius: 12px;
-                margin-bottom: 30px;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-                animation: slideDown 0.3s ease-out;
-            }
-
-            @keyframes slideDown {
-                from {
-                    opacity: 0;
-                    transform: translateY(-10px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-
-            .card {
-                background: var(--bg-secondary);
-                border: none;
-                border-radius: 12px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                transition: background-color 0.3s ease;
-                margin-bottom: 30px;
-            }
-
-            .card:last-child {
-                margin-bottom: 0;
-            }
-
-            .card-body {
-                color: var(--text-primary);
-                padding: 20px;
-            }
-
-            .card-body.table-card {
-                padding: 0;
-            }
-
-            .filter-form {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 20px;
-                align-items: center;
-            }
-
-            .filter-item {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-
-            .filter-buttons {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                margin-left: auto;
-            }
-
-            .form-label {
-                color: var(--text-primary);
-                font-weight: 600;
-                font-size: 14px;
-                margin-bottom: 0;
-                white-space: nowrap;
-            }
-
-            .form-select, .form-control {
-                background: var(--bg-tertiary);
-                border: 2px solid var(--border-color);
-                color: var(--text-primary);
-                padding: 10px 12px;
-                border-radius: 8px;
-                transition: all 0.3s ease;
-            }
-
-            .form-select:focus, .form-control:focus {
-                background: var(--bg-tertiary);
-                border-color: #667eea;
-                color: var(--text-primary);
-                outline: none;
-                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            }
-
-            .btn {
-                padding: 10px 24px;
-                border-radius: 8px;
-                font-size: 14px;
-                font-weight: 600;
-                transition: all 0.3s;
-            }
-
-            .btn-primary {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                border: none;
-                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-            }
-
-            .btn-primary:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-            }
-
-            [data-theme="dark"] .btn-primary {
-                background: #6c757d;
-                box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
-            }
-
-            [data-theme="dark"] .btn-primary:hover {
-                background: #5a6268;
-            }
-
-            .btn-outline-secondary {
-                border: 2px solid var(--border-color);
-                color: var(--text-primary);
-                background: transparent;
-            }
-
-            .btn-outline-secondary:hover {
-                background: var(--bg-tertiary);
-                border-color: var(--text-primary);
-                color: var(--text-primary);
-            }
-
-            .btn-sm.btn-outline-primary {
-                padding: 6px 12px;
-                font-size: 12px;
-            }
-
-            [data-theme="dark"] .btn-sm.btn-outline-primary {
-                border-color: #6c757d;
-                color: #6c757d;
-            }
-
-            [data-theme="dark"] .btn-sm.btn-outline-primary:hover {
-                background: #6c757d;
-                color: white;
-                border-color: #6c757d;
-            }
-
-            .table-responsive {
-                border-radius: 12px;
-                overflow: hidden;
-            }
-
-            .table-scroll-container {
-                max-height: calc(100vh - 380px);
-                overflow-y: auto;
-            }
-
-            .table {
-                color: var(--text-primary);
-                margin-bottom: 0;
-                width: 100%;
-                table-layout: fixed;
-            }
-
-            .table thead {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                position: sticky;
-                top: 0;
-                z-index: 10;
-            }
-
-            [data-theme="dark"] .table thead {
-                background: linear-gradient(135deg, #2a2d4a 0%, #1e2139 100%);
-            }
-
-            .table thead th {
-                padding: 15px 12px;
-                font-weight: 600;
-                font-size: 13px;
-                text-transform: uppercase;
-                border: none;
-                white-space: nowrap;
-            }
-
-            .table thead th:first-child {
-                border-radius: 12px 0 0 0;
-            }
-
-            .table thead th:last-child {
-                border-radius: 0 12px 0 0;
-            }
-
-            .table th.col-symbol { width: 90px; }
-            .table th.col-name-kr { width: auto; }
-            .table th.col-name-en { width: 150px; }
-            .table th.col-market { width: 70px; }
-            .table th.col-industry { width: 100px; }
-            .table th.col-status { width: 70px; }
-            .table th.col-tradable { width: 70px; }
-            .table th.col-halted { width: 70px; }
-            .table th.col-listing { width: 90px; }
-            .table th.col-action { width: 60px; }
-
-            .table td {
-                overflow: visible;
-            }
-
-            .table td.text-center {
-                text-align: center !important;
-            }
-
-            .table tbody tr {
-                background: var(--bg-secondary);
-                border-bottom: 1px solid var(--border-color);
-                transition: background-color 0.2s;
-            }
-
-            .table tbody tr:hover {
-                background: var(--bg-tertiary);
-            }
-
-            .table tbody td {
-                padding: 15px 12px;
-                border: none;
-                vertical-align: middle;
-            }
-
-            .text-muted {
-                color: var(--text-muted) !important;
-            }
-
-            .symbol-link {
-                color: var(--text-primary);
-                font-weight: 600;
-                text-decoration: none;
-                transition: color 0.2s;
-            }
-
-            .symbol-link:hover {
-                color: #667eea;
-                text-decoration: underline;
-            }
-
-            [data-theme="dark"] .symbol-link:hover {
-                color: #8b9df0;
-            }
-
-            .detail-link {
-                color: var(--text-primary);
-                text-decoration: none;
-                font-size: 12px;
-            }
-
-            .detail-link:hover {
-                color: #667eea;
-                text-decoration: underline;
-            }
-
-            .badge {
-                padding: 4px 10px;
-                border-radius: 4px;
-                font-size: 10px;
-                font-weight: 600;
-            }
-
-            .badge.bg-primary {
-                background: #667eea !important;
-            }
-
-            .badge.bg-success {
-                background: #28a745 !important;
-            }
-
-            .badge.bg-warning {
-                background: #ffc107 !important;
-            }
-
-            .badge.bg-danger {
-                background: #dc3545 !important;
-            }
-
-            [data-theme="dark"] .badge.bg-primary,
-            [data-theme="dark"] .badge.bg-success,
-            [data-theme="dark"] .badge.bg-warning,
-            [data-theme="dark"] .badge.bg-danger {
-                background: #6c757d !important;
-                color: white !important;
-            }
-        </style>
+        <link rel="stylesheet" th:href="@{/css/trading.css}"/>
     </th:block>
 </head>
 <body>
 <div layout:fragment="content">
-    <div class="instruments-container">
-        <div class="page-header">
-            <h2>
-                <i class="bi bi-graph-up me-2"></i>종목 관리
-                <span class="badge bg-secondary ms-3" th:text="'총 ' + ${#numbers.formatInteger(total, 0, 'COMMA')} + '개'"></span>
-            </h2>
+    <!-- Skip Link for Accessibility -->
+    <a href="#instruments-table" class="skip-link">종목 목록으로 바로가기</a>
+
+    <!-- Live Region for Dynamic Updates -->
+    <div id="live-region" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+    <main class="instruments-container" role="main">
+        <header class="page-header">
+            <h1>
+                <span aria-hidden="true"><i class="bi bi-graph-up me-2"></i></span>
+                <span>종목 관리</span>
+                <span class="badge bg-secondary ms-3"
+                      role="status"
+                      th:aria-label="${'총 ' + #numbers.formatInteger(total, 0, 'COMMA') + '개 종목'}"
+                      th:text="'총 ' + ${#numbers.formatInteger(total, 0, 'COMMA')} + '개'"></span>
+            </h1>
+        </header>
+
+        <!-- Alert Messages -->
+        <div th:if="${successMessage}"
+             class="alert alert-success alert-dismissible fade show"
+             role="alert"
+             aria-live="polite">
+            <span aria-hidden="true"><i class="bi bi-check-circle me-2"></i></span>
+            <span th:text="${successMessage}"></span>
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="알림 닫기"></button>
+        </div>
+        <div th:if="${errorMessage}"
+             class="alert alert-danger alert-dismissible fade show"
+             role="alert"
+             aria-live="assertive">
+            <span aria-hidden="true"><i class="bi bi-exclamation-triangle me-2"></i></span>
+            <span th:text="${errorMessage}"></span>
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="알림 닫기"></button>
+        </div>
+        <div th:if="${error}"
+             class="alert alert-warning alert-dismissible fade show"
+             role="alert"
+             aria-live="polite">
+            <span aria-hidden="true"><i class="bi bi-exclamation-triangle me-2"></i></span>
+            <span th:text="${error}"></span>
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="알림 닫기"></button>
         </div>
 
-        <!-- 알림 메시지 -->
-        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle me-2"></i><span th:text="${successMessage}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${errorMessage}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        <div th:if="${error}" class="alert alert-warning alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${error}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-
-        <!-- 필터 -->
-        <div class="card mb-4">
+        <!-- Filter Section -->
+        <section class="card mb-4" aria-labelledby="filter-heading">
             <div class="card-body">
-                <form method="get" action="/trading/instruments" class="filter-form">
+                <h2 id="filter-heading" class="sr-only">종목 필터</h2>
+                <form method="get"
+                      action="/trading/instruments"
+                      class="filter-form"
+                      role="search"
+                      aria-label="종목 검색">
                     <div class="filter-item">
-                        <label class="form-label">시장</label>
-                        <select name="market" class="form-select">
+                        <label for="market-filter" class="form-label">시장</label>
+                        <select id="market-filter"
+                                name="market"
+                                class="form-select"
+                                aria-describedby="market-help">
                             <option value="">전체</option>
                             <option value="KOSPI" th:selected="${selectedMarket == 'KOSPI'}">KOSPI</option>
                             <option value="KOSDAQ" th:selected="${selectedMarket == 'KOSDAQ'}">KOSDAQ</option>
@@ -370,8 +85,10 @@
                         </select>
                     </div>
                     <div class="filter-item">
-                        <label class="form-label">상태</label>
-                        <select name="status" class="form-select">
+                        <label for="status-filter" class="form-label">상태</label>
+                        <select id="status-filter"
+                                name="status"
+                                class="form-select">
                             <option value="">전체</option>
                             <option value="LISTED" th:selected="${selectedStatus == 'LISTED'}">상장</option>
                             <option value="SUSPENDED" th:selected="${selectedStatus == 'SUSPENDED'}">거래정지</option>
@@ -379,81 +96,115 @@
                         </select>
                     </div>
                     <div class="filter-item">
-                        <label class="form-label">거래 가능</label>
-                        <select name="tradable" class="form-select">
+                        <label for="tradable-filter" class="form-label">거래 가능</label>
+                        <select id="tradable-filter"
+                                name="tradable"
+                                class="form-select">
                             <option value="">전체</option>
                             <option value="true" th:selected="${selectedTradable == true}">거래 가능</option>
                             <option value="false" th:selected="${selectedTradable == false}">거래 불가</option>
                         </select>
                     </div>
                     <div class="filter-item">
-                        <label class="form-label">종목 검색</label>
-                        <input type="text" name="search" class="form-control" placeholder="종목명 또는 코드"
-                               th:value="${searchKeyword}">
+                        <label for="search-input" class="form-label">종목 검색</label>
+                        <input type="text"
+                               id="search-input"
+                               name="search"
+                               class="form-control"
+                               placeholder="종목명 또는 코드"
+                               th:value="${searchKeyword}"
+                               aria-label="종목명 또는 코드로 검색">
                     </div>
                     <div class="filter-buttons">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-search me-1"></i>검색
+                        <button type="submit"
+                                class="btn btn-primary"
+                                aria-label="종목 검색">
+                            <span aria-hidden="true"><i class="bi bi-search me-1"></i></span>검색
                         </button>
-                        <a href="/trading/instruments" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-counterclockwise me-1"></i>초기화
+                        <a href="/trading/instruments"
+                           class="btn btn-outline-secondary"
+                           aria-label="필터 초기화">
+                            <span aria-hidden="true"><i class="bi bi-arrow-counterclockwise me-1"></i></span>초기화
                         </a>
                     </div>
                 </form>
             </div>
-        </div>
+        </section>
 
-        <!-- 종목 목록 테이블 -->
-        <div class="card">
+        <!-- Instruments Table -->
+        <section id="instruments-table" class="card" aria-labelledby="instruments-heading">
+            <h2 id="instruments-heading" class="sr-only">종목 목록</h2>
             <div class="card-body table-card">
-                <div class="table-responsive table-scroll-container">
-                    <table class="table table-hover">
+                <div class="table-responsive table-scroll-container" tabindex="0">
+                    <table class="table table-hover" aria-describedby="instruments-heading">
+                        <caption class="sr-only">
+                            종목 목록 테이블 - 종목코드, 종목명, 시장, 상태 등의 정보를 포함합니다.
+                        </caption>
                         <thead class="table-light">
                             <tr>
-                                <th class="col-symbol text-center">종목코드</th>
-                                <th class="col-name-kr">종목명 (한글)</th>
-                                <th class="col-name-en">종목명 (영문)</th>
-                                <th class="col-market text-center">시장</th>
-                                <th class="col-industry text-center">업종</th>
-                                <th class="col-status text-center">상태</th>
-                                <th class="col-tradable text-center">거래 가능</th>
-                                <th class="col-halted text-center">거래 정지</th>
-                                <th class="col-listing text-center">상장일</th>
-                                <th class="col-action text-center">관리</th>
+                                <th scope="col" class="col-symbol text-center">종목코드</th>
+                                <th scope="col" class="col-name-kr">종목명 (한글)</th>
+                                <th scope="col" class="col-name-en">종목명 (영문)</th>
+                                <th scope="col" class="col-market text-center">시장</th>
+                                <th scope="col" class="col-industry text-center">업종</th>
+                                <th scope="col" class="col-status text-center">상태</th>
+                                <th scope="col" class="col-tradable text-center">
+                                    <span aria-label="거래 가능 여부">거래</span>
+                                </th>
+                                <th scope="col" class="col-halted text-center">
+                                    <span aria-label="거래 정지 여부">정지</span>
+                                </th>
+                                <th scope="col" class="col-listing text-center">상장일</th>
+                                <th scope="col" class="col-action text-center">관리</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:if="${#lists.isEmpty(instruments)}">
                                 <td colspan="10" class="text-center text-muted py-4">
-                                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                                    조회된 종목이 없습니다.
+                                    <div class="trading-empty" role="status">
+                                        <div class="trading-empty-icon" aria-hidden="true">
+                                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                        </div>
+                                        <p class="trading-empty-title">조회된 종목이 없습니다.</p>
+                                    </div>
                                 </td>
                             </tr>
                             <tr th:each="inst : ${instruments}">
                                 <td class="text-center">
                                     <a th:href="@{/trading/instruments/{symbol}(symbol=${inst.symbol})}"
-                                       th:text="${inst.symbol}" class="symbol-link"></a>
+                                       th:text="${inst.symbol}"
+                                       th:aria-label="${inst.nameKr + ' (' + inst.symbol + ') 상세 정보 보기'}"
+                                       class="symbol-link"></a>
                                 </td>
                                 <td th:text="${inst.nameKr}"></td>
                                 <td th:text="${inst.nameEn}" class="text-muted small"></td>
                                 <td class="text-center" th:text="${inst.market}"></td>
                                 <td class="text-center small" th:text="${inst.industry}"></td>
-                                <td class="text-center" th:text="${inst.status == 'LISTED'} ? '상장' : (${inst.status == 'SUSPENDED'} ? '거래정지' : '상장폐지')"></td>
-                                <td class="text-center" th:text="${inst.tradable} ? 'Y' : 'N'"></td>
-                                <td class="text-center" th:text="${inst.halted} ? 'Y' : 'N'"></td>
+                                <td class="text-center">
+                                    <span th:text="${inst.status == 'LISTED'} ? '상장' : (${inst.status == 'SUSPENDED'} ? '거래정지' : '상장폐지')"
+                                          th:aria-label="${inst.status == 'LISTED'} ? '상장 상태' : (${inst.status == 'SUSPENDED'} ? '거래정지 상태' : '상장폐지 상태')"></span>
+                                </td>
+                                <td class="text-center">
+                                    <span th:text="${inst.tradable} ? 'Y' : 'N'"
+                                          th:aria-label="${inst.tradable} ? '거래 가능' : '거래 불가'"></span>
+                                </td>
+                                <td class="text-center">
+                                    <span th:text="${inst.halted} ? 'Y' : 'N'"
+                                          th:aria-label="${inst.halted} ? '거래 정지됨' : '정상 거래'"></span>
+                                </td>
                                 <td class="text-center small" th:text="${inst.listingDate}"></td>
                                 <td class="text-center">
                                     <a th:href="@{/trading/instruments/{symbol}(symbol=${inst.symbol})}"
-                                       class="detail-link">상세</a>
+                                       class="detail-link"
+                                       th:aria-label="${inst.nameKr + ' 상세 정보 보기'}">상세</a>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
 </div>
-
 </body>
 </html>
