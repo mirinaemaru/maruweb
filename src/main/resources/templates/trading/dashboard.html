@@ -513,6 +513,129 @@
             .empty-state-text {
                 font-size: 14px;
             }
+
+            /* Symbol Search */
+            .symbol-search-container {
+                position: relative;
+                min-width: 280px;
+            }
+
+            .symbol-search-input {
+                width: 100%;
+                padding: 10px 15px;
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                background: var(--bg-tertiary);
+                color: var(--text-primary);
+                font-size: 14px;
+                outline: none;
+                transition: border-color 0.2s, box-shadow 0.2s;
+            }
+
+            .symbol-search-input:focus {
+                border-color: var(--accent-primary);
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+            }
+
+            .symbol-search-input::placeholder {
+                color: var(--text-secondary);
+            }
+
+            .symbol-search-results {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                max-height: 300px;
+                overflow-y: auto;
+                background: var(--bg-secondary);
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                z-index: 1000;
+                margin-top: 4px;
+            }
+
+            .symbol-search-item {
+                padding: 10px 15px;
+                cursor: pointer;
+                border-bottom: 1px solid var(--border-color);
+                transition: background 0.2s;
+            }
+
+            .symbol-search-item:last-child {
+                border-bottom: none;
+            }
+
+            .symbol-search-item:hover {
+                background: var(--filter-tab-hover);
+            }
+
+            .symbol-search-item.selected {
+                background: var(--accent-primary);
+                color: white;
+            }
+
+            .symbol-code {
+                font-weight: 700;
+                color: var(--text-primary);
+            }
+
+            .symbol-search-item:hover .symbol-code,
+            .symbol-search-item.selected .symbol-code {
+                color: inherit;
+            }
+
+            .symbol-name {
+                font-size: 12px;
+                color: var(--text-secondary);
+                margin-left: 8px;
+            }
+
+            .symbol-search-item:hover .symbol-name,
+            .symbol-search-item.selected .symbol-name {
+                color: inherit;
+                opacity: 0.8;
+            }
+
+            .symbol-market {
+                font-size: 11px;
+                color: var(--text-secondary);
+                float: right;
+                padding: 2px 6px;
+                background: var(--bg-tertiary);
+                border-radius: 4px;
+            }
+
+            .symbol-search-loading,
+            .symbol-search-empty {
+                padding: 15px;
+                text-align: center;
+                color: var(--text-secondary);
+                font-size: 13px;
+            }
+
+            .selected-symbol-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 6px 12px;
+                background: var(--accent-primary);
+                color: white;
+                border-radius: 20px;
+                font-size: 13px;
+                font-weight: 600;
+            }
+
+            .selected-symbol-badge .clear-btn {
+                cursor: pointer;
+                opacity: 0.8;
+                transition: opacity 0.2s;
+            }
+
+            .selected-symbol-badge .clear-btn:hover {
+                opacity: 1;
+            }
         </style>
     </th:block>
 </head>
@@ -728,15 +851,12 @@
                     </div>
                 </div>
                 <div class="chart-controls">
-                    <select class="symbol-selector" id="chartSymbolSelector">
-                        <option value="">-- 종목 선택 --</option>
-                        <th:block th:if="${positions != null}">
-                            <option th:each="position : ${positions}"
-                                    th:value="${position['symbol']}"
-                                    th:text="${position['symbol'] + ' - ' + (position['symbolName'] != null ? position['symbolName'] : '')}">
-                            </option>
-                        </th:block>
-                    </select>
+                    <div class="symbol-search-container">
+                        <input type="text" class="symbol-search-input" id="symbolSearchInput"
+                               placeholder="종목명 또는 코드 검색..." autocomplete="off">
+                        <input type="hidden" id="selectedSymbol" value="">
+                        <div class="symbol-search-results" id="symbolSearchResults" style="display: none;"></div>
+                    </div>
                     <div class="chart-legend">
                         <div class="legend-item">
                             <div class="legend-marker buy-signal"></div>
@@ -1136,7 +1256,6 @@
                         if (data.success && data.items) {
                             updatePositionTable(data.items);
                             document.getElementById('positionCount').textContent = data.items.length;
-                            updateChartSymbolSelector(data.items);
                         }
                     })
                     .catch(error => console.error('Failed to refresh positions:', error));
@@ -1205,24 +1324,7 @@
                 return new Intl.NumberFormat('ko-KR').format(Math.round(num));
             }
 
-            // 차트 종목 선택기 업데이트
-            function updateChartSymbolSelector(positions) {
-                const selector = document.getElementById('chartSymbolSelector');
-                if (!selector) return;
-
-                const currentValue = selector.value;
-                selector.innerHTML = '<option value="">-- 종목 선택 --</option>';
-
-                positions.forEach(pos => {
-                    const option = document.createElement('option');
-                    option.value = pos.symbol;
-                    option.textContent = `${pos.symbol} - ${pos.symbolName || ''}`;
-                    if (pos.symbol === currentValue) {
-                        option.selected = true;
-                    }
-                    selector.appendChild(option);
-                });
-            }
+            // 차트 종목 선택기 업데이트 (검색 기능 사용으로 제거됨)
 
             // 실시간 차트 초기화
             function initRealtimeChart() {
@@ -1295,24 +1397,142 @@
                 });
             }
 
-            // 종목 선택 시 차트 시작
-            const chartSymbolSelector = document.getElementById('chartSymbolSelector');
-            if (chartSymbolSelector) {
-                chartSymbolSelector.addEventListener('change', function() {
-                    selectedSymbol = this.value;
-                    const ctx = document.getElementById('realtimePriceChart');
-                    const noDataMsg = document.getElementById('chartNoData');
+            // =============================================
+            // Symbol Search Functions
+            // =============================================
 
-                    if (selectedSymbol) {
-                        ctx.style.display = 'block';
-                        noDataMsg.style.display = 'none';
-                        startPriceUpdates(selectedSymbol);
-                    } else {
-                        ctx.style.display = 'none';
-                        noDataMsg.style.display = 'block';
-                        stopPriceUpdates();
+            const symbolSearchInput = document.getElementById('symbolSearchInput');
+            const symbolSearchResults = document.getElementById('symbolSearchResults');
+            const selectedSymbolInput = document.getElementById('selectedSymbol');
+            let searchTimeout = null;
+            let searchResultsData = [];
+            let selectedResultIndex = -1;
+
+            if (symbolSearchInput) {
+                // 검색 입력 이벤트
+                symbolSearchInput.addEventListener('input', function() {
+                    const query = this.value.trim();
+
+                    if (searchTimeout) {
+                        clearTimeout(searchTimeout);
+                    }
+
+                    if (query.length < 1) {
+                        hideSearchResults();
+                        return;
+                    }
+
+                    // 디바운스: 300ms 후 검색
+                    searchTimeout = setTimeout(() => {
+                        searchInstruments(query);
+                    }, 300);
+                });
+
+                // 키보드 네비게이션
+                symbolSearchInput.addEventListener('keydown', function(e) {
+                    if (!symbolSearchResults.style.display || symbolSearchResults.style.display === 'none') {
+                        return;
+                    }
+
+                    if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        selectedResultIndex = Math.min(selectedResultIndex + 1, searchResultsData.length - 1);
+                        updateSelectedResult();
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        selectedResultIndex = Math.max(selectedResultIndex - 1, 0);
+                        updateSelectedResult();
+                    } else if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (selectedResultIndex >= 0 && searchResultsData[selectedResultIndex]) {
+                            selectSymbol(searchResultsData[selectedResultIndex]);
+                        }
+                    } else if (e.key === 'Escape') {
+                        hideSearchResults();
                     }
                 });
+
+                // 포커스 아웃 시 결과 숨김
+                symbolSearchInput.addEventListener('blur', function() {
+                    setTimeout(() => hideSearchResults(), 200);
+                });
+            }
+
+            // 종목 검색 API 호출
+            function searchInstruments(query) {
+                symbolSearchResults.innerHTML = '<div class="symbol-search-loading">검색 중...</div>';
+                symbolSearchResults.style.display = 'block';
+
+                fetch(`/trading/api/instruments/search?query=${encodeURIComponent(query)}&limit=15`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.items && data.items.length > 0) {
+                            searchResultsData = data.items;
+                            selectedResultIndex = -1;
+                            renderSearchResults(data.items);
+                        } else {
+                            searchResultsData = [];
+                            symbolSearchResults.innerHTML = '<div class="symbol-search-empty">검색 결과가 없습니다.</div>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Search failed:', error);
+                        symbolSearchResults.innerHTML = '<div class="symbol-search-empty">검색 중 오류가 발생했습니다.</div>';
+                    });
+            }
+
+            // 검색 결과 렌더링
+            function renderSearchResults(items) {
+                symbolSearchResults.innerHTML = items.map((item, index) => `
+                    <div class="symbol-search-item" data-index="${index}" data-symbol="${item.symbol}">
+                        <span class="symbol-code">${item.symbol}</span>
+                        <span class="symbol-name">${item.nameKr || item.name || ''}</span>
+                        <span class="symbol-market">${item.market || ''}</span>
+                    </div>
+                `).join('');
+
+                // 클릭 이벤트 추가
+                symbolSearchResults.querySelectorAll('.symbol-search-item').forEach(el => {
+                    el.addEventListener('click', function() {
+                        const index = parseInt(this.dataset.index);
+                        selectSymbol(searchResultsData[index]);
+                    });
+                });
+            }
+
+            // 선택된 결과 하이라이트
+            function updateSelectedResult() {
+                symbolSearchResults.querySelectorAll('.symbol-search-item').forEach((el, index) => {
+                    el.classList.toggle('selected', index === selectedResultIndex);
+                });
+
+                // 스크롤 위치 조정
+                const selectedEl = symbolSearchResults.querySelector('.symbol-search-item.selected');
+                if (selectedEl) {
+                    selectedEl.scrollIntoView({ block: 'nearest' });
+                }
+            }
+
+            // 종목 선택
+            function selectSymbol(item) {
+                selectedSymbol = item.symbol;
+                selectedSymbolInput.value = item.symbol;
+                symbolSearchInput.value = `${item.symbol} - ${item.nameKr || item.name || ''}`;
+                hideSearchResults();
+
+                // 차트 시작
+                const ctx = document.getElementById('realtimePriceChart');
+                const noDataMsg = document.getElementById('chartNoData');
+
+                ctx.style.display = 'block';
+                noDataMsg.style.display = 'none';
+                startPriceUpdates(selectedSymbol);
+            }
+
+            // 검색 결과 숨김
+            function hideSearchResults() {
+                symbolSearchResults.style.display = 'none';
+                selectedResultIndex = -1;
             }
 
             // 가격 업데이트 시작 (폴링)

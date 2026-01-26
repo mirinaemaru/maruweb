@@ -929,6 +929,54 @@ public class TradingController {
         }
     }
 
+    /**
+     * 종목 검색 API (JSON)
+     * 대시보드 실시간 시세 종목 검색용
+     */
+    @GetMapping("/api/instruments/search")
+    @ResponseBody
+    public Map<String, Object> searchInstruments(@RequestParam(required = false) String query,
+                                                  @RequestParam(defaultValue = "20") int limit) {
+        try {
+            // Trading API의 search 파라미터가 동작하지 않으므로 서버측 필터링 수행
+            Map<String, Object> instrumentsData = tradingApiService.getInstruments(null, null, true, null);
+            List<?> items = (List<?>) instrumentsData.get("items");
+
+            // 검색어로 필터링
+            if (query != null && !query.isEmpty() && items != null) {
+                String lowerQuery = query.toLowerCase();
+                items = items.stream()
+                    .filter(item -> {
+                        if (item instanceof Map) {
+                            @SuppressWarnings("unchecked")
+                            Map<String, Object> map = (Map<String, Object>) item;
+                            String symbol = String.valueOf(map.getOrDefault("symbol", "")).toLowerCase();
+                            String nameKr = String.valueOf(map.getOrDefault("nameKr", "")).toLowerCase();
+                            String nameEn = String.valueOf(map.getOrDefault("nameEn", "")).toLowerCase();
+                            return symbol.contains(lowerQuery) || nameKr.contains(lowerQuery) || nameEn.contains(lowerQuery);
+                        }
+                        return false;
+                    })
+                    .limit(limit)
+                    .collect(java.util.stream.Collectors.toList());
+            } else if (items != null && items.size() > limit) {
+                items = items.subList(0, limit);
+            }
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", true);
+            result.put("items", items != null ? items : new java.util.ArrayList<>());
+            return result;
+        } catch (Exception e) {
+            log.error("Failed to search instruments: query={}", query, e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("items", new java.util.ArrayList<>());
+            return errorResponse;
+        }
+    }
+
     // ==================== Health Check API ====================
 
     /**
