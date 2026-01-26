@@ -22,7 +22,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest
+@WebMvcTest(controllers = BacktestController.class,
+        properties = "spring.thymeleaf.enabled=false")
 @ContextConfiguration(classes = TestConfig.class)
 @Import(BacktestController.class)
 @AutoConfigureMockMvc(addFilters = false)

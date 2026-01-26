@@ -4108,7 +4108,7 @@ class TradingApiServiceTest {
         response.put("backtests", new java.util.ArrayList<>());
 
         when(restTemplate.exchange(
-                eq("/api/v1/query/backtests?strategyId=strategy-001"),
+                eq("/api/v1/admin/backtests?strategyId=strategy-001"),
                 eq(HttpMethod.GET),
                 any(),
                 any(ParameterizedTypeReference.class)
@@ -4129,7 +4129,7 @@ class TradingApiServiceTest {
         response.put("backtests", new java.util.ArrayList<>());
 
         when(restTemplate.exchange(
-                eq("/api/v1/query/backtests?startDate=2024-01-01"),
+                eq("/api/v1/admin/backtests?startDate=2024-01-01"),
                 eq(HttpMethod.GET),
                 any(),
                 any(ParameterizedTypeReference.class)
@@ -4150,7 +4150,7 @@ class TradingApiServiceTest {
         response.put("backtests", new java.util.ArrayList<>());
 
         when(restTemplate.exchange(
-                eq("/api/v1/query/backtests?endDate=2024-12-31"),
+                eq("/api/v1/admin/backtests?endDate=2024-12-31"),
                 eq(HttpMethod.GET),
                 any(),
                 any(ParameterizedTypeReference.class)
@@ -4171,7 +4171,7 @@ class TradingApiServiceTest {
         response.put("backtests", new java.util.ArrayList<>());
 
         when(restTemplate.exchange(
-                eq("/api/v1/query/backtests?strategyId=strategy-001&startDate=2024-01-01&endDate=2024-12-31"),
+                eq("/api/v1/admin/backtests?strategyId=strategy-001&startDate=2024-01-01&endDate=2024-12-31"),
                 eq(HttpMethod.GET),
                 any(),
                 any(ParameterizedTypeReference.class)

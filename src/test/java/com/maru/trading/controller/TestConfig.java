@@ -23,7 +23,7 @@ import java.util.Locale;
  * @Configuration을 사용하여 통합테스트에 영향을 주지 않습니다.
  * @WebMvcTest에서 @ContextConfiguration(classes = TestConfig.class)로 명시적으로 로드합니다.
  */
-@Configuration
+@Configuration("tradingControllerTestConfig")
 @EnableAutoConfiguration(exclude = {
         DataSourceAutoConfiguration.class,
         HibernateJpaAutoConfiguration.class,

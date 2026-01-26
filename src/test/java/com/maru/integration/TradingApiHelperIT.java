@@ -43,7 +43,7 @@ import static org.mockito.Mockito.*;
  * - Retry + Circuit Breaker 연동 확인
  * - 동시성 처리 확인
  */
-@SpringBootTest(classes = {TodoApplication.class, TestConfig.class})
+@SpringBootTest(classes = TodoApplication.class)
 @ActiveProfiles("test")
 @DisplayName("TradingApiHelper 통합 테스트")
 class TradingApiHelperIT {

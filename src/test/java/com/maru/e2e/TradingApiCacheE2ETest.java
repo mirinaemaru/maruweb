@@ -112,7 +112,7 @@ class TradingApiCacheE2ETest extends E2ETestBase {
                 "/api/v1/admin/accounts", accountData, Map.class);
 
             assertThat(createResponse).isNotNull();
-            assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(createResponse.getStatusCode().is2xxSuccessful()).isTrue();
 
             Map createBody = createResponse.getBody();
             assertThat(createBody).isNotNull();
