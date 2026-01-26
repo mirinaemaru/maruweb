@@ -60,6 +60,28 @@ public class TradingController {
             model.addAttribute("strategies", strategies);
             model.addAttribute("strategyCount", strategies != null ? strategies.size() : 0);
 
+            // 5. Positions and Balance (포트폴리오 현황)
+            if (accounts != null && !accounts.isEmpty()) {
+                try {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> firstAccount = (Map<String, Object>) accounts.get(0);
+                    String firstAccountId = (String) firstAccount.get("accountId");
+
+                    Map<String, Object> positionsData = tradingApiService.getPositions(firstAccountId);
+                    List<?> positions = (List<?>) positionsData.get("items");
+                    model.addAttribute("positions", positions);
+                    model.addAttribute("positionCount", positions != null ? positions.size() : 0);
+
+                    Map<String, Object> balanceData = tradingApiService.getAccountBalance(firstAccountId);
+                    model.addAttribute("balance", balanceData);
+                    model.addAttribute("selectedAccountId", firstAccountId);
+                } catch (Exception e) {
+                    log.warn("Failed to load positions/balance for dashboard", e);
+                    model.addAttribute("positions", new java.util.ArrayList<>());
+                    model.addAttribute("positionCount", 0);
+                }
+            }
+
             // Count active strategies
             long activeCount = 0;
             if (strategies != null) {
@@ -811,6 +833,99 @@ public class TradingController {
             log.error("Failed to update account permission: {}", accountId, e);
             redirectAttributes.addFlashAttribute("error", "계좌 권한 업데이트에 실패했습니다: " + e.getMessage());
             return "redirect:/trading/accounts/" + accountId + "/permissions";
+        }
+    }
+
+    // ==================== Dashboard REST API ====================
+
+    /**
+     * 포지션 데이터 조회 API (JSON)
+     * 대시보드 실시간 업데이트용
+     */
+    @GetMapping("/api/positions")
+    @ResponseBody
+    public Map<String, Object> getPositions(@RequestParam String accountId) {
+        try {
+            Map<String, Object> positionsData = tradingApiService.getPositions(accountId);
+            positionsData.put("success", true);
+            return positionsData;
+        } catch (Exception e) {
+            log.error("Failed to get positions for accountId: {}", accountId, e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("items", new java.util.ArrayList<>());
+            return errorResponse;
+        }
+    }
+
+    /**
+     * 체결 데이터 조회 API (JSON)
+     * 대시보드 실시간 업데이트용
+     */
+    @GetMapping("/api/fills/recent")
+    @ResponseBody
+    public Map<String, Object> getRecentFills(@RequestParam String accountId,
+                                               @RequestParam(defaultValue = "20") int limit) {
+        try {
+            Map<String, Object> fillsData = tradingApiService.getFills(accountId, null, null);
+            List<?> fills = (List<?>) fillsData.get("items");
+            // Limit results
+            if (fills != null && fills.size() > limit) {
+                fills = fills.subList(0, limit);
+            }
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", true);
+            result.put("items", fills);
+            return result;
+        } catch (Exception e) {
+            log.error("Failed to get recent fills for accountId: {}", accountId, e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("items", new java.util.ArrayList<>());
+            return errorResponse;
+        }
+    }
+
+    /**
+     * 전략 상태 조회 API (JSON)
+     * 대시보드 Strategy Monitor용
+     */
+    @GetMapping("/api/strategies/status")
+    @ResponseBody
+    public Map<String, Object> getStrategiesStatus() {
+        try {
+            Map<String, Object> strategiesData = tradingApiService.getStrategies();
+            strategiesData.put("success", true);
+            return strategiesData;
+        } catch (Exception e) {
+            log.error("Failed to get strategies status", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("items", new java.util.ArrayList<>());
+            return errorResponse;
+        }
+    }
+
+    /**
+     * 계좌 잔고 조회 API (JSON)
+     * 대시보드 실시간 업데이트용
+     */
+    @GetMapping("/api/balance")
+    @ResponseBody
+    public Map<String, Object> getBalance(@RequestParam String accountId) {
+        try {
+            Map<String, Object> balanceData = tradingApiService.getAccountBalance(accountId);
+            balanceData.put("success", true);
+            return balanceData;
+        } catch (Exception e) {
+            log.error("Failed to get balance for accountId: {}", accountId, e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", e.getMessage());
+            return errorResponse;
         }
     }
 

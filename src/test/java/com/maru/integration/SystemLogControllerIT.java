@@ -9,12 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -376,10 +376,9 @@ class SystemLogControllerIT {
         void downloadLog_Success() throws Exception {
             // Given
             String content = "test log content";
-            InputStreamResource resource = new InputStreamResource(
-                    new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)));
+            Resource resource = new ByteArrayResource(content.getBytes(StandardCharsets.UTF_8));
 
-            when(systemLogService.getLogFileStream("app.log")).thenReturn(resource);
+            when(systemLogService.getLogFileResource("app.log")).thenReturn(resource);
             when(systemLogService.getFileSize("app.log")).thenReturn((long) content.length());
 
             // When & Then
@@ -395,7 +394,7 @@ class SystemLogControllerIT {
         @DisplayName("로그 다운로드 API - 파일 없음 (404)")
         void downloadLog_FileNotFound() throws Exception {
             // Given
-            when(systemLogService.getLogFileStream("nonexistent.log"))
+            when(systemLogService.getLogFileResource("nonexistent.log"))
                     .thenThrow(new FileNotFoundException("파일 없음"));
 
             // When & Then
@@ -409,7 +408,7 @@ class SystemLogControllerIT {
         @DisplayName("로그 다운로드 API - 보안 위반 (403)")
         void downloadLog_SecurityViolation() throws Exception {
             // Given
-            when(systemLogService.getLogFileStream("../etc/passwd"))
+            when(systemLogService.getLogFileResource("../etc/passwd"))
                     .thenThrow(new SecurityException("접근 거부"));
 
             // When & Then

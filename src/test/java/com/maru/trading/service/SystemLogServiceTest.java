@@ -5,7 +5,7 @@ import com.maru.trading.dto.LogFileInfo;
 import com.maru.trading.dto.LogSearchCriteria;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.*;
@@ -420,23 +420,25 @@ class SystemLogServiceTest {
         }
     }
 
-    // ==================== getLogFileStream Tests ====================
+    // ==================== getLogFileResource Tests ====================
 
     @Nested
-    @DisplayName("getLogFileStream")
-    class GetLogFileStreamTests {
+    @DisplayName("getLogFileResource")
+    class GetLogFileResourceTests {
 
         @Test
-        @DisplayName("로그 파일 스트림 조회 - 성공")
-        void getLogFileStream_Success() throws IOException {
+        @DisplayName("로그 파일 리소스 조회 - 성공")
+        void getLogFileResource_Success() throws IOException {
             // Given
             createLogFile("app.log", "test content");
 
             // When
-            InputStreamResource resource = systemLogService.getLogFileStream("app.log");
+            Resource resource = systemLogService.getLogFileResource("app.log");
 
             // Then
             assertThat(resource).isNotNull();
+            assertThat(resource.exists()).isTrue();
+            assertThat(resource.isReadable()).isTrue();
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(resource.getInputStream()))) {
                 String line = reader.readLine();
@@ -445,11 +447,24 @@ class SystemLogServiceTest {
         }
 
         @Test
-        @DisplayName("로그 파일 스트림 조회 - 파일 없음")
-        void getLogFileStream_FileNotFound() {
+        @DisplayName("로그 파일 리소스 조회 - 파일 없음")
+        void getLogFileResource_FileNotFound() {
             // When/Then
-            assertThatThrownBy(() -> systemLogService.getLogFileStream("nonexistent.log"))
+            assertThatThrownBy(() -> systemLogService.getLogFileResource("nonexistent.log"))
                     .isInstanceOf(FileNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("로그 파일 리소스 조회 - UrlResource 타입 반환")
+        void getLogFileResource_ReturnsUrlResource() throws IOException {
+            // Given
+            createLogFile("app.log", "test content");
+
+            // When
+            Resource resource = systemLogService.getLogFileResource("app.log");
+
+            // Then
+            assertThat(resource).isInstanceOf(org.springframework.core.io.UrlResource.class);
         }
     }
 
@@ -534,10 +549,10 @@ class SystemLogServiceTest {
         }
 
         @Test
-        @DisplayName("스트림 조회 시 경로 조작 차단")
-        void blockPathTraversal_GetStream() {
+        @DisplayName("리소스 조회 시 경로 조작 차단")
+        void blockPathTraversal_GetResource() {
             // When/Then
-            assertThatThrownBy(() -> systemLogService.getLogFileStream("../etc/passwd"))
+            assertThatThrownBy(() -> systemLogService.getLogFileResource("../etc/passwd"))
                     .isInstanceOf(SecurityException.class);
         }
 
@@ -599,6 +614,80 @@ class SystemLogServiceTest {
 
             assertThat(entry.getLevel()).isEqualTo("TRACE"); // 패턴 불일치 시 TRACE
             assertThat(entry.getMessage()).isEqualTo(stackLine);
+        }
+    }
+
+    // ==================== GZIP Resource Management Tests ====================
+
+    @Nested
+    @DisplayName("GZIP 리소스 관리")
+    class GzipResourceManagementTests {
+
+        @Test
+        @DisplayName("손상된 GZIP 파일 처리 시 리소스 누수 없음")
+        void corruptedGzipFile_NoResourceLeak() throws IOException {
+            // Given - 손상된 GZIP 파일 생성 (유효하지 않은 GZIP 헤더)
+            Path corruptedGzipPath = tempDir.resolve("corrupted.log.gz");
+            Files.write(corruptedGzipPath, "not a valid gzip content".getBytes(StandardCharsets.UTF_8));
+
+            LogSearchCriteria criteria = new LogSearchCriteria();
+            criteria.setFilename("corrupted.log.gz");
+
+            // When
+            Map<String, Object> result = systemLogService.searchLogs(criteria);
+
+            // Then - 예외는 처리되고 success=false 반환
+            assertThat(result.get("success")).isEqualTo(false);
+            assertThat(result.get("error")).isNotNull();
+        }
+
+        @Test
+        @DisplayName("정상 GZIP 파일 검색 후 리소스 정상 해제")
+        void normalGzipFile_ResourceProperlyReleased() throws IOException {
+            // Given
+            createGzipLogFile("test.log.gz",
+                    createLogLine("INFO", "Test message 1"),
+                    createLogLine("ERROR", "Test error"));
+
+            LogSearchCriteria criteria = new LogSearchCriteria();
+            criteria.setFilename("test.log.gz");
+
+            // When - 여러 번 검색 수행 (리소스 누수 시 파일 핸들 고갈)
+            for (int i = 0; i < 10; i++) {
+                Map<String, Object> result = systemLogService.searchLogs(criteria);
+                assertThat(result.get("success")).isEqualTo(true);
+            }
+
+            // Then - 모든 검색 성공 (리소스 누수 없음)
+            Map<String, Object> finalResult = systemLogService.searchLogs(criteria);
+            assertThat(finalResult.get("success")).isEqualTo(true);
+            List<LogEntry> entries = (List<LogEntry>) finalResult.get("entries");
+            assertThat(entries).hasSize(2);
+        }
+
+        @Test
+        @DisplayName("GZIP tail 조회 후 리소스 정상 해제")
+        void gzipTail_ResourceProperlyReleased() throws IOException {
+            // Given
+            String[] lines = new String[50];
+            for (int i = 0; i < 50; i++) {
+                lines[i] = createLogLine("INFO", "Message " + i);
+            }
+            createGzipLogFile("large.log.gz", lines);
+
+            LogSearchCriteria criteria = new LogSearchCriteria();
+            criteria.setFilename("large.log.gz");
+            criteria.setLines(10);
+
+            // When - 여러 번 tail 수행
+            for (int i = 0; i < 5; i++) {
+                Map<String, Object> result = systemLogService.tailLog(criteria);
+                assertThat(result.get("success")).isEqualTo(true);
+            }
+
+            // Then - 성공적으로 완료
+            Map<String, Object> finalResult = systemLogService.tailLog(criteria);
+            assertThat(finalResult.get("success")).isEqualTo(true);
         }
     }
 

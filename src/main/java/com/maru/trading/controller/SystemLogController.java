@@ -5,7 +5,7 @@ import com.maru.trading.dto.LogSearchCriteria;
 import com.maru.trading.service.SystemLogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -125,7 +125,7 @@ public class SystemLogController {
     public ResponseEntity<?> downloadLog(@RequestParam String filename) {
         try {
             // 보안 검증은 서비스에서 수행
-            InputStreamResource resource = systemLogService.getLogFileStream(filename);
+            Resource resource = systemLogService.getLogFileResource(filename);
             long fileSize = systemLogService.getFileSize(filename);
 
             HttpHeaders headers = new HttpHeaders();

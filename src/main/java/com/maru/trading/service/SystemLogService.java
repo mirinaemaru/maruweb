@@ -6,7 +6,8 @@ import com.maru.trading.dto.LogSearchCriteria;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -185,16 +186,22 @@ public class SystemLogService {
     }
 
     /**
-     * 로그 파일 다운로드용 스트림 반환
+     * 로그 파일 다운로드용 리소스 반환
+     * UrlResource를 사용하여 Spring이 리소스 수명 주기를 관리하도록 함
      */
-    public InputStreamResource getLogFileStream(String filename) throws IOException {
+    public Resource getLogFileResource(String filename) throws IOException {
         Path filePath = resolveAndValidatePath(filename);
 
         if (!Files.exists(filePath)) {
             throw new FileNotFoundException("파일을 찾을 수 없습니다: " + filename);
         }
 
-        return new InputStreamResource(Files.newInputStream(filePath));
+        Resource resource = new UrlResource(filePath.toUri());
+        if (!resource.exists() || !resource.isReadable()) {
+            throw new FileNotFoundException("파일을 읽을 수 없습니다: " + filename);
+        }
+
+        return resource;
     }
 
     /**
@@ -302,11 +309,25 @@ public class SystemLogService {
         String filename = filePath.getFileName().toString();
 
         if (filename.endsWith(".gz")) {
-            return new BufferedReader(new InputStreamReader(
-                    new GZIPInputStream(Files.newInputStream(filePath)), StandardCharsets.UTF_8));
+            return createGzipReader(filePath);
         }
 
         return Files.newBufferedReader(filePath, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * GZIP 파일용 BufferedReader 생성 (리소스 누수 방지)
+     * 중첩 스트림 생성 중 예외 발생 시 이미 열린 스트림을 안전하게 닫음
+     */
+    private BufferedReader createGzipReader(Path filePath) throws IOException {
+        InputStream rawStream = Files.newInputStream(filePath);
+        try {
+            GZIPInputStream gzipStream = new GZIPInputStream(rawStream);
+            return new BufferedReader(new InputStreamReader(gzipStream, StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            rawStream.close();
+            throw e;
+        }
     }
 
     /**
