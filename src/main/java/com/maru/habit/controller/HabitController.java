@@ -42,7 +42,8 @@ public class HabitController {
 
         model.addAttribute("habits", habitService.getAllHabits());
         model.addAttribute("records", habitService.getRecordsForMonth(displayYear, displayMonth));
-        model.addAttribute("streaks", habitService.getStreakCounts());
+        model.addAttribute("numericRecords", habitService.getNumericRecordsForMonth(displayYear, displayMonth));
+        model.addAttribute("counts", habitService.getMonthlyCounts(displayYear, displayMonth));
         model.addAttribute("days", days);
         model.addAttribute("year", displayYear);
         model.addAttribute("month", displayMonth);
@@ -79,6 +80,20 @@ public class HabitController {
                               @RequestParam(required = false) Integer year,
                               @RequestParam(required = false) Integer month) {
         habitService.toggleRecord(id, date);
+        String redirect = "redirect:/habits";
+        if (year != null && month != null) {
+            redirect += "?year=" + year + "&month=" + month;
+        }
+        return redirect;
+    }
+
+    @PostMapping("/{id}/numeric")
+    public String saveNumericRecord(@PathVariable Long id,
+                                   @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                                   @RequestParam(required = false) Double value,
+                                   @RequestParam(required = false) Integer year,
+                                   @RequestParam(required = false) Integer month) {
+        habitService.saveNumericRecord(id, date, value);
         String redirect = "redirect:/habits";
         if (year != null && month != null) {
             redirect += "?year=" + year + "&month=" + month;

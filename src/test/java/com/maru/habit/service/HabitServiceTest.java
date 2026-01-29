@@ -407,89 +407,251 @@ class HabitServiceTest {
         }
     }
 
-    // ==================== getStreakCount Tests ====================
+    // ==================== saveNumericRecord Tests ====================
 
     @Nested
-    @DisplayName("getStreakCount")
-    class GetStreakCountTests {
+    @DisplayName("saveNumericRecord")
+    class SaveNumericRecordTests {
 
         @Test
-        @DisplayName("연속 기록 일수 조회 - 연속 3일")
-        void getStreakCount_ThreeDays() {
+        @DisplayName("숫자 기록 저장 - 새 기록 생성")
+        void saveNumericRecord_CreateNew() {
             // given
-            Habit habit = createHabit(1L, "운동하기");
-            LocalDate today = LocalDate.now();
+            Habit habit = createHabit(1L, "몸무게");
+            habit.setIcon("📊");
+            LocalDate date = LocalDate.now();
+            Double value = 72.5;
 
-            when(habitRecordRepository.findByHabitAndRecordDate(habit, today))
-                    .thenReturn(Optional.of(new HabitRecord(habit, today)));
-            when(habitRecordRepository.findByHabitAndRecordDate(habit, today.minusDays(1)))
-                    .thenReturn(Optional.of(new HabitRecord(habit, today.minusDays(1))));
-            when(habitRecordRepository.findByHabitAndRecordDate(habit, today.minusDays(2)))
-                    .thenReturn(Optional.of(new HabitRecord(habit, today.minusDays(2))));
-            when(habitRecordRepository.findByHabitAndRecordDate(habit, today.minusDays(3)))
-                    .thenReturn(Optional.empty());
+            when(habitRepository.findById(1L)).thenReturn(Optional.of(habit));
+            when(habitRecordRepository.findByHabitAndRecordDate(habit, date)).thenReturn(Optional.empty());
+            when(habitRecordRepository.save(any(HabitRecord.class))).thenAnswer(inv -> inv.getArgument(0));
 
             // when
-            int result = habitService.getStreakCount(habit);
+            habitService.saveNumericRecord(1L, date, value);
 
             // then
-            assertThat(result).isEqualTo(3);
+            ArgumentCaptor<HabitRecord> captor = ArgumentCaptor.forClass(HabitRecord.class);
+            verify(habitRecordRepository).save(captor.capture());
+            assertThat(captor.getValue().getNumericValue()).isEqualTo(72.5);
         }
 
         @Test
-        @DisplayName("연속 기록 일수 조회 - 오늘 기록 없음")
-        void getStreakCount_NoRecordToday() {
+        @DisplayName("숫자 기록 저장 - 기존 기록 업데이트")
+        void saveNumericRecord_UpdateExisting() {
             // given
-            Habit habit = createHabit(1L, "운동하기");
-            LocalDate today = LocalDate.now();
+            Habit habit = createHabit(1L, "몸무게");
+            habit.setIcon("📊");
+            LocalDate date = LocalDate.now();
+            HabitRecord existingRecord = new HabitRecord(habit, date, 70.0);
 
-            when(habitRecordRepository.findByHabitAndRecordDate(habit, today))
-                    .thenReturn(Optional.empty());
+            when(habitRepository.findById(1L)).thenReturn(Optional.of(habit));
+            when(habitRecordRepository.findByHabitAndRecordDate(habit, date)).thenReturn(Optional.of(existingRecord));
+            when(habitRecordRepository.save(any(HabitRecord.class))).thenAnswer(inv -> inv.getArgument(0));
 
             // when
-            int result = habitService.getStreakCount(habit);
+            habitService.saveNumericRecord(1L, date, 72.5);
 
             // then
-            assertThat(result).isEqualTo(0);
+            ArgumentCaptor<HabitRecord> captor = ArgumentCaptor.forClass(HabitRecord.class);
+            verify(habitRecordRepository).save(captor.capture());
+            assertThat(captor.getValue().getNumericValue()).isEqualTo(72.5);
+        }
+
+        @Test
+        @DisplayName("숫자 기록 저장 - null 값으로 기록 삭제")
+        void saveNumericRecord_DeleteWithNull() {
+            // given
+            Habit habit = createHabit(1L, "몸무게");
+            habit.setIcon("📊");
+            LocalDate date = LocalDate.now();
+            HabitRecord existingRecord = new HabitRecord(habit, date, 70.0);
+
+            when(habitRepository.findById(1L)).thenReturn(Optional.of(habit));
+            when(habitRecordRepository.findByHabitAndRecordDate(habit, date)).thenReturn(Optional.of(existingRecord));
+
+            // when
+            habitService.saveNumericRecord(1L, date, null);
+
+            // then
+            verify(habitRecordRepository).delete(existingRecord);
+            verify(habitRecordRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("숫자 기록 저장 - 존재하지 않는 습관")
+        void saveNumericRecord_HabitNotFound() {
+            // given
+            when(habitRepository.findById(999L)).thenReturn(Optional.empty());
+
+            // when
+            habitService.saveNumericRecord(999L, LocalDate.now(), 72.5);
+
+            // then
+            verify(habitRecordRepository, never()).save(any());
+            verify(habitRecordRepository, never()).delete(any());
+        }
+
+        @Test
+        @DisplayName("숫자 기록 저장 - 삭제된 습관")
+        void saveNumericRecord_DeletedHabit() {
+            // given
+            Habit deletedHabit = createHabit(1L, "삭제된 습관");
+            deletedHabit.setDeleted("Y");
+            when(habitRepository.findById(1L)).thenReturn(Optional.of(deletedHabit));
+
+            // when
+            habitService.saveNumericRecord(1L, LocalDate.now(), 72.5);
+
+            // then
+            verify(habitRecordRepository, never()).save(any());
+            verify(habitRecordRepository, never()).delete(any());
         }
     }
 
-    // ==================== getStreakCounts Tests ====================
+    // ==================== getNumericRecordsForMonth Tests ====================
 
     @Nested
-    @DisplayName("getStreakCounts")
-    class GetStreakCountsTests {
+    @DisplayName("getNumericRecordsForMonth")
+    class GetNumericRecordsForMonthTests {
 
         @Test
-        @DisplayName("모든 습관의 연속 기록 일수 조회")
-        void getStreakCounts_Success() {
+        @DisplayName("월별 숫자 기록 조회 - 성공")
+        void getNumericRecordsForMonth_Success() {
             // given
-            Habit habit1 = createHabit(1L, "운동하기");
-            Habit habit2 = createHabit(2L, "독서하기");
-            LocalDate today = LocalDate.now();
+            Habit habit1 = createHabit(1L, "몸무게");
+            Habit habit2 = createHabit(2L, "혈당");
+            int year = 2026;
+            int month = 1;
+            LocalDate startDate = LocalDate.of(year, month, 1);
+            LocalDate endDate = LocalDate.of(year, month, 31);
 
             when(habitRepository.findByDeletedOrderByDisplayOrderAscCreatedAtAsc("N"))
                     .thenReturn(Arrays.asList(habit1, habit2));
 
-            // habit1: 2일 연속
-            when(habitRecordRepository.findByHabitAndRecordDate(habit1, today))
-                    .thenReturn(Optional.of(new HabitRecord(habit1, today)));
-            when(habitRecordRepository.findByHabitAndRecordDate(habit1, today.minusDays(1)))
-                    .thenReturn(Optional.of(new HabitRecord(habit1, today.minusDays(1))));
-            when(habitRecordRepository.findByHabitAndRecordDate(habit1, today.minusDays(2)))
-                    .thenReturn(Optional.empty());
+            // habit1: 숫자 기록 2개
+            HabitRecord record1 = new HabitRecord(habit1, LocalDate.of(2026, 1, 28), 72.0);
+            HabitRecord record2 = new HabitRecord(habit1, LocalDate.of(2026, 1, 29), 72.5);
+            when(habitRecordRepository.findByHabitAndRecordDateBetween(habit1, startDate, endDate))
+                    .thenReturn(Arrays.asList(record1, record2));
 
-            // habit2: 0일
-            when(habitRecordRepository.findByHabitAndRecordDate(habit2, today))
-                    .thenReturn(Optional.empty());
+            // habit2: 숫자 기록 1개
+            HabitRecord record3 = new HabitRecord(habit2, LocalDate.of(2026, 1, 29), 106.0);
+            when(habitRecordRepository.findByHabitAndRecordDateBetween(habit2, startDate, endDate))
+                    .thenReturn(Arrays.asList(record3));
 
             // when
-            Map<Long, Integer> result = habitService.getStreakCounts();
+            Map<Long, Map<LocalDate, Double>> result = habitService.getNumericRecordsForMonth(year, month);
 
             // then
             assertThat(result).hasSize(2);
-            assertThat(result.get(1L)).isEqualTo(2);
-            assertThat(result.get(2L)).isEqualTo(0);
+            assertThat(result.get(1L)).hasSize(2);
+            assertThat(result.get(1L).get(LocalDate.of(2026, 1, 28))).isEqualTo(72.0);
+            assertThat(result.get(1L).get(LocalDate.of(2026, 1, 29))).isEqualTo(72.5);
+            assertThat(result.get(2L)).hasSize(1);
+            assertThat(result.get(2L).get(LocalDate.of(2026, 1, 29))).isEqualTo(106.0);
+        }
+
+        @Test
+        @DisplayName("월별 숫자 기록 조회 - numericValue가 null인 기록 제외")
+        void getNumericRecordsForMonth_ExcludeNullValues() {
+            // given
+            Habit habit = createHabit(1L, "몸무게");
+            int year = 2026;
+            int month = 1;
+            LocalDate startDate = LocalDate.of(year, month, 1);
+            LocalDate endDate = LocalDate.of(year, month, 31);
+
+            when(habitRepository.findByDeletedOrderByDisplayOrderAscCreatedAtAsc("N"))
+                    .thenReturn(Arrays.asList(habit));
+
+            // 숫자 값 있는 기록과 없는 기록 혼합
+            HabitRecord recordWithValue = new HabitRecord(habit, LocalDate.of(2026, 1, 28), 72.0);
+            HabitRecord recordWithoutValue = new HabitRecord(habit, LocalDate.of(2026, 1, 29));  // numericValue = null
+            when(habitRecordRepository.findByHabitAndRecordDateBetween(habit, startDate, endDate))
+                    .thenReturn(Arrays.asList(recordWithValue, recordWithoutValue));
+
+            // when
+            Map<Long, Map<LocalDate, Double>> result = habitService.getNumericRecordsForMonth(year, month);
+
+            // then
+            assertThat(result.get(1L)).hasSize(1);
+            assertThat(result.get(1L).get(LocalDate.of(2026, 1, 28))).isEqualTo(72.0);
+            assertThat(result.get(1L).containsKey(LocalDate.of(2026, 1, 29))).isFalse();
+        }
+
+        @Test
+        @DisplayName("월별 숫자 기록 조회 - 빈 결과")
+        void getNumericRecordsForMonth_Empty() {
+            // given
+            when(habitRepository.findByDeletedOrderByDisplayOrderAscCreatedAtAsc("N"))
+                    .thenReturn(Collections.emptyList());
+
+            // when
+            Map<Long, Map<LocalDate, Double>> result = habitService.getNumericRecordsForMonth(2026, 1);
+
+            // then
+            assertThat(result).isEmpty();
+        }
+    }
+
+    // ==================== getMonthlyCounts Tests ====================
+
+    @Nested
+    @DisplayName("getMonthlyCounts")
+    class GetMonthlyCountsTests {
+
+        @Test
+        @DisplayName("월별 수행 횟수 조회")
+        void getMonthlyCounts_Success() {
+            // given
+            Habit habit1 = createHabit(1L, "운동하기");
+            Habit habit2 = createHabit(2L, "독서하기");
+            int year = 2026;
+            int month = 1;
+            LocalDate startDate = LocalDate.of(year, month, 1);
+            LocalDate endDate = LocalDate.of(year, month, 31);
+
+            when(habitRepository.findByDeletedOrderByDisplayOrderAscCreatedAtAsc("N"))
+                    .thenReturn(Arrays.asList(habit1, habit2));
+
+            // habit1: 5회
+            when(habitRecordRepository.findByHabitAndRecordDateBetween(habit1, startDate, endDate))
+                    .thenReturn(Arrays.asList(
+                            new HabitRecord(habit1, LocalDate.of(2026, 1, 1)),
+                            new HabitRecord(habit1, LocalDate.of(2026, 1, 2)),
+                            new HabitRecord(habit1, LocalDate.of(2026, 1, 3)),
+                            new HabitRecord(habit1, LocalDate.of(2026, 1, 4)),
+                            new HabitRecord(habit1, LocalDate.of(2026, 1, 5))
+                    ));
+
+            // habit2: 2회
+            when(habitRecordRepository.findByHabitAndRecordDateBetween(habit2, startDate, endDate))
+                    .thenReturn(Arrays.asList(
+                            new HabitRecord(habit2, LocalDate.of(2026, 1, 10)),
+                            new HabitRecord(habit2, LocalDate.of(2026, 1, 15))
+                    ));
+
+            // when
+            Map<Long, Integer> result = habitService.getMonthlyCounts(year, month);
+
+            // then
+            assertThat(result).hasSize(2);
+            assertThat(result.get(1L)).isEqualTo(5);
+            assertThat(result.get(2L)).isEqualTo(2);
+        }
+
+        @Test
+        @DisplayName("월별 수행 횟수 조회 - 빈 결과")
+        void getMonthlyCounts_Empty() {
+            // given
+            when(habitRepository.findByDeletedOrderByDisplayOrderAscCreatedAtAsc("N"))
+                    .thenReturn(Collections.emptyList());
+
+            // when
+            Map<Long, Integer> result = habitService.getMonthlyCounts(2026, 1);
+
+            // then
+            assertThat(result).isEmpty();
         }
     }
 }

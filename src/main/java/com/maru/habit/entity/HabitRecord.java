@@ -32,6 +32,9 @@ public class HabitRecord {
     @Column(name = "completed", length = 1)
     private String completed = "Y";
 
+    @Column(name = "numeric_value", precision = 5, scale = 1)
+    private Double numericValue;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -39,6 +42,13 @@ public class HabitRecord {
     public HabitRecord(Habit habit, LocalDate recordDate) {
         this.habit = habit;
         this.recordDate = recordDate;
+        this.completed = "Y";
+    }
+
+    public HabitRecord(Habit habit, LocalDate recordDate, Double numericValue) {
+        this.habit = habit;
+        this.recordDate = recordDate;
+        this.numericValue = numericValue;
         this.completed = "Y";
     }
 }

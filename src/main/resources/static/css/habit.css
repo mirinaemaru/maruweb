@@ -127,7 +127,7 @@
     padding-left: 10px !important;
 }
 
-.streak-col {
+.count-col {
     min-width: 50px;
     max-width: 60px;
 }
@@ -156,17 +156,17 @@
     font-size: 1em;
 }
 
-/* Streak Cell */
-.streak-cell {
+/* Count Cell */
+.count-cell {
     text-align: center;
 }
 
-.streak-badge {
+.count-badge {
     display: inline-block;
-    padding: 2px 6px;
+    padding: 2px 8px;
     background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
     border-radius: 8px;
-    font-size: 0.7em;
+    font-size: 0.75em;
     font-weight: 600;
     color: #333;
 }
@@ -213,6 +213,52 @@
     border-color: var(--accent-primary);
 }
 
+/* Numeric Input (Body Log) */
+.numeric-form {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+}
+
+.numeric-input {
+    width: 38px;
+    height: 22px;
+    padding: 1px 2px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 10px;
+    text-align: center;
+    transition: all 0.2s ease;
+    -moz-appearance: textfield;
+}
+
+.numeric-input::-webkit-outer-spin-button,
+.numeric-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.numeric-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.numeric-input.has-value {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: var(--accent-primary);
+    color: white;
+    font-weight: 600;
+}
+
+.numeric-input::placeholder {
+    color: var(--text-tertiary);
+    opacity: 0.5;
+}
+
 /* Action Cell */
 .action-cell {
     text-align: center;
@@ -257,7 +303,7 @@
     background: #4a5568 !important;
 }
 
-[data-theme="dark"] .streak-badge {
+[data-theme="dark"] .count-badge {
     background: var(--bg-tertiary) !important;
     color: var(--text-primary) !important;
 }
@@ -274,6 +320,22 @@
 
 [data-theme="dark"] .check-btn:hover {
     background: #4a5568 !important;
+}
+
+[data-theme="dark"] .numeric-input {
+    background: var(--bg-tertiary) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .numeric-input:focus {
+    background: #4a5568 !important;
+}
+
+[data-theme="dark"] .numeric-input.has-value {
+    background: #4a5568 !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
 }
 
 /* Weekend (Saturday, Sunday) - Dark Mode */
