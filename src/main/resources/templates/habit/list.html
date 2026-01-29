@@ -33,6 +33,7 @@
                                 <option value="💊">💊 Vitamins</option>
                                 <option value="🌅">🌅 Early Rise</option>
                                 <option value="✍️">✍️ Writing</option>
+                                <option value="📊">📊 Body Log</option>
                             </select>
                             <button type="submit" class="btn btn-primary">Add Habit</button>
                         </form>
@@ -55,7 +56,7 @@
                             <thead>
                                 <tr>
                                     <th class="habit-name-col">Habit</th>
-                                    <th class="streak-col">Streak</th>
+                                    <th class="count-col">Count</th>
                                     <th th:each="day : ${days}"
                                         th:text="${day.dayOfMonth}"
                                         th:classappend="${(day.equals(today) ? 'today' : '') + (day.dayOfWeek.value == 6 or day.dayOfWeek.value == 7 ? ' weekend' : '')}"
@@ -69,11 +70,24 @@
                                         <span class="habit-icon" th:text="${habit.icon}">✅</span>
                                         <span th:text="${habit.name}">Habit Name</span>
                                     </td>
-                                    <td class="streak-cell">
-                                        <span class="streak-badge" th:text="${streaks[habit.id] + ' days'}">0 days</span>
+                                    <td class="count-cell">
+                                        <span class="count-badge" th:if="${counts[habit.id] != null and counts[habit.id] > 0}" th:text="${counts[habit.id]}">0</span>
                                     </td>
-                                    <td th:each="day : ${days}" class="check-cell" th:classappend="${(day.equals(today) ? 'today' : '') + (day.dayOfWeek.value == 6 or day.dayOfWeek.value == 7 ? ' weekend' : '')}">
-                                        <form th:action="@{/habits/{id}/toggle(id=${habit.id})}" method="post">
+                                    <td th:each="day : ${days}" class="check-cell" th:classappend="${(day.equals(today) ? 'today' : '') + (day.dayOfWeek.value == 6 or day.dayOfWeek.value == 7 ? ' weekend' : '')}"
+                                        th:with="habitNumericMap=${numericRecords.get(habit.id)},numVal=${habitNumericMap != null ? habitNumericMap.get(day) : null}">
+                                        <!-- Body Log: numeric input -->
+                                        <form th:if="${habit.icon == '📊'}" th:action="@{/habits/{id}/numeric(id=${habit.id})}" method="post" class="numeric-form">
+                                            <input type="hidden" name="date" th:value="${day}">
+                                            <input type="hidden" name="year" th:value="${year}">
+                                            <input type="hidden" name="month" th:value="${month}">
+                                            <input type="number" name="value" step="0.1" min="0" max="999.9"
+                                                   class="numeric-input"
+                                                   th:value="${numVal != null ? (numVal % 1 == 0 ? numVal.intValue() : numVal) : ''}"
+                                                   th:classappend="${numVal != null} ? 'has-value' : ''"
+                                                   onchange="this.form.submit()">
+                                        </form>
+                                        <!-- Other types: checkbox -->
+                                        <form th:unless="${habit.icon == '📊'}" th:action="@{/habits/{id}/toggle(id=${habit.id})}" method="post">
                                             <input type="hidden" name="date" th:value="${day}">
                                             <input type="hidden" name="year" th:value="${year}">
                                             <input type="hidden" name="month" th:value="${month}">

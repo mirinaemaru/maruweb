@@ -71,6 +71,27 @@ public class HabitService {
                 });
     }
 
+    @Transactional
+    public void saveNumericRecord(Long habitId, LocalDate date, Double value) {
+        habitRepository.findById(habitId)
+                .filter(habit -> "N".equals(habit.getDeleted()))
+                .ifPresent(habit -> {
+                    Optional<HabitRecord> existingRecord = habitRecordRepository.findByHabitAndRecordDate(habit, date);
+                    boolean isEmptyValue = value == null || value == 0.0;
+                    if (existingRecord.isPresent()) {
+                        HabitRecord record = existingRecord.get();
+                        if (isEmptyValue) {
+                            habitRecordRepository.delete(record);
+                        } else {
+                            record.setNumericValue(value);
+                            habitRecordRepository.save(record);
+                        }
+                    } else if (!isEmptyValue) {
+                        habitRecordRepository.save(new HabitRecord(habit, date, value));
+                    }
+                });
+    }
+
     public Map<Long, Set<LocalDate>> getRecordsForMonth(int year, int month) {
         LocalDate startDate = LocalDate.of(year, month, 1);
         LocalDate endDate = startDate.plusMonths(1).minusDays(1);
@@ -90,29 +111,49 @@ public class HabitService {
         return recordMap;
     }
 
-    public int getStreakCount(Habit habit) {
-        LocalDate today = LocalDate.now();
-        int streak = 0;
-        LocalDate checkDate = today;
+    public Map<Long, Map<LocalDate, Double>> getNumericRecordsForMonth(int year, int month) {
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.plusMonths(1).minusDays(1);
 
-        while (true) {
-            Optional<HabitRecord> record = habitRecordRepository.findByHabitAndRecordDate(habit, checkDate);
-            if (record.isPresent()) {
-                streak++;
-                checkDate = checkDate.minusDays(1);
-            } else {
-                break;
+        Map<Long, Map<LocalDate, Double>> numericMap = new HashMap<>();
+        List<Habit> habits = getAllHabits();
+
+        for (Habit habit : habits) {
+            List<HabitRecord> records = habitRecordRepository.findByHabitAndRecordDateBetween(habit, startDate, endDate);
+            Map<LocalDate, Double> dateValueMap = new HashMap<>();
+            for (HabitRecord record : records) {
+                if (record.getNumericValue() != null && record.getNumericValue() != 0.0) {
+                    dateValueMap.put(record.getRecordDate(), record.getNumericValue());
+                }
             }
+            numericMap.put(habit.getId(), dateValueMap);
         }
-        return streak;
+
+        return numericMap;
     }
 
-    public Map<Long, Integer> getStreakCounts() {
-        Map<Long, Integer> streakMap = new HashMap<>();
+    public Map<Long, Integer> getMonthlyCounts(int year, int month) {
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.plusMonths(1).minusDays(1);
+
+        Map<Long, Integer> countMap = new HashMap<>();
         List<Habit> habits = getAllHabits();
+
         for (Habit habit : habits) {
-            streakMap.put(habit.getId(), getStreakCount(habit));
+            List<HabitRecord> records = habitRecordRepository.findByHabitAndRecordDateBetween(habit, startDate, endDate);
+            int count = 0;
+            for (HabitRecord record : records) {
+                if (record.getNumericValue() != null) {
+                    if (record.getNumericValue() != 0.0) {
+                        count++;
+                    }
+                } else {
+                    count++;
+                }
+            }
+            countMap.put(habit.getId(), count);
         }
-        return streakMap;
+
+        return countMap;
     }
 }
