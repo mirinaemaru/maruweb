@@ -1,0 +1,257 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'ECS Task Definitions and Services for Maruweb'
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: maruweb
+    Description: Environment name prefix for resources
+
+  MaruwebImageTag:
+    Type: String
+    Default: latest
+    Description: Docker image tag for maruweb
+
+  TradingApiImageTag:
+    Type: String
+    Default: latest
+    Description: Docker image tag for trading-api
+
+Resources:
+  # Secrets in Secrets Manager (create these manually first)
+  # - maruweb/db-credentials
+  # - maruweb/google-oauth
+  # - maruweb/encryption-key
+
+  # Service Discovery for trading-api
+  TradingApiServiceDiscovery:
+    Type: AWS::ServiceDiscovery::Service
+    Properties:
+      Name: trading-api
+      NamespaceId: !ImportValue
+        Fn::Sub: ${EnvironmentName}-ServiceDiscoveryNamespaceId
+      DnsConfig:
+        DnsRecords:
+          - Type: A
+            TTL: 60
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+
+  # Maruweb Task Definition
+  MaruwebTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: maruweb-task
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      Cpu: '512'
+      Memory: '1024'
+      ExecutionRoleArn: !ImportValue
+        Fn::Sub: ${EnvironmentName}-ECSTaskExecutionRoleArn
+      TaskRoleArn: !ImportValue
+        Fn::Sub: ${EnvironmentName}-ECSTaskRoleArn
+      Volumes:
+        - Name: efs-uploads
+          EFSVolumeConfiguration:
+            FilesystemId: !ImportValue
+              Fn::Sub: ${EnvironmentName}-EFSFileSystemId
+            TransitEncryption: ENABLED
+            AuthorizationConfig:
+              AccessPointId: !ImportValue
+                Fn::Sub: ${EnvironmentName}-EFSAccessPointId
+              IAM: ENABLED
+      ContainerDefinitions:
+        - Name: maruweb
+          Image: !Sub
+            - '${ECRUri}:${Tag}'
+            - ECRUri: !ImportValue
+                Fn::Sub: ${EnvironmentName}-MaruwebECRUri
+              Tag: !Ref MaruwebImageTag
+          Essential: true
+          PortMappings:
+            - ContainerPort: 8090
+              Protocol: tcp
+          MountPoints:
+            - ContainerPath: /app/uploads/kanban
+              SourceVolume: efs-uploads
+              ReadOnly: false
+          Environment:
+            - Name: SPRING_PROFILES_ACTIVE
+              Value: prod
+            - Name: TRADING_API_BASE_URL
+              Value: http://trading-api.maruweb.local:8099
+          Secrets:
+            - Name: DB_URL
+              ValueFrom: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${EnvironmentName}/db-credentials:url::
+            - Name: DB_USERNAME
+              ValueFrom: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${EnvironmentName}/db-credentials:username::
+            - Name: DB_PASSWORD
+              ValueFrom: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${EnvironmentName}/db-credentials:password::
+            - Name: GOOGLE_CLIENT_ID
+              ValueFrom: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${EnvironmentName}/google-oauth:clientId::
+            - Name: GOOGLE_CLIENT_SECRET
+              ValueFrom: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${EnvironmentName}/google-oauth:clientSecret::
+            - Name: GOOGLE_OAUTH_REDIRECT_URI
+              ValueFrom: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${EnvironmentName}/google-oauth:redirectUri::
+            - Name: CALENDAR_ENCRYPTION_KEY
+              ValueFrom: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${EnvironmentName}/encryption-key:value::
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !ImportValue
+                Fn::Sub: ${EnvironmentName}-LogGroupName
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: maruweb
+          HealthCheck:
+            Command:
+              - CMD-SHELL
+              - wget -q --spider http://localhost:8090/actuator/health || exit 1
+            Interval: 30
+            Timeout: 10
+            Retries: 3
+            StartPeriod: 60
+
+  # Trading API Task Definition
+  TradingApiTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: trading-api-task
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      Cpu: '256'
+      Memory: '512'
+      ExecutionRoleArn: !ImportValue
+        Fn::Sub: ${EnvironmentName}-ECSTaskExecutionRoleArn
+      TaskRoleArn: !ImportValue
+        Fn::Sub: ${EnvironmentName}-ECSTaskRoleArn
+      ContainerDefinitions:
+        - Name: trading-api
+          Image: !Sub
+            - '${ECRUri}:${Tag}'
+            - ECRUri: !ImportValue
+                Fn::Sub: ${EnvironmentName}-TradingApiECRUri
+              Tag: !Ref TradingApiImageTag
+          Essential: true
+          PortMappings:
+            - ContainerPort: 8099
+              Protocol: tcp
+          Secrets:
+            - Name: DB_URL
+              ValueFrom: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${EnvironmentName}/trading-db-credentials:url::
+            - Name: DB_USERNAME
+              ValueFrom: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${EnvironmentName}/trading-db-credentials:username::
+            - Name: DB_PASSWORD
+              ValueFrom: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${EnvironmentName}/trading-db-credentials:password::
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !ImportValue
+                Fn::Sub: ${EnvironmentName}-LogGroupName
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: trading-api
+          HealthCheck:
+            Command:
+              - CMD-SHELL
+              - wget -q --spider http://localhost:8099/health || exit 1
+            Interval: 30
+            Timeout: 10
+            Retries: 3
+            StartPeriod: 60
+
+  # Maruweb ECS Service
+  MaruwebService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: maruweb-service
+      Cluster: !ImportValue
+        Fn::Sub: ${EnvironmentName}-ClusterArn
+      TaskDefinition: !Ref MaruwebTaskDefinition
+      DesiredCount: 2
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          SecurityGroups:
+            - !ImportValue
+              Fn::Sub: ${EnvironmentName}-ECSSecurityGroupId
+          Subnets:
+            - !ImportValue
+              Fn::Sub: ${EnvironmentName}-PrivateSubnet1Id
+            - !ImportValue
+              Fn::Sub: ${EnvironmentName}-PrivateSubnet2Id
+      LoadBalancers:
+        - ContainerName: maruweb
+          ContainerPort: 8090
+          TargetGroupArn: !ImportValue
+            Fn::Sub: ${EnvironmentName}-MaruwebTargetGroupArn
+      DeploymentConfiguration:
+        MinimumHealthyPercent: 50
+        MaximumPercent: 200
+      HealthCheckGracePeriodSeconds: 120
+
+  # Trading API ECS Service
+  TradingApiService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: trading-api-service
+      Cluster: !ImportValue
+        Fn::Sub: ${EnvironmentName}-ClusterArn
+      TaskDefinition: !Ref TradingApiTaskDefinition
+      DesiredCount: 1
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          SecurityGroups:
+            - !ImportValue
+              Fn::Sub: ${EnvironmentName}-ECSSecurityGroupId
+          Subnets:
+            - !ImportValue
+              Fn::Sub: ${EnvironmentName}-PrivateSubnet1Id
+            - !ImportValue
+              Fn::Sub: ${EnvironmentName}-PrivateSubnet2Id
+      ServiceRegistries:
+        - RegistryArn: !GetAtt TradingApiServiceDiscovery.Arn
+      DeploymentConfiguration:
+        MinimumHealthyPercent: 0
+        MaximumPercent: 200
+
+  # Auto Scaling for Maruweb
+  MaruwebScalableTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Properties:
+      MinCapacity: 1
+      MaxCapacity: 4
+      ResourceId: !Sub service/${EnvironmentName}-cluster/maruweb-service
+      RoleARN: !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+    DependsOn: MaruwebService
+
+  MaruwebScalingPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: maruweb-cpu-scaling
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref MaruwebScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ECSServiceAverageCPUUtilization
+        TargetValue: 70.0
+        ScaleInCooldown: 300
+        ScaleOutCooldown: 60
+
+Outputs:
+  MaruwebServiceArn:
+    Description: Maruweb ECS Service ARN
+    Value: !Ref MaruwebService
+
+  TradingApiServiceArn:
+    Description: Trading API ECS Service ARN
+    Value: !Ref TradingApiService
+
+  TradingApiDNS:
+    Description: Trading API internal DNS
+    Value: trading-api.maruweb.local

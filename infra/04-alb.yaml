@@ -1,0 +1,127 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Application Load Balancer for Maruweb'
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: maruweb
+    Description: Environment name prefix for resources
+
+  CertificateArn:
+    Type: String
+    Description: ARN of ACM certificate for HTTPS
+    Default: ''
+
+Conditions:
+  HasCertificate: !Not [!Equals [!Ref CertificateArn, '']]
+
+Resources:
+  # Application Load Balancer
+  ApplicationLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub ${EnvironmentName}-alb
+      Type: application
+      Scheme: internet-facing
+      SecurityGroups:
+        - !ImportValue
+          Fn::Sub: ${EnvironmentName}-ALBSecurityGroupId
+      Subnets:
+        - !ImportValue
+          Fn::Sub: ${EnvironmentName}-PublicSubnet1Id
+        - !ImportValue
+          Fn::Sub: ${EnvironmentName}-PublicSubnet2Id
+      LoadBalancerAttributes:
+        - Key: idle_timeout.timeout_seconds
+          Value: '60'
+
+  # Target Group for maruweb
+  MaruwebTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub ${EnvironmentName}-maruweb-tg
+      Port: 8090
+      Protocol: HTTP
+      TargetType: ip
+      VpcId: !ImportValue
+        Fn::Sub: ${EnvironmentName}-VpcId
+      HealthCheckEnabled: true
+      HealthCheckPath: /actuator/health
+      HealthCheckProtocol: HTTP
+      HealthCheckIntervalSeconds: 30
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 3
+      Matcher:
+        HttpCode: '200'
+
+  # HTTP Listener (redirect to HTTPS if certificate exists)
+  HTTPListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - !If
+          - HasCertificate
+          - Type: redirect
+            RedirectConfig:
+              Protocol: HTTPS
+              Port: '443'
+              StatusCode: HTTP_301
+          - Type: forward
+            TargetGroupArn: !Ref MaruwebTargetGroup
+
+  # HTTPS Listener (only if certificate is provided)
+  HTTPSListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Condition: HasCertificate
+    Properties:
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: 443
+      Protocol: HTTPS
+      SslPolicy: ELBSecurityPolicy-TLS13-1-2-2021-06
+      Certificates:
+        - CertificateArn: !Ref CertificateArn
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref MaruwebTargetGroup
+
+Outputs:
+  LoadBalancerDNS:
+    Description: ALB DNS Name
+    Value: !GetAtt ApplicationLoadBalancer.DNSName
+    Export:
+      Name: !Sub ${EnvironmentName}-ALBDNS
+
+  LoadBalancerArn:
+    Description: ALB ARN
+    Value: !Ref ApplicationLoadBalancer
+    Export:
+      Name: !Sub ${EnvironmentName}-ALBArn
+
+  LoadBalancerHostedZoneId:
+    Description: ALB Hosted Zone ID (for Route53 alias records)
+    Value: !GetAtt ApplicationLoadBalancer.CanonicalHostedZoneID
+    Export:
+      Name: !Sub ${EnvironmentName}-ALBHostedZoneId
+
+  MaruwebTargetGroupArn:
+    Description: Maruweb Target Group ARN
+    Value: !Ref MaruwebTargetGroup
+    Export:
+      Name: !Sub ${EnvironmentName}-MaruwebTargetGroupArn
+
+  HTTPListenerArn:
+    Description: HTTP Listener ARN
+    Value: !Ref HTTPListener
+    Export:
+      Name: !Sub ${EnvironmentName}-HTTPListenerArn
+
+  HTTPSListenerArn:
+    Description: HTTPS Listener ARN
+    Condition: HasCertificate
+    Value: !Ref HTTPSListener
+    Export:
+      Name: !Sub ${EnvironmentName}-HTTPSListenerArn

@@ -1,0 +1,259 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'ECS Cluster, ECR, EFS, and Cloud Map for Maruweb'
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: maruweb
+    Description: Environment name prefix for resources
+
+Resources:
+  # ECR Repository for maruweb
+  MaruwebECRRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: maruweb/app
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Keep only 10 images",
+                "selection": {
+                  "tagStatus": "any",
+                  "countType": "imageCountMoreThan",
+                  "countNumber": 10
+                },
+                "action": {
+                  "type": "expire"
+                }
+              }
+            ]
+          }
+
+  # ECR Repository for trading-api
+  TradingApiECRRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: maruweb/trading-api
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Keep only 10 images",
+                "selection": {
+                  "tagStatus": "any",
+                  "countType": "imageCountMoreThan",
+                  "countNumber": 10
+                },
+                "action": {
+                  "type": "expire"
+                }
+              }
+            ]
+          }
+
+  # ECS Cluster
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub ${EnvironmentName}-cluster
+      CapacityProviders:
+        - FARGATE
+        - FARGATE_SPOT
+      DefaultCapacityProviderStrategy:
+        - CapacityProvider: FARGATE_SPOT
+          Weight: 2
+        - CapacityProvider: FARGATE
+          Weight: 1
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
+
+  # Cloud Map Namespace for Service Discovery
+  ServiceDiscoveryNamespace:
+    Type: AWS::ServiceDiscovery::PrivateDnsNamespace
+    Properties:
+      Name: maruweb.local
+      Vpc: !ImportValue
+        Fn::Sub: ${EnvironmentName}-VpcId
+      Description: Private DNS namespace for maruweb services
+
+  # EFS File System for uploads
+  EFSFileSystem:
+    Type: AWS::EFS::FileSystem
+    Properties:
+      PerformanceMode: generalPurpose
+      ThroughputMode: bursting
+      Encrypted: true
+      FileSystemTags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-efs
+
+  # EFS Mount Target in Private Subnet 1
+  EFSMountTarget1:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref EFSFileSystem
+      SubnetId: !ImportValue
+        Fn::Sub: ${EnvironmentName}-PrivateSubnet1Id
+      SecurityGroups:
+        - !ImportValue
+          Fn::Sub: ${EnvironmentName}-EFSSecurityGroupId
+
+  # EFS Mount Target in Private Subnet 2
+  EFSMountTarget2:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref EFSFileSystem
+      SubnetId: !ImportValue
+        Fn::Sub: ${EnvironmentName}-PrivateSubnet2Id
+      SecurityGroups:
+        - !ImportValue
+          Fn::Sub: ${EnvironmentName}-EFSSecurityGroupId
+
+  # EFS Access Point for kanban uploads
+  EFSAccessPoint:
+    Type: AWS::EFS::AccessPoint
+    Properties:
+      FileSystemId: !Ref EFSFileSystem
+      PosixUser:
+        Uid: '1000'
+        Gid: '1000'
+      RootDirectory:
+        Path: /uploads/kanban
+        CreationInfo:
+          OwnerUid: '1000'
+          OwnerGid: '1000'
+          Permissions: '755'
+      AccessPointTags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-efs-ap-kanban
+
+  # CloudWatch Log Group
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /ecs/${EnvironmentName}
+      RetentionInDays: 30
+
+  # ECS Task Execution Role
+  ECSTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${EnvironmentName}-ecs-execution-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      Policies:
+        - PolicyName: SecretsManagerAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${EnvironmentName}/*
+
+  # ECS Task Role
+  ECSTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${EnvironmentName}-ecs-task-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: EFSAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - elasticfilesystem:ClientMount
+                  - elasticfilesystem:ClientWrite
+                Resource: !GetAtt EFSFileSystem.Arn
+
+Outputs:
+  ClusterName:
+    Description: ECS Cluster Name
+    Value: !Ref ECSCluster
+    Export:
+      Name: !Sub ${EnvironmentName}-ClusterName
+
+  ClusterArn:
+    Description: ECS Cluster ARN
+    Value: !GetAtt ECSCluster.Arn
+    Export:
+      Name: !Sub ${EnvironmentName}-ClusterArn
+
+  MaruwebECRRepositoryUri:
+    Description: ECR Repository URI for maruweb
+    Value: !GetAtt MaruwebECRRepository.RepositoryUri
+    Export:
+      Name: !Sub ${EnvironmentName}-MaruwebECRUri
+
+  TradingApiECRRepositoryUri:
+    Description: ECR Repository URI for trading-api
+    Value: !GetAtt TradingApiECRRepository.RepositoryUri
+    Export:
+      Name: !Sub ${EnvironmentName}-TradingApiECRUri
+
+  ServiceDiscoveryNamespaceId:
+    Description: Cloud Map Namespace ID
+    Value: !GetAtt ServiceDiscoveryNamespace.Id
+    Export:
+      Name: !Sub ${EnvironmentName}-ServiceDiscoveryNamespaceId
+
+  ServiceDiscoveryNamespaceArn:
+    Description: Cloud Map Namespace ARN
+    Value: !GetAtt ServiceDiscoveryNamespace.Arn
+    Export:
+      Name: !Sub ${EnvironmentName}-ServiceDiscoveryNamespaceArn
+
+  EFSFileSystemId:
+    Description: EFS File System ID
+    Value: !Ref EFSFileSystem
+    Export:
+      Name: !Sub ${EnvironmentName}-EFSFileSystemId
+
+  EFSAccessPointId:
+    Description: EFS Access Point ID
+    Value: !Ref EFSAccessPoint
+    Export:
+      Name: !Sub ${EnvironmentName}-EFSAccessPointId
+
+  LogGroupName:
+    Description: CloudWatch Log Group Name
+    Value: !Ref LogGroup
+    Export:
+      Name: !Sub ${EnvironmentName}-LogGroupName
+
+  ECSTaskExecutionRoleArn:
+    Description: ECS Task Execution Role ARN
+    Value: !GetAtt ECSTaskExecutionRole.Arn
+    Export:
+      Name: !Sub ${EnvironmentName}-ECSTaskExecutionRoleArn
+
+  ECSTaskRoleArn:
+    Description: ECS Task Role ARN
+    Value: !GetAtt ECSTaskRole.Arn
+    Export:
+      Name: !Sub ${EnvironmentName}-ECSTaskRoleArn

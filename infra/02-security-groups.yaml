@@ -1,0 +1,123 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Security Groups for Maruweb ECS Fargate Deployment'
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: maruweb
+    Description: Environment name prefix for resources
+
+Resources:
+  # ALB Security Group
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Application Load Balancer
+      VpcId: !ImportValue
+        Fn::Sub: ${EnvironmentName}-VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+          Description: Allow HTTP from anywhere
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+          Description: Allow HTTPS from anywhere
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-alb-sg
+
+  # ECS Tasks Security Group
+  ECSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for ECS Fargate tasks
+      VpcId: !ImportValue
+        Fn::Sub: ${EnvironmentName}-VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8090
+          ToPort: 8090
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+          Description: Allow traffic from ALB to maruweb
+        - IpProtocol: tcp
+          FromPort: 8099
+          ToPort: 8099
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+          Description: Allow traffic from ALB to trading-api
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-ecs-sg
+
+  # Allow ECS tasks to communicate with each other
+  ECSSecurityGroupIngressFromSelf:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref ECSSecurityGroup
+      IpProtocol: tcp
+      FromPort: 8090
+      ToPort: 8099
+      SourceSecurityGroupId: !Ref ECSSecurityGroup
+      Description: Allow ECS tasks to communicate with each other
+
+  # Database Security Group
+  DBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for MariaDB EC2 instance
+      VpcId: !ImportValue
+        Fn::Sub: ${EnvironmentName}-VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref ECSSecurityGroup
+          Description: Allow MariaDB connections from ECS tasks
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-db-sg
+
+  # EFS Security Group
+  EFSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for EFS file system
+      VpcId: !ImportValue
+        Fn::Sub: ${EnvironmentName}-VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 2049
+          ToPort: 2049
+          SourceSecurityGroupId: !Ref ECSSecurityGroup
+          Description: Allow NFS from ECS tasks
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-efs-sg
+
+Outputs:
+  ALBSecurityGroupId:
+    Description: ALB Security Group ID
+    Value: !Ref ALBSecurityGroup
+    Export:
+      Name: !Sub ${EnvironmentName}-ALBSecurityGroupId
+
+  ECSSecurityGroupId:
+    Description: ECS Security Group ID
+    Value: !Ref ECSSecurityGroup
+    Export:
+      Name: !Sub ${EnvironmentName}-ECSSecurityGroupId
+
+  DBSecurityGroupId:
+    Description: DB Security Group ID
+    Value: !Ref DBSecurityGroup
+    Export:
+      Name: !Sub ${EnvironmentName}-DBSecurityGroupId
+
+  EFSSecurityGroupId:
+    Description: EFS Security Group ID
+    Value: !Ref EFSSecurityGroup
+    Export:
+      Name: !Sub ${EnvironmentName}-EFSSecurityGroupId

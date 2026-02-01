@@ -1,0 +1,56 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.iml
+
+# Build artifacts
+target/
+*.class
+*.jar
+*.war
+
+# Maven
+.mvn/repository
+
+# Node.js (Playwright tests)
+node_modules/
+e2e-tests/
+playwright-report/
+test-results/
+
+# Environment files (secrets should come from AWS Secrets Manager)
+.env
+.env.*
+!.env.example
+
+# Documentation
+*.md
+docs/
+!README.md
+
+# Logs
+*.log
+logs/
+
+# Local files
+uploads/
+.claude/
+.playwright-mcp/
+
+# Temporary files
+*.swp
+*.swo
+*~
+.DS_Store
+
+# CI/CD
+Jenkinsfile
+.github/
+
+# Test configuration
+playwright.config.ts
+package*.json
