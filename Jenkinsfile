@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    parameters {
+        choice(name: 'ENVIRONMENT', choices: ['dev', 'prod'], description: '배포 환경 선택 (dev: 로컬 9080, prod: AWS 8090)')
+    }
+
     environment {
         // Java 17 설정
         JAVA_HOME = '/Users/changsupark/Library/Java/JavaVirtualMachines/corretto-17.0.5/Contents/Home'
@@ -19,7 +23,6 @@ pipeline {
         // Build settings
         MAVEN_OPTS = '-Xmx1024m'
         APP_NAME = 'maruweb'
-        DEPLOY_PORT = '9080'
     }
 
     tools {
@@ -37,8 +40,8 @@ pipeline {
 
         stage('Build') {
             steps {
-                echo 'Building application...'
-                sh './mvnw clean package -DskipTests -Dspring.profiles.active=prod'
+                echo "Building application with profile: ${params.ENVIRONMENT}..."
+                sh "./mvnw clean package -DskipTests -Dspring.profiles.active=${params.ENVIRONMENT}"
             }
         }
 
@@ -56,7 +59,10 @@ pipeline {
 
         stage('Stop Previous Instance') {
             steps {
-                echo 'Stopping previous instance...'
+                script {
+                    env.DEPLOY_PORT = (params.ENVIRONMENT == 'prod') ? '8090' : '9080'
+                }
+                echo "Stopping previous instance on port ${DEPLOY_PORT}..."
                 sh '''
                     PID=$(lsof -ti:${DEPLOY_PORT}) || true
                     if [ -n "$PID" ]; then
@@ -72,8 +78,8 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                echo 'Deploying application...'
-                sh '''
+                echo "Deploying application with profile: ${params.ENVIRONMENT}, port: ${DEPLOY_PORT}..."
+                sh """
                     # Create deploy directory if not exists
                     mkdir -p /opt/maruweb
 
@@ -82,18 +88,19 @@ pipeline {
 
                     # Start application in background
                     nohup java -jar \
-                        -Dspring.profiles.active=prod \
+                        -Dspring.profiles.active=${params.ENVIRONMENT} \
                         -DDB_USERNAME=${DB_USERNAME} \
                         -DDB_PASSWORD=${DB_PASSWORD} \
                         -DDB_URL=${DB_URL} \
                         -DGOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID} \
                         -DGOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET} \
                         -DCALENDAR_ENCRYPTION_KEY=${CALENDAR_ENCRYPTION_KEY} \
+                        --server.port=${DEPLOY_PORT} \
                         /opt/maruweb/${APP_NAME}.jar > /opt/maruweb/application.log 2>&1 &
 
-                    echo $! > /opt/maruweb/app.pid
+                    echo \$! > /opt/maruweb/app.pid
                     sleep 5
-                '''
+                """
             }
         }
 
