@@ -168,7 +168,11 @@
       "Bash(crontab -l:*)",
       "Bash(sudo ls:*)",
       "Bash(crontab:*)",
-      "Skill(kanban)"
+      "Skill(kanban)",
+      "Skill(status)",
+      "Bash(tee:*)",
+      "Skill(restart)",
+      "Bash(launchctl list:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
