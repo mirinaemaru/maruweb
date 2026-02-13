@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     parameters {
-        choice(name: 'ENVIRONMENT', choices: ['dev', 'prod'], description: '배포 환경 선택 (dev: 로컬 9080, prod: AWS 8090)')
+        choice(name: 'ENVIRONMENT', choices: ['dev', 'prod'], description: '배포 환경 선택 (dev: 로컬 9080, prod: Mac Mini 8090)')
     }
 
     environment {
@@ -80,8 +80,8 @@ pipeline {
             steps {
                 echo "Deploying application with profile: ${params.ENVIRONMENT}, port: ${DEPLOY_PORT}..."
                 sh """
-                    # Create deploy directory if not exists
-                    mkdir -p /opt/maruweb
+                    # Create deploy directory and subdirectories if not exists
+                    mkdir -p /opt/maruweb/uploads/kanban /opt/maruweb/logs
 
                     # Copy JAR file
                     cp target/todo-0.0.1-SNAPSHOT.jar /opt/maruweb/${APP_NAME}.jar

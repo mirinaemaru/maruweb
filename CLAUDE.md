@@ -137,8 +137,8 @@ LocalDate 필드는 HTML 폼 바인딩을 위해 `@DateTimeFormat(pattern = "yyy
 
 **Spring 프로파일:**
 - `local`: 로컬 개발 (.env 변수 사용, 포트 8090)
-- `dev`: 개발 서버
-- `prod`: 프로덕션 (포트 9080)
+- `dev`: 개발 서버 (포트 9080)
+- `prod`: 프로덕션 (Mac Mini, 포트 8090, nginx reverse proxy)
 
 ### 데이터베이스 스키마 규칙
 
@@ -223,9 +223,13 @@ SpEL 평가 오류를 피하기 위해 복합 조건에서 항상 null 체크:
 - `.env`를 로드하고 포트 8090에서 시작하는 `./run-maruweb.sh` 사용
 - 로그는 `/tmp/maruweb.log`에 기록됨
 
-**프로덕션:**
-- WAR 파일 빌드: `./mvnw clean package -DskipTests`
-- Tomcat에 배포하거나 독립 실행형으로 실행: `java -jar -Dspring.profiles.active=prod target/todo-0.0.1-SNAPSHOT.jar`
+**프로덕션 (Mac Mini):**
+- Jenkins 파이프라인을 통한 자동 배포: `git push origin master` → Jenkins 빌드/테스트/배포
+- Jenkins URL: http://localhost:9090/job/maruweb-local/
+- 배포 디렉토리: `/opt/maruweb/`
+- 로그: `/opt/maruweb/application.log`
+- Nginx reverse proxy: HTTP(80) → HTTPS(443) → localhost:8090
+- Nginx 설정: `infra/nginx/maruweb.conf`
 - Jenkins 배포 스킬이 `.claude/skills/deploy/`에 있음
 
 ### 외부 의존성

@@ -6,7 +6,18 @@ allowed-tools: Bash, Read, Grep, Glob
 
 # Deploy Skill
 
-This skill handles deployment operations for the Maru Web application.
+Mac Mini 홈 서버에 Jenkins 파이프라인을 통해 Maru Web 애플리케이션을 배포합니다.
+
+## 환경 구성
+
+| 환경 | 포트 | 프로파일 | 용도 |
+|------|------|----------|------|
+| dev | 9080 | dev | 개발/테스트 |
+| prod | 8090 | prod | 프로덕션 (Mac Mini) |
+
+**배포 디렉토리**: `/opt/maruweb/`
+**업로드 디렉토리**: `/opt/maruweb/uploads/kanban/`
+**로그 디렉토리**: `/opt/maruweb/logs/`
 
 ## Deployment Process
 
@@ -36,31 +47,51 @@ git push origin master
   - Checks out code
   - Builds with Maven
   - Runs tests
-  - Stops previous instance on port 9080
+  - Stops previous instance
+  - Creates required directories (`/opt/maruweb/uploads/kanban`, `/opt/maruweb/logs`)
   - Deploys new JAR to /opt/maruweb/
   - Performs health check
 
 ### 5. Verify Deployment
+
+**dev 환경:**
 ```bash
-# Check if app is running
+curl -s -o /dev/null -w "%{http_code}" http://localhost:9080/
+```
+
+**prod 환경:**
+```bash
+curl -s -o /dev/null -w "%{http_code}" http://localhost:8090/
+```
+
+## Health Check Commands
+
+```bash
+# prod 헬스체크
+curl -s -o /dev/null -w "%{http_code}" http://localhost:8090/actuator/health
+
+# dev 헬스체크
 curl -s -o /dev/null -w "%{http_code}" http://localhost:9080/
 
-# Check application logs
+# Application logs
 tail -f /opt/maruweb/application.log
 
 # Check process
-lsof -ti:9080
+lsof -ti:8090  # prod
+lsof -ti:9080  # dev
+
+# Nginx status (prod)
+brew services list | grep nginx
 ```
 
 ## Deployment Configuration
 
 **Build Tool**: Maven 3.9
 **Java Version**: JDK 17
-**Deploy Port**: 9080
-**Deploy Directory**: /opt/maruweb/
 **Artifact**: todo-0.0.1-SNAPSHOT.jar
 
 ## Environment Variables (Jenkins)
+- `DB_USERNAME`, `DB_PASSWORD`, `DB_URL`: Database credentials
 - `GOOGLE_CLIENT_ID`: Google OAuth credentials
 - `GOOGLE_CLIENT_SECRET`: Google OAuth credentials
 - `CALENDAR_ENCRYPTION_KEY`: Calendar data encryption key
@@ -78,22 +109,13 @@ lsof -ti:9080
 # Build
 ./mvnw clean package -DskipTests
 
-# Stop current instance
-kill -9 $(lsof -ti:9080)
+# Stop current instance (prod)
+kill -9 $(lsof -ti:8090)
 
-# Start new instance
+# Start new instance (prod)
 nohup java -jar target/todo-0.0.1-SNAPSHOT.jar \
   --spring.profiles.active=prod \
-  --server.port=9080 > /opt/maruweb/application.log 2>&1 &
-```
-
-### Health Check
-```bash
-# Check HTTP status
-curl -I http://localhost:9080/
-
-# Check logs for errors
-grep -i error /opt/maruweb/application.log | tail -20
+  --server.port=8090 > /opt/maruweb/application.log 2>&1 &
 ```
 
 ## Troubleshooting
@@ -104,7 +126,7 @@ grep -i error /opt/maruweb/application.log | tail -20
 - Verify all tests pass: `./mvnw test`
 
 ### Deployment Fails
-- Check port 9080 is not blocked: `lsof -ti:9080`
+- Check port is not blocked: `lsof -ti:8090`
 - Verify Jenkins credentials are configured
 - Check disk space: `df -h`
 - Review application logs: `tail -f /opt/maruweb/application.log`
@@ -114,6 +136,7 @@ grep -i error /opt/maruweb/application.log | tail -20
 - Check logs: `tail -100 /opt/maruweb/application.log`
 - Verify database connectivity
 - Check environment variables are set
+- Check Nginx: `nginx -t && brew services list | grep nginx`
 
 ## Instructions for Claude
 
@@ -121,26 +144,16 @@ When user asks to deploy:
 
 1. **Check git status** - ensure all changes are committed
 2. **Ask user confirmation** - "Ready to deploy to production?"
-3. **Run tests** - `./mvnw test` and verify they pass
-4. **Push to GitHub** - This triggers Jenkins pipeline
-5. **Wait 2-3 minutes** - Jenkins needs time to build and deploy
-6. **Verify deployment** - Check http://localhost:9080/ returns 200
-7. **Report results** - Tell user deployment status and provide Jenkins URL
+3. **Ask environment** - dev (9080) or prod (8090)?
+4. **Run tests** - `./mvnw test` and verify they pass
+5. **Push to GitHub** - This triggers Jenkins pipeline
+6. **Wait 2-3 minutes** - Jenkins needs time to build and deploy
+7. **Verify deployment** - Check appropriate port returns 200
+8. **Report results** - Tell user deployment status and provide Jenkins URL
 
 When user asks to check deployment:
 
-1. **Check app health** - `curl http://localhost:9080/`
+1. **Check app health** - `curl http://localhost:8090/` (prod) or `curl http://localhost:9080/` (dev)
 2. **Check Jenkins** - Provide Jenkins build URL
 3. **Check logs** - `tail /opt/maruweb/application.log`
 4. **Report status** - Running/Not Running, last build info
-
-## Examples
-
-**User**: "Deploy the app"
-**Claude**: Runs tests, pushes to GitHub, waits for Jenkins, verifies deployment
-
-**User**: "Is the app deployed?"
-**Claude**: Checks port 9080, Jenkins status, reports current state
-
-**User**: "Check deployment logs"
-**Claude**: Shows recent application logs from /opt/maruweb/application.log

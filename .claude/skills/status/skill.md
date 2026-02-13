@@ -16,25 +16,31 @@ allowed-tools: Bash
 curl -s -o /dev/null -w "%{http_code}" http://localhost:8090/ 2>/dev/null || echo "000"
 ```
 
-### 2. Production Server (9080)
+### 2. Production (Mac Mini, 8090)
 
 ```bash
-curl -s -o /dev/null -w "%{http_code}" http://localhost:9080/ 2>/dev/null || echo "000"
+curl -s -o /dev/null -w "%{http_code}" http://localhost:8090/ 2>/dev/null || echo "000"
 ```
 
-### 3. Trading API (8099)
+### 3. Nginx (80/443)
+
+```bash
+curl -s -o /dev/null -w "%{http_code}" http://localhost:80/ 2>/dev/null || echo "000"
+```
+
+### 4. Trading API (8099)
 
 ```bash
 curl -s -o /dev/null -w "%{http_code}" http://localhost:8099/health 2>/dev/null || echo "000"
 ```
 
-### 4. Database Connection
+### 5. Database Connection
 
 ```bash
 mysql -u $DB_USERNAME -p$DB_PASSWORD -e "SELECT 1" maruweb 2>/dev/null && echo "OK" || echo "FAIL"
 ```
 
-### 5. Git Status
+### 6. Git Status
 
 ```bash
 git status --short
@@ -47,7 +53,8 @@ git status --short
 | 서비스 | 상태 | 포트/정보 |
 |--------|------|-----------|
 | Local Dev | ✓ Running / ✗ Down | 8090 |
-| Production | ✓ Running / ✗ Down | 9080 |
+| Production (Mac Mini) | ✓ Running / ✗ Down | 8090 |
+| Nginx | ✓ Running / ✗ Down | 80/443 |
 | Trading API | ✓ Running / ✗ Down | 8099 |
 | Database | ✓ Connected / ✗ Failed | maruweb |
 | Git | Clean / n changes | branch명 |
@@ -71,8 +78,8 @@ git status --short
 
 ```bash
 echo "=== System Status ===" && \
-echo -n "Local (8090): " && curl -s -o /dev/null -w "%{http_code}" http://localhost:8090/ 2>/dev/null || echo "DOWN" && \
-echo -n "Prod (9080): " && curl -s -o /dev/null -w "%{http_code}" http://localhost:9080/ 2>/dev/null || echo "DOWN" && \
-echo -n "Trading API (8099): " && curl -s -o /dev/null -w "%{http_code}" http://localhost:8099/health 2>/dev/null || echo "DOWN" && \
+echo -n "Local/Prod (8090): " && (curl -s -o /dev/null -w "%{http_code}" http://localhost:8090/ 2>/dev/null || echo "DOWN") && \
+echo -n "Nginx (80): " && (curl -s -o /dev/null -w "%{http_code}" http://localhost:80/ 2>/dev/null || echo "DOWN") && \
+echo -n "Trading API (8099): " && (curl -s -o /dev/null -w "%{http_code}" http://localhost:8099/health 2>/dev/null || echo "DOWN") && \
 echo -n "Git: " && git branch --show-current && git status --short
 ```
